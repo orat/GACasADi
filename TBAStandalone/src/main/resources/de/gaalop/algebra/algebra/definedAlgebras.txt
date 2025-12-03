@@ -1,0 +1,10 @@
+2d;imaginary numbers
+3d;euclidean geometric algebra
+2dpga;2D projective geometric algebra
+3dpga;3D projective geometric algebra
+cra;compass ruler algebra
+sta;space-time algebra
+cga;conformal geometric algebra
+gac;geometric algebra for conics
+dcga;double conformal geometric algebra
+qga;quantum bit geometric algebra

@@ -1,0 +1,5 @@
+1,e1,e2,e3,eo1,ei1,eo2,ei2,eo3,ei3,eo4,ei4,eo5,ei5,eo6,ei6
+ep1=-eo1+0.5*ei1,ep2=-eo2+0.5*ei2,ep3=-eo3+0.5*ei3,ep4=-eo4+0.5*ei4,ep5=-eo5+0.5*ei5,ep6=-eo6+0.5*ei6,em1=eo1+0.5*ei1,em2=eo2+0.5*ei2,em3=eo3+0.5*ei3,em4=eo4+0.5*ei4,em5=eo5+0.5*ei5,em6=eo6+0.5*ei6
+1,e1,e2,e3,ep1,ep2,ep3,ep4,ep5,ep6,em1,em2,em3,em4,em5,em6
+e1=1,e2=1,e3=1,ep1=1,ep2=1,ep3=1,ep4=1,ep5=1,ep6=1,em1=-1,em2=-1,em3=-1,em4=-1,em5=-1,em6=-1
+ei1=ep1+em1,ei2=ep2+em2,ei3=ep3+em3,ei4=ep4+em4,ei5=ep5+em5,ei6=ep6+em6,eo1=0.5*ep1-0.5*em1,eo2=0.5*ep2-0.5*em2,eo3=0.5*ep3-0.5*em3,eo4=0.5*ep4-0.5*em4,eo5=0.5*ep5-0.5*em5,eo6=0.5*ep6-0.5*em6
