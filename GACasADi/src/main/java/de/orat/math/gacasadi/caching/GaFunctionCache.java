@@ -1,9 +1,9 @@
 package de.orat.math.gacasadi.caching;
 
-import de.orat.math.gacasadi.impl.CgaFunction;
-import de.orat.math.gacasadi.impl.CgaMvVariable;
-import de.orat.math.gacasadi.impl.CgaMvExpr;
-import de.orat.math.gacasadi.impl.gen.CachedCgaMvExpr;
+import de.orat.math.gacasadi.impl.GaFunction;
+import de.orat.math.gacasadi.impl.GaMvVariable;
+import de.orat.math.gacasadi.impl.GaMvExpr;
+import de.orat.math.gacasadi.impl.gen.CachedGaMvExpr;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,9 +17,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 
-public class CgaFunctionCache implements IFunctionCache {
+public class GaFunctionCache implements IFunctionCache {
 
-    private final Map<String, CgaFunction> functionCache
+    private final Map<String, GaFunction> functionCache
         = new HashMap<>(1024, 0.5f);
     private final Map<String, Integer> cachedFunctionsUsage
         = new HashMap<>(1024, 0.5f);
@@ -30,36 +30,36 @@ public class CgaFunctionCache implements IFunctionCache {
      *
      * @param name Used directly as key in the cache. Needs to be unique for combination of actual function
      * name, symbolic arguments and their sparsities, and need to take identity of the arguments into account.
-     * Use createFuncName() for this. Example usage is in CachedCgaMvExpr.
+     * Use createFuncName() for this. Example usage is in CachedGaMvExpr.
      */
-    public CachedCgaMvExpr getOrCreateSymbolicFunction(String name, List<CgaMvExpr> args, Function<List<? extends CachedCgaMvExpr>, CgaMvExpr> res) {
+    public CachedGaMvExpr getOrCreateSymbolicFunction(String name, List<GaMvExpr> args, Function<List<? extends CachedGaMvExpr>, GaMvExpr> res) {
         if (NOCACHE) {
-            List<CachedCgaMvExpr> params = args.stream().map(CachedCgaMvExpr::new).toList();
-            return new CachedCgaMvExpr(res.apply(params));
+            List<CachedGaMvExpr> params = args.stream().map(CachedGaMvExpr::new).toList();
+            return new CachedGaMvExpr(res.apply(params));
         } else {
-            CgaFunction func = functionCache.get(name);
+            GaFunction func = functionCache.get(name);
             if (func == null) {
                 func = createSymbolicFunction(String.format("cache_func_%s", functionCache.size()), args, res);
                 functionCache.put(name, func);
                 cachedFunctionsUsage.put(name, 0);
             }
-            // Specific type: CachedCgaMvExpr.
-            CgaMvExpr retVal = func.callExpr(args).get(0).simplifySparsify();
+            // Specific type: CachedGaMvExpr.
+            GaMvExpr retVal = func.callExpr(args).get(0).simplifySparsify();
             cachedFunctionsUsage.compute(name, (k, v) -> ++v);
-            return new CachedCgaMvExpr(retVal);
+            return new CachedGaMvExpr(retVal);
         }
     }
 
-    private static CgaFunction createSymbolicFunction(String name, List<CgaMvExpr> args, Function<List<? extends CachedCgaMvExpr>, CgaMvExpr> res) {
+    private static GaFunction createSymbolicFunction(String name, List<GaMvExpr> args, Function<List<? extends CachedGaMvExpr>, GaMvExpr> res) {
         final int size = args.size();
-        List<CgaMvVariable> casadiFuncParams = new ArrayList<>(size);
-        List<CgaMvVariable> symbolicMultivectorParams = new ArrayList<>(size);
+        List<GaMvVariable> casadiFuncParams = new ArrayList<>(size);
+        List<GaMvVariable> symbolicMultivectorParams = new ArrayList<>(size);
         List<Integer> argsFirstOccurrences = computeFirstOccurrences(args);
         // Convert to purely symbolic multivector.
         for (int i = 0; i < size; ++i) {
-            CgaMvExpr arg = args.get(i);
+            GaMvExpr arg = args.get(i);
             // sparsity
-            var param = new CgaMvVariable(getParamName(i), arg);
+            var param = new GaMvVariable(getParamName(i), arg);
             casadiFuncParams.add(param);
 
             // Preserve identity for symbolicMultivectorParams.
@@ -69,9 +69,9 @@ public class CgaFunctionCache implements IFunctionCache {
             var symbolicMultivectorParam = casadiFuncParams.get(firstOccurrence);
             symbolicMultivectorParams.add(symbolicMultivectorParam);
         }
-        // Specific type: CachedCgaMvExpr.
-        CgaMvExpr symbolicReturn = res.apply(symbolicMultivectorParams).simplifySparsify();
-        CgaFunction func = new CgaFunction(name, casadiFuncParams, List.of(symbolicReturn));
+        // Specific type: CachedGaMvExpr.
+        GaMvExpr symbolicReturn = res.apply(symbolicMultivectorParams).simplifySparsify();
+        GaFunction func = new GaFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }
 

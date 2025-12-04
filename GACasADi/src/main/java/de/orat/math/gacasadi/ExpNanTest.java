@@ -7,11 +7,11 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import de.orat.math.gacasadi.impl.CgaFactory;
-import de.orat.math.gacasadi.impl.CgaFunction;
-import de.orat.math.gacasadi.impl.CgaMvExpr;
-import de.orat.math.gacasadi.impl.CgaMvValue;
-import de.orat.math.gacasadi.impl.CgaMvVariable;
+import de.orat.math.gacasadi.impl.GaFactory;
+import de.orat.math.gacasadi.impl.GaFunction;
+import de.orat.math.gacasadi.impl.GaMvExpr;
+import de.orat.math.gacasadi.impl.GaMvValue;
+import de.orat.math.gacasadi.impl.GaMvVariable;
 import de.orat.math.gacasadi.impl.IGetSX;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.Arrays;
@@ -25,9 +25,9 @@ public class ExpNanTest {
     /**
      * Works only if expr are constructed from getDelegate() of inputs.
      */
-    public static CgaMvValue evalPoint(List<CgaMvValue> inputs, CgaMvExpr expr) {
-        List<CgaMvVariable> variables = inputs.stream().map(v -> (CgaMvVariable) v.getDelegate()).toList();
-        return (new CgaFunction("evalPoint", variables, List.of(expr))).callValue(inputs).get(0);
+    public static GaMvValue evalPoint(List<GaMvValue> inputs, GaMvExpr expr) {
+        List<GaMvVariable> variables = inputs.stream().map(v -> (GaMvVariable) v.getDelegate()).toList();
+        return (new GaFunction("evalPoint", variables, List.of(expr))).callValue(inputs).get(0);
     }
 
     private static StdVectorSX transformImpl(List<? extends IGetSX> mvs) {
@@ -36,7 +36,7 @@ public class ExpNanTest {
     }
 
     public static void main(String[] args) {
-        var fac = CgaFactory.instance;
+        var fac = GaFactory.instance;
 
         /*
         // Numerisch Expr tut immer noch:
@@ -67,12 +67,12 @@ public class ExpNanTest {
         System.out.println(exp3);
          */
         //  Noch näher an der DSL.
-        CgaMvValue ae = fac.createValue(SparseCGAColumnVector.createEuclid(new double[]{0d, 1d, 0d}));
-        CgaMvExpr d6 = fac.createExpr(0.0996);
-        CgaMvExpr vec = d6.gp(ae.getDelegate());
-        CgaMvExpr expInput = fac.createExpr(-0.5).gp(vec).gp(fac.constantsExpr().getBaseVectorInfinity());
-        CgaMvExpr exp = expInput.exp();
-        CgaMvValue expNum = evalPoint(List.of(ae), exp);
+        GaMvValue ae = fac.createValue(SparseCGAColumnVector.createEuclid(new double[]{0d, 1d, 0d}));
+        GaMvExpr d6 = fac.createExpr(0.0996);
+        GaMvExpr vec = d6.gp(ae.getDelegate());
+        GaMvExpr expInput = fac.createExpr(-0.5).gp(vec).gp(fac.constantsExpr().getBaseVectorInfinity());
+        GaMvExpr exp = expInput.exp();
+        GaMvValue expNum = evalPoint(List.of(ae), exp);
         System.out.println(exp);
         System.out.println(expNum); // Richtig
 
@@ -86,11 +86,11 @@ public class ExpNanTest {
         System.out.println(result); // Mit NaN
 
         // Wie verhält sich CasADi# hinsichtlich 0/0?
-        CgaMvValue t1 = fac.createValue(0);
-        CgaMvValue t2 = fac.createValue(0);
+        GaMvValue t1 = fac.createValue(0);
+        GaMvValue t2 = fac.createValue(0);
         SX div = SxStatic.rdivide(t1.getDelegate().getSX(), t2.getDelegate().getSX());
-        CgaMvExpr expr = CgaMvExpr.create(div).simplifySparsify();
-        CgaMvValue nanEval = evalPoint(List.of(t1, t2), expr);
+        GaMvExpr expr = GaMvExpr.create(div).simplifySparsify();
+        GaMvValue nanEval = evalPoint(List.of(t1, t2), expr);
         // Das gibt NaN. Also liegt es wo anders.
         // Wenn ich nur mit t1 mache, gibt es 1.
         System.out.println(nanEval);
@@ -140,5 +140,5 @@ Es ist durchaus so, dass in CasADi# gilt: a/a=1 und 0/0=NaN.
 Sodass es eine Rolle spielt, ob man erst symbolisch minimiert oder erst numerisch evaluiert.
 Allerdings ist das Ergebnis bei DM und SX gleich, wenn da eine 0 (oder 00) drin steckt.
 Das erklärt also noch nicht, warum es für die Evaluierung von exp für bestimmte Eingaben notwendig ist, in CgaCasADi::CgaFunction::callNumeric den internen Call mit numerischem SX anstatt numerischem DM zu machen, um NaN zu vermeiden.
-→ CgaCasADi::ExpNanTest
+→ GaCasADi::ExpNanTest
  */

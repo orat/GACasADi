@@ -5,48 +5,48 @@ import java.util.function.Supplier;
 import java.util.concurrent.ConcurrentHashMap;
 import de.orat.math.gacalc.spi.IConstantsExpression;
 
-public class CgaConstantsExpr implements IConstantsExpression<CgaMvExpr> {
+public class GaConstantsExpr implements IConstantsExpression<GaMvExpr> {
 
-    public static final CgaConstantsExpr instance = new CgaConstantsExpr();
+    public static final GaConstantsExpr instance = new GaConstantsExpr();
 
-    private CgaConstantsExpr() {
+    private GaConstantsExpr() {
 
     }
 
     @Override
-    public CgaFactory fac() {
-        return CgaFactory.instance;
+    public GaFactory fac() {
+        return GaFactory.instance;
     }
 
     @Override
-    public CgaMvExpr getSparseEmptyInstance() {
+    public GaMvExpr getSparseEmptyInstance() {
         final String name = "SparseEmptyInstance";
-        return cached2(name, () -> CgaMvVariable.createSparse(name));
+        return cached2(name, () -> GaMvVariable.createSparse(name));
     }
 
     @Override
-    public CgaMvExpr getDenseEmptyInstance() {
+    public GaMvExpr getDenseEmptyInstance() {
         final String name = "DenseEmptyInstance";
-        return cached2(name, () -> CgaMvVariable.createDense(name));
+        return cached2(name, () -> GaMvVariable.createDense(name));
     }
 
     // ConcurrentHashMap to avoid ConcurrentModificationException while testing.
-    private final ConcurrentHashMap<String, CgaMvExpr> cache
+    private final ConcurrentHashMap<String, GaMvExpr> cache
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public CgaMvExpr cached(String name, Supplier<SparseDoubleMatrix> creator) {
+    public GaMvExpr cached(String name, Supplier<SparseDoubleMatrix> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache.get(name);
         if (value == null) {
             var sparseDoubleMatrix = creator.get();
-            value = CgaMvExpr.create(sparseDoubleMatrix);
+            value = GaMvExpr.create(sparseDoubleMatrix);
             this.cache.putIfAbsent(name, value);
         }
         return value;
     }
 
-    protected CgaMvExpr cached2(String name, Supplier<CgaMvExpr> creator) {
+    protected GaMvExpr cached2(String name, Supplier<GaMvExpr> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache.get(name);
         if (value == null) {

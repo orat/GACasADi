@@ -14,7 +14,7 @@ import de.orat.math.gacalc.spi.IMultivectorVariable;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
+public class GaFunction implements IGAFunction<GaMvExpr, GaMvValue> {
 
     private final String name;
     private final int arity;
@@ -34,7 +34,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
      * @param name A valid CasADi function name starts with a letter followed by letters, numbers or
      * non-consecutive underscores.
      */
-    public <MV extends IGetSX & IMultivectorVariable> CgaFunction(String name, List<MV> parameters, List<? extends CgaMvExpr> returns) {
+    public <MV extends IGetSX & IMultivectorVariable> GaFunction(String name, List<MV> parameters, List<? extends GaMvExpr> returns) {
         try {
             this.paramsSparsities = parameters.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
             StdVectorSX def_sym_in = transformImpl(parameters);
@@ -54,7 +54,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
     }
 
     @Override
-    public List<CgaMvExpr> callExpr(List<? extends CgaMvExpr> arguments) {
+    public List<GaMvExpr> callExpr(List<? extends GaMvExpr> arguments) {
         try {
             if (arguments.size() != this.arity) {
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
@@ -65,14 +65,14 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
             StdVectorSX call_sym_in = transformImpl(arguments);
             StdVectorSX call_sym_out = new StdVectorSX();
             this.f_sym_casadi.call(call_sym_in, call_sym_out);
-            return call_sym_out.stream().map(CgaMvExpr::create).toList();
+            return call_sym_out.stream().map(GaMvExpr::create).toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
     }
 
     @Override
-    public List<CgaMvValue> callValue(List<? extends CgaMvValue> arguments) {
+    public List<GaMvValue> callValue(List<? extends GaMvValue> arguments) {
         try {
             if (arguments.size() != this.arity) {
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
@@ -82,7 +82,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
 
             // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the correct value.
             StdVectorSX call_num_in = new StdVectorSX(arguments.stream()
-                .map(CgaMvValue::getDM)
+                .map(GaMvValue::getDM)
                 .map(CasADiUtil::toSX)
                 .toList()
             );
@@ -90,7 +90,7 @@ public class CgaFunction implements IGAFunction<CgaMvExpr, CgaMvValue> {
             this.f_sym_casadi.call(call_num_in, call_num_out);
             return call_num_out.stream()
                 .map(CasADiUtil::toDM)
-                .map(CgaMvValue::create)
+                .map(GaMvValue::create)
                 .toList();
         } finally {
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();

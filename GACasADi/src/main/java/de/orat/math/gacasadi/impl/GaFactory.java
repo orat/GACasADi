@@ -15,7 +15,7 @@ import util.cga.CGAMultivectorSparsity;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
+public class GaFactory implements IGAFactory<GaMvExpr, GaMvVariable, GaMvValue> {
 
     static {
         // Init JCasADi eagerly to improve profiling.
@@ -24,12 +24,12 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
-    public final static CgaFactory instance = new CgaFactory();
+    public final static GaFactory instance = new GaFactory();
 
     /**
      * Needs to be public in order to make ServiceLoader work.
      */
-    public CgaFactory() {
+    public GaFactory() {
 
     }
 
@@ -38,54 +38,54 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
     }
     
     @Override
-    public CgaConstantsExpr constantsExpr() {
-        return CgaConstantsExpr.instance;
+    public GaConstantsExpr constantsExpr() {
+        return GaConstantsExpr.instance;
     }
 
     @Override
-    public CgaConstantsValue constantsValue() {
-        return CgaConstantsValue.instance;
+    public GaConstantsValue constantsValue() {
+        return GaConstantsValue.instance;
     }
 
     @Override
-    public CgaLoopService getLoopService() {
-        return CgaLoopService.instance;
+    public GaLoopService getLoopService() {
+        return GaLoopService.instance;
     }
 
     // create symbolic multivectors
     @Override
-    public CgaMvVariable createVariable(String name, CgaMvExpr from) {
-        return new CgaMvVariable(name, from);
+    public GaMvVariable createVariable(String name, GaMvExpr from) {
+        return new GaMvVariable(name, from);
     }
 
     @Override
-    public CgaMvVariable createVariable(String name, MatrixSparsity sparsity) {
-        return CgaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
+    public GaMvVariable createVariable(String name, MatrixSparsity sparsity) {
+        return GaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
     }
 
     @Override
-    public CgaMvVariable createVariable(String name, int grade) {
-        return CgaMvExpr.create(name, grade);
+    public GaMvVariable createVariable(String name, int grade) {
+        return GaMvExpr.create(name, grade);
     }
 
     @Override
-    public CgaMvVariable createVariable(String name, int[] grades) {
-        return CgaMvExpr.create(name, grades);
+    public GaMvVariable createVariable(String name, int[] grades) {
+        return GaMvExpr.create(name, grades);
     }
 
     @Override
-    public CgaMvVariable createVariableSparse(String name) {
-        return CgaMvVariable.createSparse(name);
+    public GaMvVariable createVariableSparse(String name) {
+        return GaMvVariable.createSparse(name);
     }
 
     @Override
-    public CgaMvVariable createVariableDense(String name) {
-        return CgaMvVariable.createDense(name);
+    public GaMvVariable createVariableDense(String name) {
+        return GaMvVariable.createDense(name);
     }
 
     // random multivectors
     @Override
-    public CgaMvValue createValueRandom() {
+    public GaMvValue createValueRandom() {
         final int basisBladesCount = getBasisBladesCount();
         double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
         var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
@@ -94,7 +94,7 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
     }
 
     @Override
-    public CgaMvValue createValueRandom(int[] grades) {
+    public GaMvValue createValueRandom(int[] grades) {
         Random random = new Random();
         int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grades);
         double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
@@ -106,21 +106,21 @@ public class CgaFactory implements IGAFactory<CgaMvExpr, CgaMvVariable, CgaMvVal
 
     // create numeric multivectors
     @Override
-    public CgaMvValue createValue(double scalar) {
-        return CgaMvValue.create(scalar);
+    public GaMvValue createValue(double scalar) {
+        return GaMvValue.create(scalar);
     }
 
     @Override
-    public CgaMvValue createValue(SparseDoubleMatrix vec) {
-        return CgaMvValue.create(vec);
+    public GaMvValue createValue(SparseDoubleMatrix vec) {
+        return GaMvValue.create(vec);
     }
 
     // create function
     @Override
-    public CgaFunction createFunction(String name, 
-        List<? extends CgaMvVariable> parameters,
-        List<? extends CgaMvExpr> returns) {
-        return new CgaFunction(name, parameters, returns);
+    public GaFunction createFunction(String name, 
+        List<? extends GaMvVariable> parameters,
+        List<? extends GaMvExpr> returns) {
+        return new GaFunction(name, parameters, returns);
     }
 
     // methods to describe the functionality of the implementation

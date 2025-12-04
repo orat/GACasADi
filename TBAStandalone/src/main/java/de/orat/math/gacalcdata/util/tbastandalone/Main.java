@@ -31,7 +31,7 @@ public class Main extends JFrame {
     // Speicherverbrauch bestimmen
     public static void main(String[] args){
         try {
-            String algebraName = "2dcga"; //cga";//d41";//cga";
+            String algebraName = "3dpga"; //cga";//d41";//cga";
             Products product = Products.GEO;
             
             JFrame frame = new JFrame("Cayley table for "+product.toString()+"-product for algebra \""+ algebraName+"\""); // Fenster mit Titel erstellen

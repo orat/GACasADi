@@ -4,15 +4,15 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import static de.orat.math.gacasadi.impl.CgaFunction.transformImpl;
+import static de.orat.math.gacasadi.impl.GaFunction.transformImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
 
-public class CgaExprArray extends ArrayList<CgaMvExpr> implements IMultivectorExpressionArray<CgaMvExpr> {
+public class GaExprArray extends ArrayList<GaMvExpr> implements IMultivectorExpressionArray<GaMvExpr> {
 
-    public CgaExprArray() {
+    public GaExprArray() {
         super();
     }
 
@@ -20,7 +20,7 @@ public class CgaExprArray extends ArrayList<CgaMvExpr> implements IMultivectorEx
      *
      * @param mvs all elements must have equal sparsity.
      */
-    public CgaExprArray(Collection<? extends CgaMvExpr> mvs) {
+    public GaExprArray(Collection<? extends GaMvExpr> mvs) {
         super(mvs);
     }
 
@@ -39,9 +39,9 @@ public class CgaExprArray extends ArrayList<CgaMvExpr> implements IMultivectorEx
         return sxHorzcat;
     }
 
-    public static List<? extends CgaMvExpr> horzsplit(SX sxHorzcat) {
+    public static List<? extends GaMvExpr> horzsplit(SX sxHorzcat) {
         StdVectorSX stdVec = SxStatic.horzsplit_n(sxHorzcat, sxHorzcat.columns());
-        var mvs = stdVec.stream().map(CgaMvExpr::create).toList();
+        var mvs = stdVec.stream().map(GaMvExpr::create).toList();
         return mvs;
     }
 }

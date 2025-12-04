@@ -1,9 +1,0 @@
-
-https://stackoverflow.com/questions/61719589/do-you-need-to-override-hashcode-and-equals-for-records
-
-Tests für unterschiedliche sparsity, vermutlich am einfachsten für k-vectoren unterschiedlichen
-grades implementieren
-
-representations are just asymptotically better at high dimensions.
-200ns for 5d is actually impressive. I got 8 µs. But I do have a few ideas for low-dimension optimizations,
-update Grassmann.jl with the FFT approach for high dimensions

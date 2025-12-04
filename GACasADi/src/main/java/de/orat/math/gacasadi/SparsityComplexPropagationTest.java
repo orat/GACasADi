@@ -5,16 +5,16 @@ package de.orat.math.gacasadi;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.orat.math.gacasadi.impl.CgaFactory;
-import de.orat.math.gacasadi.impl.CgaFunction;
-import de.orat.math.gacasadi.impl.gen.CachedCgaMvExpr;
+import de.orat.math.gacasadi.impl.GaFactory;
+import de.orat.math.gacasadi.impl.GaFunction;
+import de.orat.math.gacasadi.impl.gen.CachedGaMvExpr;
 import java.util.List;
 import util.cga.SparseCGAColumnVector;
 
 public class SparsityComplexPropagationTest {
 
     public static void main(String[] args) {
-        var fac = CgaFactory.instance;
+        var fac = GaFactory.instance;
         var a = fac.createVariable("a", 0);
         var b = fac.createVariable("b", 0);
 
@@ -54,7 +54,7 @@ public class SparsityComplexPropagationTest {
 
         ////////////
 
-        String caching = CachedCgaMvExpr.getCache().cachedFunctionUsageToString();
+        String caching = CachedGaMvExpr.getCache().cachedFunctionUsageToString();
         System.out.println(caching);
 
         ////////////

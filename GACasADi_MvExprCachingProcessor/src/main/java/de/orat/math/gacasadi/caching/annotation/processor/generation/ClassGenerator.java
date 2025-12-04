@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
-import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_CgaFunctionCache;
+import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_GaFunctionCache;
 
 final class ClassGenerator {
 
@@ -36,8 +36,8 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        FieldSpec CACHE = FieldSpec.builder(T_CgaFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("new $T()", T_CgaFunctionCache)
+        FieldSpec CACHE = FieldSpec.builder(T_GaFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+            .initializer("new $T()", T_GaFunctionCache)
             .build();
 
         MethodSpec getCache = ClassGenerator.getCache();

@@ -6,54 +6,54 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import de.orat.math.gacalc.spi.IConstantsValue;
 
-public class CgaConstantsValue implements IConstantsValue<CgaMvValue, CgaMvExpr> {
+public class GaConstantsValue implements IConstantsValue<GaMvValue, GaMvExpr> {
 
-    public static final CgaConstantsValue instance = new CgaConstantsValue();
+    public static final GaConstantsValue instance = new GaConstantsValue();
 
-    private CgaConstantsValue() {
+    private GaConstantsValue() {
 
     }
 
     @Override
-    public CgaFactory fac() {
-        return CgaFactory.instance;
+    public GaFactory fac() {
+        return GaFactory.instance;
     }
 
-    private static CgaMvValue createSparseEmptyInstance() {
-        var sparseSym = CgaConstantsExpr.instance.getSparseEmptyInstance();
-        var sparseNum = CgaMvValue.createFrom(sparseSym);
+    private static GaMvValue createSparseEmptyInstance() {
+        var sparseSym = GaConstantsExpr.instance.getSparseEmptyInstance();
+        var sparseNum = GaMvValue.createFrom(sparseSym);
         return sparseNum;
     }
 
     @Override
-    public CgaMvValue getSparseEmptyInstance() {
+    public GaMvValue getSparseEmptyInstance() {
         final String name = "SparseEmptyInstance";
-        return cached2(name, CgaConstantsValue::createSparseEmptyInstance);
+        return cached2(name, GaConstantsValue::createSparseEmptyInstance);
     }
 
-    private static CgaMvValue createDenseEmptyInstance() {
-        var denseSym = CgaConstantsExpr.instance.getDenseEmptyInstance();
+    private static GaMvValue createDenseEmptyInstance() {
+        var denseSym = GaConstantsExpr.instance.getDenseEmptyInstance();
         var dm = DmStatic.zeros(denseSym.getSX().sparsity());
-        var denseNum = CgaMvValue.create(dm);
+        var denseNum = GaMvValue.create(dm);
         return denseNum;
     }
 
     @Override
-    public CgaMvValue getDenseEmptyInstance() {
+    public GaMvValue getDenseEmptyInstance() {
         final String name = "DenseEmptyInstance";
-        return cached2(name, CgaConstantsValue::createDenseEmptyInstance);
+        return cached2(name, GaConstantsValue::createDenseEmptyInstance);
     }
 
     // ConcurrentHashMap to avoid ConcurrentModificationException while testing.
-    private final ConcurrentHashMap<String, CgaMvValue> cache
+    private final ConcurrentHashMap<String, GaMvValue> cache
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public CgaMvValue cached(String name, Supplier<SparseDoubleMatrix> creator) {
+    public GaMvValue cached(String name, Supplier<SparseDoubleMatrix> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache.get(name);
         if (value == null) {
-            value = CgaMvValue.create(creator.get());
+            value = GaMvValue.create(creator.get());
             this.cache.putIfAbsent(name, value);
         }
         return value;
@@ -62,7 +62,7 @@ public class CgaConstantsValue implements IConstantsValue<CgaMvValue, CgaMvExpr>
     /**
      * Only to be used locally. creator must use cache of CGAConstants**Symbolic**!
      */
-    private CgaMvValue cached2(String name, Supplier<CgaMvValue> creator) {
+    private GaMvValue cached2(String name, Supplier<GaMvValue> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache.get(name);
         if (value == null) {

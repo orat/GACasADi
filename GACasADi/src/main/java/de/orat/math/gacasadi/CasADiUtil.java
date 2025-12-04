@@ -12,7 +12,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import de.orat.math.gacasadi.impl.CgaMvExpr;
+import de.orat.math.gacasadi.impl.GaMvExpr;
 import de.orat.math.gacasadi.impl.IGetSX;
 import de.orat.math.gacasadi.impl.IGetSparsityCasadi;
 import de.orat.math.gacalc.util.CayleyTable;
@@ -98,7 +98,7 @@ public class CasADiUtil {
      * @param cgaCayleyTable Cayley-table representing the specific product
      *
      */
-    public static SX toSXProductMatrix(CgaMvExpr mv, CGACayleyTable cgaCayleyTable) {
+    public static SX toSXProductMatrix(GaMvExpr mv, CGACayleyTable cgaCayleyTable) {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
 
@@ -183,7 +183,7 @@ public class CasADiUtil {
      * @param mv sparse multivector
      * @return sparsity of the matrix representation of the given multivector for the given cayley table
      */
-    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, CgaMvExpr mv) {
+    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, GaMvExpr mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
         ColumnVectorSparsity sparsity = mv.getSparsity();
         for (int i = 0; i < cayleyTable.getRows(); i++) {
