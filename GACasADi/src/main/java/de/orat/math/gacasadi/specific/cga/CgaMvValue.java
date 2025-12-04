@@ -1,19 +1,21 @@
-package de.orat.math.gacasadi.impl;
+package de.orat.math.gacasadi.specific.cga;
 
+import de.orat.math.gacasadi.generic.GaMvValue;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.orat.math.gacasadi.CasADiUtil;
-import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
-import static de.orat.math.gacasadi.impl.GaMvValue.create;
-import de.orat.math.gacasadi.impl.gen.DelegatingGaMvValue;
 import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
 import de.orat.math.gacalc.util.Tuple;
+import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
+import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
+import de.orat.math.gacasadi.genericInPart.*;
+import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
@@ -22,8 +24,8 @@ import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
 
-@GenerateDelegate(to = GaMvExpr.class)
-public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<GaMvValue, GaMvExpr>, IGetSparsityCasadi {
+@GenerateDelegate(to = CgaMvExpr.class)
+public class CgaMvValue extends DelegatingCgaMvValue implements GaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -34,13 +36,13 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         this.callback = callback;
     }
 
-    private final ComposableImmutableBinaryTree<GaMvValue> inputs;
+    private final ComposableImmutableBinaryTree<CgaMvValue> inputs;
 
     /**
      * Only to be used by non-static create Method for DelegatingGaMvValue.
      */
     @Deprecated
-    private GaMvValue(GaMvExpr sym, ComposableImmutableBinaryTree<GaMvValue> inputs) {
+    private CgaMvValue(CgaMvExpr sym, ComposableImmutableBinaryTree<CgaMvValue> inputs) {
         super(sym);
         this.inputs = inputs;
     }
@@ -50,9 +52,9 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      */
     @Deprecated
     @Override
-    protected GaMvValue create(GaMvExpr sym) {
+    protected CgaMvValue create(CgaMvExpr sym) {
         // Call permitted here.
-        return new GaMvValue(sym, this.inputs);
+        return new CgaMvValue(sym, this.inputs);
     }
 
     /**
@@ -60,16 +62,16 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      */
     @Deprecated
     @Override
-    protected GaMvValue create(GaMvExpr sym, GaMvValue other) {
+    protected CgaMvValue create(CgaMvExpr sym, CgaMvValue other) {
         var combinedInputs = this.inputs.append(other.inputs);
         // Call permitted here.
-        return new GaMvValue(sym, combinedInputs);
+        return new CgaMvValue(sym, combinedInputs);
     }
 
     /**
      * Creates a leaf. Only to be used by static create Method with DM input.
      */
-    private GaMvValue(DM dm) {
+    private CgaMvValue(DM dm) {
         super(dmToPureSym(dm));
         this.lazyDM = dm;
         // Not "leaking this", because the passed "this" will not be used before fully constructed.
@@ -79,18 +81,18 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
 
     private static int num = 0;
 
-    private static GaMvVariable dmToPureSym(DM dm) {
+    private static CgaMvVariable dmToPureSym(DM dm) {
         var nameSym = String.format("x%s", String.valueOf(num));
         ++num;
-        var pureSym = new GaMvVariable(nameSym, dm.sparsity());
+        var pureSym = new CgaMvVariable(nameSym, dm.sparsity());
         return pureSym;
     }
 
-    public static GaMvValue create(DM dm) {
-        return new GaMvValue(dm);
+    public static CgaMvValue create(DM dm) {
+        return new CgaMvValue(dm);
     }
 
-    public static GaMvValue createFrom(GaMvExpr sym) {
+    public static CgaMvValue createFrom(CgaMvExpr sym) {
         /*
          * https://github.com/casadi/casadi/wiki/L_rf
          * Evaluates the expression numerically.
@@ -100,7 +102,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         return create(dm);
     }
 
-    public static GaMvValue create(SparseDoubleMatrix vec) {
+    public static CgaMvValue create(SparseDoubleMatrix vec) {
         double[] nonzeros = vec.nonzeros();
         int[] rows = vec.getSparsity().getrow();
         if (baseCayleyTable.getBladesCount() < nonzeros.length) {
@@ -114,7 +116,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         return create(dm);
     }
 
-    public static GaMvValue create(double scalar) {
+    public static CgaMvValue create(double scalar) {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
         SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
         return create(sdm);
@@ -132,8 +134,8 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     public DM getDM() {
         if (this.lazyDM == null) {
             var allInputs = this.inputs.computeUniqueLeafs().stream().toList();
-            var allInputsParams = allInputs.stream().map(GaMvValue::delegatePurelySym).toList();
-            var func = new GaFunction("getDM", allInputsParams, List.of(this.delegate));
+            var allInputsParams = allInputs.stream().map(CgaMvValue::delegatePurelySym).toList();
+            var func = CgaFactory.instance.createFunction("getDM", allInputsParams, List.of(this.delegate));
             var evalMV = func.callValue(allInputs).get(0);
             // lazyDM is non-null for all leafs.
             this.lazyDM = evalMV.lazyDM;
@@ -164,9 +166,9 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * Can be expensive.
      */
     @Override
-    public GaMvExpr toExpr() {
+    public CgaMvExpr toExpr() {
         var dm = this.getDM();
-        var mv = GaMvExpr.create(dm);
+        var mv = CgaMvExpr.create(dm);
         return mv;
     }
 
@@ -175,32 +177,32 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         return super.delegate.getSparsityCasadi();
     }
 
-    public GaMvExpr getDelegate() {
+    public CgaMvExpr getDelegate() {
         return super.delegate;
     }
 
     /**
      * Only works on MVnum which were constructed from a DM.
      */
-    private GaMvVariable delegatePurelySym() {
-        return (GaMvVariable) super.delegate;
+    private CgaMvVariable delegatePurelySym() {
+        return (CgaMvVariable) super.delegate;
     }
 
     @Override
-    public IConstants<GaMvValue> constants() {
-        return GaFactory.instance.constantsValue();
+    public IConstants<CgaMvValue> constants() {
+        return CgaFactory.instance.constantsValue();
     }
 
-    public static IConstants<GaMvValue> constants2() {
-        return GaFactory.instance.constantsValue();
+    public static IConstants<CgaMvValue> constants2() {
+        return CgaFactory.instance.constantsValue();
     }
     
     // compose multivectors corresponding to specific geometric objets to test the decomposition methods
     
     // TODO in welches Interface muss das? welches Interface soll returned werden
     // eventuell hier sign für weight als argument einführen
-    public static GaMvValue compose(GeometricObject obj){
-        GaMvValue result = null;
+    public static CgaMvValue compose(GeometricObject obj) {
+        CgaMvValue result = null;
         switch (obj.geometricType){
             case GeometricObject.GeometricType.ROUND_POINT:
                 result = createIPNSRoundPoint(obj);
@@ -237,68 +239,68 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         }    
         return result;
     }
-    public static GaMvValue createIPNSRoundPoint(Tuple location, double signedWeight){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue c = createE3(location);
+    public static CgaMvValue createIPNSRoundPoint(Tuple location, double signedWeight) {
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue c = createE3(location);
          return o.add(c).add(inf.gpWithScalar(0.5*location.squaredNorm())).
             gpWithScalar(signedWeight);
     }
-    private static GaMvValue createIPNSRoundPoint(GeometricObject obj){
+    private static CgaMvValue createIPNSRoundPoint(GeometricObject obj) {
         return createIPNSRoundPoint(obj.location[0], obj.getSignedWeight());
     }
     
-    private static GaMvValue createIPNSSphere(GeometricObject obj){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue o = constants2().getBaseVectorOrigin();
+    private static CgaMvValue createIPNSSphere(GeometricObject obj) {
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue o = constants2().getBaseVectorOrigin();
         
         // following Spence2013 lua implementation
         // local blade = weight * ( no + center + 0.5 * ( ( center .. center ) - sign * radius * radius ) * ni )
-        GaMvValue c = createE3(obj.location[0]);
+        CgaMvValue c = createE3(obj.location[0]);
         double v = (obj.location[0].squaredNorm() - obj.getSignedSquaredSize())*0.5;
         return o.add(c).add(inf.gpWithScalar(v)).gpWithScalar(obj.getSignedWeight());
     }
     
-    private static GaMvValue createIPNSCircle(GeometricObject obj){
+    private static CgaMvValue createIPNSCircle(GeometricObject obj) {
         // Formula corresponding to cgaLua pdf documentation and [Rettig2023]
         // ε₀∧nn+(x⋅nn)E₀+x∧nn+((x⋅nn)x-0.5(x²-r²)nn)∧εᵢ
         
         // CGA lua code
         // local blade = weight * ( no ^ normal + ( center .. normal ) * no_ni + center ^ normal +
         // ( ( center .. normal ) * center - 0.5 * ( ( center .. center ) - sign * radius * radius ) * normal ) ^ ni )
-        GaMvValue x = createE3(obj.location[0]);
-        GaMvValue n = createE3(obj.attitude);
+        CgaMvValue x = createE3(obj.location[0]);
+        CgaMvValue n = createE3(obj.attitude);
         double v = (obj.location[0].squaredNorm() - obj.getSignedSquaredSize())*0.5;
         
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue a = o.op(n).add(x.ip(n).gp(o.op(inf))).add(x.op(n));
-        GaMvValue b = x.ip(n).gp(x);
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue a = o.op(n).add(x.ip(n).gp(o.op(inf))).add(x.op(n));
+        CgaMvValue b = x.ip(n).gp(x);
         //GaMvValue c = x.square().sub(sr2).gp(n).gpWithScalar(0.5);
-        GaMvValue c = n.gpWithScalar(v);
+        CgaMvValue c = n.gpWithScalar(v);
         return a.add((b.sub(c)).op(inf)).gpWithScalar(obj.getSignedWeight());
     }
     
     //TODO weight wird nicht berücksichtigt!
-    private static GaMvValue createOPNSOrientedPoint(GeometricObject obj){
+    private static CgaMvValue createOPNSOrientedPoint(GeometricObject obj) {
         // @CGA("nn∧x+(0.5x²nn-x (x⋅nn))εᵢ+nnε₀-(x⋅nn)E₀") FIXME x und nn vertauscht am Ende? siehe paper
         //FIXME bei decompose scheint das Vorzeichen der Orientierung falsch zu sein
         // oder ist die decompose()-Methode falsch?
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue n = createE3(obj.attitude); 
-        GaMvValue x = createE3(obj.location[0]);
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue n = createE3(obj.attitude);
+        CgaMvValue x = createE3(obj.location[0]);
         
         return n.op(x).add(n.gpWithScalar(0.5d*obj.location[0].squaredNorm())
                 .sub(x.gp(x.ip(n))).gp(inf)).
                 add(n.gp(o)).sub(x.ip(n).gp(o.op(inf)));
     }
        
-    private static GaMvValue createIPNSOrientedPoint(GeometricObject obj){
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue n = createE3(obj.attitude); 
-        GaMvValue x = createE3(obj.location[0]);
+    private static CgaMvValue createIPNSOrientedPoint(GeometricObject obj) {
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue n = createE3(obj.attitude);
+        CgaMvValue x = createE3(obj.location[0]);
         
         
         return n.op(x).add(n.gpWithScalar(0.5d*obj.location[0].squaredNorm())
@@ -310,33 +312,33 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     // flat objects creation
     
     // tested
-    private static GaMvValue createIPNSPlane(GeometricObject obj){
+    private static CgaMvValue createIPNSPlane(GeometricObject obj) {
         
         /* this((createEx(n.x)
             .add(createEy(n.y))
             .add(createEz(n.z))
             .add(createInf(P.x*n.x+P.y*n.y+P.z*n.z))).gp(weight));
         */
-        GaMvValue attitude = createE3(obj.attitude);
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue attitude = createE3(obj.attitude);
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         return attitude
             .add(inf.gpWithScalar(obj.location[0].ip(obj.attitude))).gpWithScalar(obj.getSignedWeight());
     }
-    private static GaMvValue createIPNSLine(GeometricObject obj){
+    private static CgaMvValue createIPNSLine(GeometricObject obj) {
         // local blade = weight * ( normal + ( center ^ normal ) * ni ) * i
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue I3 = constants2().getEuclideanPseudoscalar();
-        GaMvValue nq = createE3(obj.attitude);
-        GaMvValue q = createE3(obj.location[0]);
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue I3 = constants2().getEuclideanPseudoscalar();
+        CgaMvValue nq = createE3(obj.attitude);
+        CgaMvValue q = createE3(obj.location[0]);
         return nq.add(q.op(nq).gp(inf)).
                 gp(I3).gpWithScalar(obj.getSignedWeight());
     }
-    private static GaMvValue createOPNSDipole(GeometricObject obj){
-        GaMvValue d1 = createIPNSRoundPoint(obj.location[0], 
+    private static CgaMvValue createOPNSDipole(GeometricObject obj) {
+        CgaMvValue d1 = createIPNSRoundPoint(obj.location[0],
             Math.sqrt(obj.getSquaredWeight()));
-        GaMvValue d2 = createIPNSRoundPoint(obj.location[0],
+        CgaMvValue d2 = createIPNSRoundPoint(obj.location[0],
             Math.sqrt(obj.getSquaredWeight()));
-        GaMvValue result = d1.op(d2);
+        CgaMvValue result = d1.op(d2);
         if (obj.isWeightNegative()) result = result.negate();
         return result;
     }
@@ -350,52 +352,52 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * @param obj
      * @return 
      */
-    private static GaMvValue createIPNSDipole2(GeometricObject obj){
+    private static CgaMvValue createIPNSDipole2(GeometricObject obj) {
         
         Tuple center = obj.location[0].add(obj.location[1]).muls(0.5);
-        GaMvValue c = createE3(center);
+        CgaMvValue c = createE3(center);
         //Tuple normalizedNormal = obj.attitude.normalize();
-        GaMvValue weight = create(obj.getSignedWeight());
+        CgaMvValue weight = create(obj.getSignedWeight());
                 
-        GaMvValue n = createE3(obj.attitude);
+        CgaMvValue n = createE3(obj.attitude);
         System.out.println("create dipole: att="+obj.attitude.toString());
         
         // testweise
         //System.out.println("create dipole: att from locations="+obj.location[1].sub(obj.location[0]).normalize().toString());
         
-        GaMvValue sr2 = create(obj.getSignedSquaredSize());
+        CgaMvValue sr2 = create(obj.getSignedSquaredSize());
         //System.out.println("create Dipole: sr2="+String.valueOf(obj.getSignedSquaredSize())); // 0.4330127018922193 korrekt
         
         // testweise
         //System.out.println("create Dipole: vec from locations="+obj.location[1].sub(obj.location[0]).toString());
         //System.out.println("create Dipole: sr2 from locations="+String.valueOf(obj.location[1].sub(obj.location[0]).muls(0.5).squaredNorm()));
         
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue I3 = constants2().getEuclideanPseudoscalar();
-        GaMvValue oinf = o.op(inf);
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue I3 = constants2().getEuclideanPseudoscalar();
+        CgaMvValue oinf = o.op(inf);
         // code scheint nicht mit der Formel im pdf übereinzustimmen
         // (das erste "-" ist im pdf ein "+"
         // local blade = weight * ( no ^ normal + center ^ normal ^ no_ni - ( center .. normal ) -
         //( ( center .. normal ) * center - 0.5 * ( ( center .. center ) + sign * radius * radius ) * normal ) ^ ni ) * i
         // FIXME component e123 scheint falches Vorzeichen zu haben --> das "+" im pdf ist also richtig
         // CGAMultivector a =  o.op(n).add(c.op(n).op(I0)).sub(c.ip(n));
-        GaMvValue a =  o.op(n).add(c.op(n).op(oinf)).add(c.ip(n));
-        GaMvValue b = c.ip(n).gp(c);
-        GaMvValue d = c.square().add(sr2).gpWithScalar(0.5).gp(n);
-        GaMvValue result = a.sub(b.sub(d).op(inf)).gp(I3).gp(weight);
+        CgaMvValue a = o.op(n).add(c.op(n).op(oinf)).add(c.ip(n));
+        CgaMvValue b = c.ip(n).gp(c);
+        CgaMvValue d = c.square().add(sr2).gpWithScalar(0.5).gp(n);
+        CgaMvValue result = a.sub(b.sub(d).op(inf)).gp(I3).gp(weight);
         return result;
     }
     
-    private static GaMvValue createIPNSDipole(GeometricObject obj){
+    private static CgaMvValue createIPNSDipole(GeometricObject obj) {
         // WORKAROUND
         return createOPNSDipole(obj).dual();
     }
     
-    private static GaMvValue createIPNSFlatPoint(GeometricObject obj){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue I3 = constants2().getEuclideanPseudoscalar();
-        GaMvValue one = constants2().one();
+    private static CgaMvValue createIPNSFlatPoint(GeometricObject obj) {
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue I3 = constants2().getEuclideanPseudoscalar();
+        CgaMvValue one = constants2().one();
         
         // local blade = weight * ( 1 - center ^ ni ) * i
         //return (new CGAScalarOPNS(1d)).sub(createE3(c).op(inf)).gp(I3).gp(weight);
@@ -407,7 +409,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     
     // helper methods to implement composition methods
     
-    private static GaMvValue createE3(Tuple c){
+    private static CgaMvValue createE3(Tuple c) {
         return create(SparseCGAColumnVector.createEuclid(new double[]{c.values[0], c.values[1], c.values[2]}));
         /* warum funktioniert das nicht
         return constants2().getBaseVectorX().gpWithScalar(c.values[0]).
@@ -432,7 +434,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     // TODO in welches Interface muss das? welches Interface soll returned werden
     public GeometricObject decompose(boolean isIPNS){
         
-        GaMvValue probePoint; // = constants2().getBaseVectorOrigin();
+        CgaMvValue probePoint; // = constants2().getBaseVectorOrigin();
         probePoint = createIPNSRoundPoint(new Tuple(new double[]{0,0,0}), 1d);
         switch (grade()){
             case 0:
@@ -624,7 +626,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     // decompose flat objects
     
     private GeometricObject decomposeFlatPoint(boolean isIPNS){
-        GaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS);
+        CgaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS);
         System.out.println("attitude flat point="+attitude.toString());
         Tuple attitude2 = attitudeFlatPoint(isIPNS, this);
         System.out.println("attitude flat point2="+attitude2.toString());
@@ -640,15 +642,15 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * 
      * @return location as euclidean point
      */
-    private static Tuple locationFlatPoint(GaMvValue m1, boolean isIPNS){
-        GaMvValue m = m1;
+    private static Tuple locationFlatPoint(CgaMvValue m1, boolean isIPNS) {
+        CgaMvValue m = m1;
         if (isIPNS) m = m1.undual();
-        GaMvValue inf = m.constants2().getBaseVectorInfinity();
-        GaMvValue o = m.constants2().getBaseVectorOrigin();
-        GaMvValue oinf = o.op(inf);
+        CgaMvValue inf = m.constants2().getBaseVectorInfinity();
+        CgaMvValue o = m.constants2().getBaseVectorOrigin();
+        CgaMvValue oinf = o.op(inf);
         
         // Dorst2007 drills 14.9.2. nr. 5
-        GaMvValue result = oinf.lc(o.op(m)).div(oinf.lc(m)).negate();
+        CgaMvValue result = oinf.lc(o.op(m)).div(oinf.lc(m)).negate();
         return extractE3(result);
     }
     /**
@@ -660,8 +662,8 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * 
      * @return attitude 
      */
-    private static Tuple attitudeFlatPoint(boolean isIPNS, GaMvValue m){
-        GaMvValue m1 = m;
+    private static Tuple attitudeFlatPoint(boolean isIPNS, CgaMvValue m) {
+        CgaMvValue m1 = m;
         if (isIPNS) m1 = m.dual();
         // corresponding to
         // Geometric Algebra: A powerful tool for solving geometric problems in visual computing
@@ -670,14 +672,14 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         // also corresponding to [Dorst2009] p.407
         // tested for line
         //CGAMultivector result =  inf.lc(this).negate().compress();
-        GaMvValue inf = m1.constants2().getBaseVectorInfinity();
-        GaMvValue result =  inf.negate().lc(m1);
+        CgaMvValue inf = m1.constants2().getBaseVectorInfinity();
+        CgaMvValue result = inf.negate().lc(m1);
         //return new CGAAttitudeOPNS(result);
         return extractE3(result);
     }
     
-    private GeometricObject decomposeScrewAxisOrLine(boolean isIPNS, GaMvValue probePoint){
-        GaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS);
+    private GeometricObject decomposeScrewAxisOrLine(boolean isIPNS, CgaMvValue probePoint) {
+        CgaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS);
         System.out.println("attFrom line: "+attitude.toString());
         double pitch = Double.NaN;
         boolean isReal = true;
@@ -692,8 +694,8 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     
     //TODO unklar ob squaredSize=0 oder inf sein sollte
     // squaredWeight hat falsches Vorzeichen
-    private GeometricObject decomposePlane(boolean isIPNS, GaMvValue probePoint){
-        GaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS); // bivector^einf, grade-3 
+    private GeometricObject decomposePlane(boolean isIPNS, CgaMvValue probePoint) {
+        CgaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS); // bivector^einf, grade-3
         return new GeometricObject(GeometricObject.GeometricType.PLANE, isIPNS,
                         extractE3FromBivectorInf(attitude), 
                         decomposeLocationFlat(isIPNS, probePoint),
@@ -701,17 +703,17 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     }
     
     // - bei line/plane-ipns funktioniert es
-    private Tuple decomposeLocationFlat(boolean isIPNS, GaMvValue probePoint){
-        GaMvValue m = this;
+    private Tuple decomposeLocationFlat(boolean isIPNS, CgaMvValue probePoint) {
+        CgaMvValue m = this;
         if (!isIPNS) m = dual();
        
-        GaMvValue result = probePoint.op(m).div(m); // round point ipns
+        CgaMvValue result = probePoint.op(m).div(m); // round point ipns
         
         // extract E3 from normalized dual sphere
         // [Dorst2007] p.409
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue oinf = o.op(inf);
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue oinf = o.op(inf);
         
         result = oinf.lc(oinf.op(result)); // euclidean vector
         return extractE3(result);
@@ -744,8 +746,8 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         // following Dorst2008 p.407/08 (+errata: ohne Vorzeichen), corresponds to drills 14.9.2
         // gradeInversion() ist elegant, da ich damit die Formel dipole, circle und sphere
         // verwenden kann
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue result = gp(gradeInversion()).div((inf.lc(this)).square());  
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue result = gp(gradeInversion()).div((inf.lc(this)).square());
         
         // https://github.com/pygae/clifford/blob/master/clifford/cga.py
         // hier findet sich eine leicht andere Formel, mit der direkt die size/radius
@@ -767,7 +769,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * @param probePoint If not specified use e0.
      * @return squared weight >0
      */
-    private static double squaredWeight(GaMvValue attitude, GaMvValue probePoint){
+    private static double squaredWeight(CgaMvValue attitude, CgaMvValue probePoint) {
         //FIXME abs() scheint mir unnötig zu sein
         return extractScalar(probePoint.lc(attitude).square());
         // liefert gleiches Ergebnis
@@ -782,8 +784,8 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * 
      * @return attitude (as a tri-vector for a sphere)
      */
-    private GaMvValue attitudeFromTangentAndRoundIPNS(){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+    private CgaMvValue attitudeFromTangentAndRoundIPNS() {
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         return inf.negate().lc(this.undual()).op(inf);
     }
     /*private GaMvValue attitudeFromFlat(boolean isIPNS){
@@ -811,7 +813,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * 
      * @return location 
      */
-    private static Tuple locationFromTangentAndRound(GaMvValue mm){
+    private static Tuple locationFromTangentAndRound(CgaMvValue mm) {
         // corresponds to the errata of the book [Dorst2007]
         // and also Fernandes2009 supplementary material B
         // location as finite point/dual sphere corresponding to [Dorst2007]
@@ -822,15 +824,15 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         //CGAMultivector mn = this; //this.normalize();
         
         // determine location as dual-sphere [Dorst2007 p. 407]
-        GaMvValue inf = mm.constants2().getBaseVectorInfinity();
-        GaMvValue o = mm.constants2().getBaseVectorOrigin();
-        GaMvValue location = mm.negate().div(inf.lc(mm));
+        CgaMvValue inf = mm.constants2().getBaseVectorInfinity();
+        CgaMvValue o = mm.constants2().getBaseVectorOrigin();
+        CgaMvValue location = mm.negate().div(inf.lc(mm));
             
         // center of this round, as a null vector
         // https://github.com/pygae/clifford/blob/master/clifford/cga.py Zeile 284:
         // self.mv * self.cga.einf * self.mv // * bedeutet geometrisches Produkt
         //TODO ausprobieren?
-        GaMvValue oinf = o.op(inf);
+        CgaMvValue oinf = o.op(inf);
         return extractE3(oinf.ip(oinf.op(location)));
     }
     
@@ -842,7 +844,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         Tuple location = locationFromTangentAndRound(this);
         double squaredSize = squaredSizeOfRound(isIPNS);
         System.out.println("decomposeCircleOrOrientedPoint: squaredSize="+String.valueOf(squaredSize));
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
             
         //WORKAROUND anhand squaredSize herausfinden ob circle or oriented point und entsprechend die
         Tuple attitude;
@@ -851,7 +853,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         if (Precision.equals(squaredSize, 0, GeometricObject.eps)){
             // für oriented Point
             // CGAAttitudeOPNS result = new CGAAttitudeOPNS(inf.negate().lc(undual()).op(inf).compress());
-            GaMvValue a = inf.negate().lc(undual()).op(inf);
+            CgaMvValue a = inf.negate().lc(undual()).op(inf);
             attitude = extractE3FromBivectorInf(a);
             // scheint immer noch falsches Vorzeichen zu haben, also gleiches Ergebnis wie die unten
             // definiert attitue() Methode
@@ -864,8 +866,8 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
             // CGAUtil.lua l.366
             // blade = blade / weight2
             // local normal = -no_ni .. ( blade ^ ni )
-            GaMvValue o = constants2().getBaseVectorOrigin();
-            GaMvValue result = o.op(inf).negate().
+            CgaMvValue o = constants2().getBaseVectorOrigin();
+            CgaMvValue result = o.op(inf).negate().
                 ip(this.gpWithScalar(1d/weight()/*2*/).op(inf));
             attitude = extractE3(result);
         }
@@ -886,9 +888,9 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         // CGAUtil.lua l.366
         // blade = blade / weight2
         // local normal = -no_ni .. ( blade ^ ni )
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue result = o.op(inf).negate().
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue result = o.op(inf).negate().
             ip(this.gpWithScalar(1d/weight()/*2*/).op(inf));
         return extractE3(result);
         
@@ -915,9 +917,9 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
         // # bedeutet magnitude
         //FIXME warum Math.abs()? Warum bekomme ich hier das Vorzeichen nicht?
         //CGAMultivector result =  o.op(inf.ip(this.op(inf)));
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue o = constants2().getBaseVectorOrigin();
-        GaMvValue result = o.op(inf).ip(this.op(inf)).norm();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue o = constants2().getBaseVectorOrigin();
+        CgaMvValue result = o.op(inf).ip(this.op(inf)).norm();
         return extractScalar(result);
     }
     
@@ -926,18 +928,18 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     // 
     // corresponding to [Dorst2009] p. 427
     private GeometricObject decomposeDipole(boolean isIPNS){
-        GaMvValue attitude = attitudeFromTangentAndRoundIPNS(); // ok
+        CgaMvValue attitude = attitudeFromTangentAndRoundIPNS(); // ok
         double squaredWeight = squaredWeight(attitude, constants2().getBaseVectorOrigin()); // ok
         
         //WORKAROUND strict-norm (abs) verwenden statt einfach quadrieren, denn
         // das Quadrat kann negativ werden und dann läßt sich die Wurzel nicht ziehen
         //FIXME 
         // unklar, ob dadurch nicht die Reihenfolge der beiden Punkte beeinflusst wird.
-        GaMvValue m = this;
+        CgaMvValue m = this;
         if (isIPNS) m = this.undual();
         
-        GaMvValue sqrt = m.norm();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue sqrt = m.norm();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         
         // following Fernandes (Formelsammlung, attachement)
         // CGARoundPointIPNS p2 = new CGARoundPointIPNS(sub(sqrt).div(inf.negate().lc(this)).compress());
@@ -953,7 +955,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
             String.valueOf(sq)+"="+String.valueOf(sqDist));
         // 19.183012701892203=19.18301270189221
         
-        GaMvValue center = locationFromTangendAndRound();
+        CgaMvValue center = locationFromTangendAndRound();
         System.out.println("test decompose dipole: center="+center.toString());
         
         //TODO
@@ -971,9 +973,9 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * @param isIPNS
      * @return bivector^einf or E^inf
      */
-    private GaMvValue decomposeAttitudeFlatAsEInf(boolean isIPNS){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
-        GaMvValue m = this;
+    private CgaMvValue decomposeAttitudeFlatAsEInf(boolean isIPNS) {
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue m = this;
         if (isIPNS) m = this.undual();
         return inf.negate().lc(m);
     }
@@ -983,10 +985,10 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * 
      * @return location in the euclidian part directly.
      */
-    private GaMvValue locationFromTangendAndRound(){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+    private CgaMvValue locationFromTangendAndRound() {
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         // corresponds to the errata of the book Dorst2007
-        GaMvValue result = (this.gp(inf).gp(this)).div((inf.ip(this)).square()).gpWithScalar(-0.5d);
+        CgaMvValue result = (this.gp(inf).gp(this)).div((inf.ip(this)).square()).gpWithScalar(-0.5d);
         System.out.println("locationFromTangentAndRound="+result.toString());
         return result;
     }
@@ -999,7 +1001,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * @param attitude E^inf hängt vom grade ab
      * @return squared weight > 0
      */
-    private static double squaredWeight(GaMvValue attitude){
+    private static double squaredWeight(CgaMvValue attitude) {
         return squaredWeight(attitude, attitude.constants2().getBaseVectorOrigin());
     } 
     
@@ -1007,27 +1009,26 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
      * 
      * example: -1.9999999999999991*e1^e2^ei + 1.9999999999999991*e1^e3^ei + 1.9999999999999991*e2^e3^ei
      */
-    private static Tuple extractE3FromBivectorInf(GaMvValue m){
-        GaMvValue o = m.constants2().getBaseVectorOrigin();
-        GaMvValue I3i = m.constants2().getBaseVectorX().op(m.constants2().getBaseVectorY()).
-                                             op(m.constants2().getBaseVectorZ()).negate();
-        GaMvValue result = m.gradeSelection(3).rc(o).negate().lc(I3i);
+    private static Tuple extractE3FromBivectorInf(CgaMvValue m) {
+        CgaMvValue o = m.constants2().getBaseVectorOrigin();
+        CgaMvValue I3i = m.constants2().getBaseVectorX().op(m.constants2().getBaseVectorY()).                                             op(m.constants2().getBaseVectorZ()).negate();
+        CgaMvValue result = m.gradeSelection(3).rc(o).negate().lc(I3i);
         return extractE3(result);
     }
-    private static Tuple extractE3FromVectorInf(GaMvValue m){
-        GaMvValue o = m.constants2().getBaseVectorOrigin();
-        GaMvValue result = m.gradeSelection(2).rc(o).negate();
+    private static Tuple extractE3FromVectorInf(CgaMvValue m) {
+        CgaMvValue o = m.constants2().getBaseVectorOrigin();
+        CgaMvValue result = m.gradeSelection(2).rc(o).negate();
         return extractE3(result);
     }
     
-    private static Tuple extractE3(GaMvValue m){
+    private static Tuple extractE3(CgaMvValue m) {
         int[] ind = CGACayleyTable.getEuclidIndizes();
         StdVectorDouble elements = m.getDM().get_elements();
         return new Tuple(new double[]{elements.get(ind[0]), 
                            elements.get(ind[1]),
                            elements.get(ind[2])});
     }
-    private static double extractScalar(GaMvValue m){
+    private static double extractScalar(CgaMvValue m) {
         return m.getDM().get_elements().get(0);
     }
     
@@ -1043,7 +1044,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     public boolean isIPNSFlat(){
         //if (inf.op(attitude).isNull()) return false;
         //return inf.lc(attitude).isNull();
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         System.out.println("isIPNSFlat: "+inf.op(this).toString());
         // bei test dipole, also grade 3 finden sich drei nicht structurelle 0 Elemente von grade 4 ganz am Ende des mv
         // [00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0, 0, 0, 00]
@@ -1053,7 +1054,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     //TODO
     // Umstellen auf isFlat(boolean isIPNS)
     private boolean isOPNSFlat(){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         if (!inf.op(this).isNull(GeometricObject.eps)) return false;
         return !inf.lc(this).isNull(GeometricObject.eps);
     }
@@ -1066,13 +1067,13 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     
     // TODO ipns und opns-round können zu isRound(boolean isIPNS) zusammengefasst werden
     private boolean isIPNSRound(){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         System.out.println("isIPNSFlat: "+inf.op(this).toString());
         if (inf.op(this).isNull(GeometricObject.eps)) return false;
         return !inf.lc(this).isNull(GeometricObject.eps);
     }
     private boolean isOPNSRound(){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         if (inf.op(this).isNull(GeometricObject.eps)) return false;
         if (inf.lc(this).isNull(GeometricObject.eps)) return false;
         return !this.square().isNull(GeometricObject.eps);
@@ -1083,7 +1084,7 @@ public class GaMvValue extends DelegatingGaMvValue implements IMultivectorValue<
     }
     // scheint für ipns und opns gleich zu sein
     private boolean isAttitude(){
-        GaMvValue inf = constants2().getBaseVectorInfinity();
+        CgaMvValue inf = constants2().getBaseVectorInfinity();
         if (!inf.op(this).isNull(GeometricObject.eps)) return false;
         return inf.lc(this).isNull(GeometricObject.eps);
     }

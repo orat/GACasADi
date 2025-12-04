@@ -1,15 +1,20 @@
-package de.orat.math.gacasadi.impl;
+package de.orat.math.gacasadi.generic;
 
+import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import de.orat.math.gacasadi.CasADiUtil;
 import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import de.orat.math.gacalc.spi.ILoopService;
 import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
+import de.orat.math.gacasadi.generic.IGetSX;
+import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
+import de.orat.math.gacasadi.genericInPart.CasADiUtil;
+import static de.orat.math.gacasadi.generic.GaFunction.transformImpl;
 
 /**
  * <pre>
@@ -17,54 +22,55 @@ import de.orat.math.gacalc.spi.IMultivectorVariable;
  * https://web.casadi.org/api/html/da/da4/classcasadi_1_1Function.html
  * </pre>
  */
-public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExprArray> {
+public class GaLoopService<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVariable<EXPR>>
+    implements ILoopService<EXPR, VAR, GaExprArray<EXPR>> {
 
-    private GaLoopService() {
+    private final GaFactory<EXPR, VAR, ?> fac;
 
+    public GaLoopService(GaFactory<EXPR, VAR, ?> fac) {
+        this.fac = fac;
     }
 
-    public static final GaLoopService instance = new GaLoopService();
-
     @Override
-    public IMultivectorExpressionArray<GaMvExpr> toExprArray(List<GaMvExpr> from) {
+    public IMultivectorExpressionArray<EXPR> toExprArray(List<EXPR> from) {
         return new GaExprArray(from);
     }
 
     @Override
-    public List<GaExprArray> map(
-        List<GaMvVariable> paramsSimple,
-        List<GaMvVariable> paramsArray,
-        List<GaMvExpr> returnsArray,
-        List<GaMvExpr> argsSimple,
-        List<GaExprArray> argsArray,
+    public List<GaExprArray<EXPR>> map(
+        List<VAR> paramsSimple,
+        List<VAR> paramsArray,
+        List<EXPR> returnsArray,
+        List<EXPR> argsSimple,
+        List<GaExprArray<EXPR>> argsArray,
         int iterations) {
         return mapImpl(paramsSimple, paramsArray, returnsArray, argsSimple, argsArray, iterations);
     }
 
     @Override
-    public AccumArrayListReturn<GaMvExpr, GaExprArray> fold(
-        List<GaMvVariable> paramsAccum,
-        List<GaMvVariable> paramsSimple,
-        List<GaMvVariable> paramsArray,
-        List<GaMvExpr> returnsAccum,
-        List<GaMvExpr> returnsArray,
-        List<GaMvExpr> argsAccumInitial,
-        List<GaMvExpr> argsSimple,
-        List<GaExprArray> argsArray,
+    public AccumArrayListReturn<EXPR, GaExprArray<EXPR>> fold(
+        List<VAR> paramsAccum,
+        List<VAR> paramsSimple,
+        List<VAR> paramsArray,
+        List<EXPR> returnsAccum,
+        List<EXPR> returnsArray,
+        List<EXPR> argsAccumInitial,
+        List<EXPR> argsSimple,
+        List<GaExprArray<EXPR>> argsArray,
         int iterations) {
         return foldImpl(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iterations);
     }
 
     @Override
-    public AccumArrayListReturn<GaExprArray, GaExprArray> mapaccum(
-        List<GaMvVariable> paramsAccum,
-        List<GaMvVariable> paramsSimple,
-        List<GaMvVariable> paramsArray,
-        List<GaMvExpr> returnsAccum,
-        List<GaMvExpr> returnsArray,
-        List<GaMvExpr> argsAccumInitial,
-        List<GaMvExpr> argsSimple,
-        List<GaExprArray> argsArray,
+    public AccumArrayListReturn<GaExprArray<EXPR>, GaExprArray<EXPR>> mapaccum(
+        List<VAR> paramsAccum,
+        List<VAR> paramsSimple,
+        List<VAR> paramsArray,
+        List<EXPR> returnsAccum,
+        List<EXPR> returnsArray,
+        List<EXPR> argsAccumInitial,
+        List<EXPR> argsSimple,
+        List<GaExprArray<EXPR>> argsArray,
         int iterations) {
         return mapaccumImpl(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iterations);
     }
@@ -81,12 +87,12 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
      * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
      * @return One array element for each iteration for the variables of the returnsArray parameter.
      */
-    public static <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> List<GaExprArray> mapImpl(
+    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> List<GaExprArray<EXPR>> mapImpl(
         List<MV> paramsSimple,
         List<MV> paramsArray,
-        List<? extends GaMvExpr> returnsArray,
-        List<? extends GaMvExpr> argsSimple,
-        List<GaExprArray> argsArray,
+        List<? extends EXPR> returnsArray,
+        List<? extends EXPR> argsSimple,
+        List<GaExprArray<EXPR>> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsSimple.size() == argsSimple.size();
@@ -111,7 +117,7 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
         var call_sym_in = new StdVectorSX(
             Stream.concat(
                 argsSimple.stream().map(IGetSX::getSX),
-                argsArray.stream().map(GaExprArray::horzcat)
+                argsArray.stream().map(GaLoopService::horzcat)
             ).toList()
         );
         var call_sym_out = new StdVectorSX();
@@ -120,7 +126,7 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
         // parallelization = unroll|serial|openmp
         f_sym_casadi.map("MapMap", "serial", iterations, nonRepeated, new StdVectorCasadiInt()).call(call_sym_in, call_sym_out);
 
-        var call_out = call_sym_out.stream().map(GaExprArray::horzsplit).map(GaExprArray::new).toList();
+        var call_out = call_sym_out.stream().map(sx -> horzsplit(sx)).map(GaExprArray::new).toList();
         return call_out;
     }
 
@@ -143,15 +149,15 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
      * @return Only end results of accum Variables. One array element for each iteration for the variables of
      * the returnsArray parameter.
      */
-    public static <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<GaMvExpr, GaExprArray> foldImpl(
+    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<EXPR, GaExprArray<EXPR>> foldImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
-        List<? extends GaMvExpr> returnsAccum,
-        List<? extends GaMvExpr> returnsArray,
-        List<? extends GaMvExpr> argsAccumInitial,
-        List<? extends GaMvExpr> argsSimple,
-        List<GaExprArray> argsArray,
+        List<? extends EXPR> returnsAccum,
+        List<? extends EXPR> returnsArray,
+        List<? extends EXPR> argsAccumInitial,
+        List<? extends EXPR> argsSimple,
+        List<GaExprArray<EXPR>> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsAccum.size() >= 1;
@@ -171,14 +177,14 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(
-                Stream.of(GaExprArray.horzcat(paramsAccum)),
+                Stream.of(GaLoopService.horzcat(paramsAccum)),
                 paramsSimple.stream().map(IGetSX::getSX),
                 paramsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
         var def_sym_out = new StdVectorSX(
             Stream.concat(
-                Stream.of(GaExprArray.horzcat(returnsAccum)),
+                Stream.of(GaLoopService.horzcat(returnsAccum)),
                 returnsArray.stream().map(IGetSX::getSX)
             ).toList()
         );
@@ -186,19 +192,19 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
 
         var call_sym_in = new StdVectorSX(
             StreamConcat(
-                Stream.of(GaExprArray.horzcat(argsAccumInitial)),
+                Stream.of(GaLoopService.horzcat(argsAccumInitial)),
                 // CasADi treats a SX as an arbitrary long List of SxStatic.
                 // No need to use repmat.
                 argsSimple.stream().map(IGetSX::getSX),
-                argsArray.stream().map(GaExprArray::horzcat)
+                argsArray.stream().map(GaLoopService::horzcat)
             ).toList()
         );
         var call_sym_out = new StdVectorSX();
         f_sym_casadi.fold(iterations).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
-        var call_out_accum = GaExprArray.horzsplit(call_out_all.get(0)).stream().map(GaMvExpr::create).toList();
-        var call_out_array = call_out_all.subList(1, call_out_all.size()).stream().map(GaExprArray::horzsplit).map(GaExprArray::new).toList();
+        var call_out_accum = this.horzsplit(call_out_all.get(0));
+        var call_out_array = call_out_all.subList(1, call_out_all.size()).stream().map(sx -> horzsplit(sx)).map(GaExprArray::new).toList();
         var call_out = new AccumArrayListReturn(call_out_accum, call_out_array);
         return call_out;
     }
@@ -218,15 +224,15 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
      * @return Results of all iterations of accum Variables. One array element for each iteration for the
      * variables of the returnsArray parameter.
      */
-    public static <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<GaExprArray, GaExprArray> mapaccumImpl(
+    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<GaExprArray<EXPR>, GaExprArray<EXPR>> mapaccumImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
-        List<? extends GaMvExpr> returnsAccum,
-        List<? extends GaMvExpr> returnsArray,
-        List<? extends GaMvExpr> argsAccumInitial,
-        List<? extends GaMvExpr> argsSimple,
-        List<GaExprArray> argsArray,
+        List<? extends EXPR> returnsAccum,
+        List<? extends EXPR> returnsArray,
+        List<? extends EXPR> argsAccumInitial,
+        List<? extends EXPR> argsSimple,
+        List<GaExprArray<EXPR>> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsAccum.size() >= 1;
@@ -265,7 +271,7 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
                 // CasADi treats a SX as an arbitrary long List of SxStatic.
                 // No need to use repmat.
                 argsSimple.stream().map(IGetSX::getSX),
-                argsArray.stream().map(GaExprArray::horzcat)
+                argsArray.stream().map(GaLoopService::horzcat)
             ).toList()
         );
         var call_sym_out = new StdVectorSX();
@@ -274,9 +280,21 @@ public class GaLoopService implements ILoopService<GaMvExpr, GaMvVariable, GaExp
         f_sym_casadi.mapaccum("MapaccumMapaccum", iterations, accumVars, accumVars).call(call_sym_in, call_sym_out);
 
         var call_out_all = call_sym_out.stream().toList();
-        var call_out_accum = call_out_all.subList(0, returnsAccum.size()).stream().map(GaExprArray::horzsplit).map(GaExprArray::new).toList();
-        var call_out_array = call_out_all.subList(returnsAccum.size(), call_out_all.size()).stream().map(GaExprArray::horzsplit).map(GaExprArray::new).toList();
+        var call_out_accum = call_out_all.subList(0, returnsAccum.size()).stream().map(sx -> horzsplit(sx)).map(GaExprArray::new).toList();
+        var call_out_array = call_out_all.subList(returnsAccum.size(), call_out_all.size()).stream().map(sx -> horzsplit(sx)).map(GaExprArray::new).toList();
         var call_out = new AccumArrayListReturn(call_out_accum, call_out_array);
         return call_out;
+    }
+
+    public static SX horzcat(List<? extends IGetSX> mvs) {
+        StdVectorSX stdVec = transformImpl(mvs);
+        SX sxHorzcat = SxStatic.horzcat(stdVec);
+        return sxHorzcat;
+    }
+
+    public List<? extends EXPR> horzsplit(SX sxHorzcat) {
+        StdVectorSX stdVec = SxStatic.horzsplit_n(sxHorzcat, sxHorzcat.columns());
+        var mvs = stdVec.stream().map(sx -> fac.SXtoEXPR(sx)).toList();
+        return mvs;
     }
 }

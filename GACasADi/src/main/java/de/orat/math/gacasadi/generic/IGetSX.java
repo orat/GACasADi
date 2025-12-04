@@ -1,4 +1,4 @@
-package de.orat.math.gacasadi.impl;
+package de.orat.math.gacasadi.generic;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 

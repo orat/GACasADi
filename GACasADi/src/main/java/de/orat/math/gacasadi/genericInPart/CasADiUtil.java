@@ -1,5 +1,6 @@
-package de.orat.math.gacasadi;
+package de.orat.math.gacasadi.genericInPart;
 
+import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.Util;
 import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
@@ -12,11 +13,9 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import de.orat.math.gacasadi.impl.GaMvExpr;
-import de.orat.math.gacasadi.impl.IGetSX;
-import de.orat.math.gacasadi.impl.IGetSparsityCasadi;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacalc.util.CayleyTable.Cell;
+import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
@@ -185,7 +184,7 @@ public class CasADiUtil {
      */
     private static MatrixSparsity createSparsity(CayleyTable cayleyTable, GaMvExpr mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
-        ColumnVectorSparsity sparsity = mv.getSparsity();
+        MatrixSparsity sparsity = mv.getSparsity();
         for (int i = 0; i < cayleyTable.getRows(); i++) {
             for (int j = 0; j < cayleyTable.getCols(); j++) {
                 Cell cell = cayleyTable.getCell(i, j);

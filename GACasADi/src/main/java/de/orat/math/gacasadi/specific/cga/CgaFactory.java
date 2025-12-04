@@ -1,7 +1,12 @@
-package de.orat.math.gacasadi.impl;
+package de.orat.math.gacasadi.specific.cga;
 
-import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
+import com.google.auto.service.AutoService;
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
+import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.orat.math.gacalc.spi.IGAFactory;
+import de.orat.math.gacasadi.generic.GaFactory;
+import de.orat.math.gacasadi.generic.GaFunction;
+import de.orat.math.gacasadi.generic.GaLoopService;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
@@ -12,115 +17,82 @@ import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 
-/**
- * @author Oliver Rettig (Oliver.Rettig@orat.de)
- */
-public class GaFactory implements IGAFactory<GaMvExpr, GaMvVariable, GaMvValue> {
-
-    static {
-        // Init JCasADi eagerly to improve profiling.
-        NativeLibLoader.load();
-    }
-
-    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
-
-    public final static GaFactory instance = new GaFactory();
+@AutoService(IGAFactory.class)
+public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
 
     /**
      * Needs to be public in order to make ServiceLoader work.
      */
-    public GaFactory() {
+    public CgaFactory() {
 
     }
 
-    public int getBasisBladesCount(){
+    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+
+    public final static CgaFactory instance = new CgaFactory();
+
+    public int getBasisBladesCount() {
         return baseCayleyTable.getBladesCount();
     }
-    
+
     @Override
-    public GaConstantsExpr constantsExpr() {
-        return GaConstantsExpr.instance;
+    public CgaConstantsExpr constantsExpr() {
+        return CgaConstantsExpr.instance;
     }
 
     @Override
-    public GaConstantsValue constantsValue() {
-        return GaConstantsValue.instance;
-    }
-
-    @Override
-    public GaLoopService getLoopService() {
-        return GaLoopService.instance;
+    public CgaConstantsValue constantsValue() {
+        return CgaConstantsValue.instance;
     }
 
     // create symbolic multivectors
     @Override
-    public GaMvVariable createVariable(String name, GaMvExpr from) {
-        return new GaMvVariable(name, from);
+    public CgaMvVariable createVariable(String name, CgaMvExpr from) {
+        return new CgaMvVariable(name, from);
     }
 
     @Override
-    public GaMvVariable createVariable(String name, MatrixSparsity sparsity) {
-        return GaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
+    public CgaMvVariable createVariable(String name, MatrixSparsity sparsity) {
+        return CgaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
     }
 
     @Override
-    public GaMvVariable createVariable(String name, int grade) {
-        return GaMvExpr.create(name, grade);
+    public CgaMvVariable createVariable(String name, int grade) {
+        return CgaMvExpr.create(name, grade);
     }
 
     @Override
-    public GaMvVariable createVariable(String name, int[] grades) {
-        return GaMvExpr.create(name, grades);
+    public CgaMvVariable createVariable(String name, int[] grades) {
+        return CgaMvExpr.create(name, grades);
     }
 
     @Override
-    public GaMvVariable createVariableSparse(String name) {
-        return GaMvVariable.createSparse(name);
+    public CgaMvVariable createVariableSparse(String name) {
+        return CgaMvVariable.createSparse(name);
     }
 
     @Override
-    public GaMvVariable createVariableDense(String name) {
-        return GaMvVariable.createDense(name);
-    }
-
-    // random multivectors
-    @Override
-    public GaMvValue createValueRandom() {
-        final int basisBladesCount = getBasisBladesCount();
-        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
-        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
-        var val = createValue(sdm);
-        return val;
-    }
-
-    @Override
-    public GaMvValue createValueRandom(int[] grades) {
-        Random random = new Random();
-        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grades);
-        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
-        var sparsity = new CGAMultivectorSparsity(indizes);
-        var sdm = new SparseDoubleColumnVector(sparsity, values);
-        var val = createValue(sdm);
-        return val;
+    public CgaMvVariable createVariableDense(String name) {
+        return CgaMvVariable.createDense(name);
     }
 
     // create numeric multivectors
     @Override
-    public GaMvValue createValue(double scalar) {
-        return GaMvValue.create(scalar);
+    public CgaMvValue createValue(double scalar) {
+        return CgaMvValue.create(scalar);
     }
 
     @Override
-    public GaMvValue createValue(SparseDoubleMatrix vec) {
-        return GaMvValue.create(vec);
+    public CgaMvValue createValue(SparseDoubleMatrix vec) {
+        return CgaMvValue.create(vec);
     }
 
     // create function
     @Override
-    public GaFunction createFunction(String name, 
-        List<? extends GaMvVariable> parameters,
-        List<? extends GaMvExpr> returns) {
-        return new GaFunction(name, parameters, returns);
+    public GaFunction<CgaMvExpr, CgaMvValue> createFunction(String name,
+        List<? extends CgaMvVariable> parameters,
+        List<? extends CgaMvExpr> returns) {
+        return new GaFunction<>(this, name, parameters, returns);
     }
 
     // methods to describe the functionality of the implementation
@@ -132,6 +104,34 @@ public class GaFactory implements IGAFactory<GaMvExpr, GaMvVariable, GaMvValue> 
     @Override
     public String getImplementationName() {
         return "cgacasadisx";
+    }
+
+    private final GaLoopService<CgaMvExpr, CgaMvVariable> loopService = new GaLoopService<>(this);
+
+    @Override
+    public GaLoopService<CgaMvExpr, CgaMvVariable> getLoopService() {
+        return this.loopService;
+    }
+
+    // random multivectors
+    @Override
+    public CgaMvValue createValueRandom() {
+        final int basisBladesCount = getBasisBladesCount();
+        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
+        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
+        var val = createValue(sdm);
+        return val;
+    }
+
+    @Override
+    public CgaMvValue createValueRandom(int[] grades) {
+        Random random = new Random();
+        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grades);
+        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
+        var sparsity = new CGAMultivectorSparsity(indizes);
+        var sdm = new SparseDoubleColumnVector(sparsity, values);
+        var val = createValue(sdm);
+        return val;
     }
 
     // create constants
@@ -216,10 +216,10 @@ public class GaFactory implements IGAFactory<GaMvExpr, GaMvVariable, GaMvValue> 
 
     /**
      * Minkovski Bivector.
-     * 
+     *
      * This is the flat point origin, corresponding to einf^e0=e4^e5.
-     * 
-     * @return 
+     *
+     * @return
      */
     @Override
     public SparseDoubleMatrix createMinkovskiBiVector() {
@@ -235,9 +235,7 @@ public class GaFactory implements IGAFactory<GaMvExpr, GaMvVariable, GaMvValue> 
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    
     // die folgenden Defs sind noch nicht überprüft
-    
     @Override
     public SparseDoubleMatrix createBaseVectorInfinityDorst() {
         double[] nonzeros = new double[]{-1d, 1d};
@@ -269,4 +267,25 @@ public class GaFactory implements IGAFactory<GaMvExpr, GaMvVariable, GaMvValue> 
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
+
+    @Override
+    protected CgaMvExpr SXtoEXPR(SX sx) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    protected CgaMvValue DMtoVAL(DM dm) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public CgaMvExpr cachedEXPR(CgaMvExpr expr) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public CgaMvVariable EXPRtoVAR(String name, CgaMvExpr from) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 }

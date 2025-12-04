@@ -64,6 +64,13 @@
 			<!-- Supress transitivity -->
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>com.google.auto.service</groupId>
+			<artifactId>auto-service</artifactId>
+			<version>1.0.1</version>
+			<!-- Supress transitivity -->
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -83,18 +90,8 @@
 				<configuration>
 					<generatedSourcesDirectory>${generatedSourcesDirectory}</generatedSourcesDirectory>
 					<generatedTestSourcesDirectory>${generatedTestSourcesDirectory}</generatedTestSourcesDirectory>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>de.orat.math.gacasadi</groupId>
-							<artifactId>GACasADi_MvExprCachingProcessor</artifactId>
-							<version>1.0-SNAPSHOT</version>
-						</path>
-						<path>
-							<groupId>de.orat.math.gacasadi</groupId>
-							<artifactId>GACasADi_MvValueDelegatingProcessor</artifactId>
-							<version>1.0-SNAPSHOT</version>
-						</path>
-					</annotationProcessorPaths>
+					<!-- annotation processing of auto-service -->
+					<compilerArgs>-proc:full</compilerArgs>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -106,6 +103,11 @@
 						<groupId>de.orat.math.gacasadi</groupId>
 						<artifactId>GACasADi_MvValueDelegatingProcessor</artifactId>
 						<version>1.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>com.google.auto.service</groupId>
+						<artifactId>auto-service</artifactId>
+						<version>1.0.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>

@@ -1,4 +1,4 @@
-package de.orat.math.gacasadi.impl;
+package de.orat.math.gacasadi.generic;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -6,41 +6,31 @@ import java.util.LinkedHashSet;
 import java.util.SequencedCollection;
 import java.util.SequencedSet;
 
-public final class ComposableImmutableBinaryTree<T> {
+public sealed interface ComposableImmutableBinaryTree2<T> permits ComposableImmutableBinaryTree2.Branch, ComposableImmutableBinaryTree2.Leaf {
 
-    private static sealed interface Node<T> permits Branch, Leaf {
-    }
-
-    private static record Branch<T>(Node<T> left, Node<T> right) implements Node<T> {
+    public static final record Branch<T>(ComposableImmutableBinaryTree2<T> left, ComposableImmutableBinaryTree2<T> right) implements ComposableImmutableBinaryTree2<T> {
 
     }
 
-    private static record Leaf<T>(T value) implements Node<T> {
+    public static final record Leaf<T>(T value) implements ComposableImmutableBinaryTree2<T> {
 
     }
 
-    private final Node<T> root;
-
-    private ComposableImmutableBinaryTree(Node<T> root) {
-        this.root = root;
-    }
-
-    public ComposableImmutableBinaryTree(T value) {
-        this.root = new Leaf<>(value);
+    public static <T> ComposableImmutableBinaryTree2<T> create(T value) {
+        return new Leaf<>(value);
     }
 
     /**
      * This is a cheap operation.
      */
-    public ComposableImmutableBinaryTree<T> append(ComposableImmutableBinaryTree<T> other) {
-        var branch = new Branch<>(this.root, other.root);
-        return new ComposableImmutableBinaryTree<>(branch);
+    public default ComposableImmutableBinaryTree2<T> append(ComposableImmutableBinaryTree2<T> other) {
+        return new Branch<>(this, other);
     }
 
     private SequencedCollection<T> dfsPostorderIterative() {
         Deque<T> values = new ArrayDeque<>();
-        Deque<Node<T>> stack = new ArrayDeque<>();
-        stack.addLast(root);
+        Deque<ComposableImmutableBinaryTree2<T>> stack = new ArrayDeque<>();
+        stack.addLast(this);
         while (!stack.isEmpty()) {
             var top = stack.pollLast(); // Process tail first.
             switch (top) {
@@ -58,7 +48,7 @@ public final class ComposableImmutableBinaryTree<T> {
     /**
      * This is an expensive operation.
      */
-    public SequencedSet<T> computeUniqueLeafs() {
+    public default SequencedSet<T> computeUniqueLeafs() {
         var leafs = this.dfsPostorderIterative();
         SequencedSet<T> uniqueLeafs = new LinkedHashSet<>(leafs);
         return uniqueLeafs;
