@@ -1,20 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package de.orat.math.gacasadi.impl;
 
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
+import static de.dhbw.rahmlab.casadi.api.SXScalar.ZERO_SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
-//import static de.orat.math.gacasadi.impl.PgaMvExpr.create;
+import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import static de.orat.math.gacasadi.impl.GaMvExpr.create;
+import static de.orat.math.gacasadi.impl.GaMvExpr.createSparse;
 import java.util.Arrays;
 import util.cga.CGACayleyTable;
 
 /**
- *
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class PgaNonLinearFunctions {
@@ -25,13 +23,36 @@ public class PgaNonLinearFunctions {
         }
         return expr.getSX().at(0);
     }
-    
+    private static GaMvExpr createFromScalar(SX sx) {
+        // 1x1
+        if (!sx.sparsity().is_scalar()) {
+            throw new IllegalArgumentException("This is no scalar!");
+        }
+        SX result = createSparse("").getSX();
+        result.at(0).assign(sx);
+        return create(result);
+    }
     private GaMvExpr computeScalar(java.util.function.Function<SX, SX> computer, GaMvExpr expr) {
         SX inputScalar = asScalar(expr);
         SX outputScalar = computer.apply(inputScalar);
         GaMvExpr mv = createFromScalar(outputScalar);
         return mv;
     }
+    
+    private static final SX ZERO_SX = new SX(new Sparsity(1, 1));
+    
+    private SXColVec getRotor(GaMvExpr expr){
+        // 0,5,6,7,8,9,10,15 --> 0,1,2,3,4,5,6,7
+        int[] evenIndizes = CGACayleyTable.getEvenIndizes();
+        return new SXColVec(expr.getSX(), evenIndizes);
+    }
+    
+    private static final GaConstantsExpr CONSTANTS = GaConstantsExpr.instance;
+
+    private GaConstantsExpr constants() {
+        return CONSTANTS;
+    }
+    
     
     // non linear operators/functions
     // [8] M Roelfs and S De Keninck. 2021.
@@ -41,7 +62,7 @@ public class PgaNonLinearFunctions {
     // exponential of a bivector (B) or a scalar for PGA (R301)
     /**
      * Basis of PGA 1,e0,e1,e2,e3<p>
-     * 1,e0,e1,e2,e3,e01,e02,e03,e12,e13,e23,e012,e013,e023,e123,e0123
+     * 1,e0,e1,e2,e3,e01,e02,e03,e12,e13,e23,e012,e013,e023,e123,e0123<p>
      * 
      * Input:<p>
      * B = B0e01 + B1e02 + B2e03 + B3e12 + B4e31 + B5e23<p>
@@ -55,31 +76,46 @@ public class PgaNonLinearFunctions {
             throw new IllegalArgumentException("exp() defined for bivectors and scalars only ("+this.toString()+")!");
         }
         
-        // 5,6,7,8,9,10
-        // coefficient 9 hat anderes Vorzeichen
-        SXColVec B = new SXColVec(sx, CGACayleyTable.getBivectorIndizes());
-        // B3²+B4²+B5² corresponding to e12 + e31 + e23
-        //WORKAROUND 
-        // hardcodierte Indizes, generisch macht erst Sinn wenn die Algebra-Def e31 erlaubt
-        SXScalar l = SXScalar.sumSq(B, new int[]{3,5}).sub(SXScalar.sumSq(B, new int[]{4}));
-
-        //TODO
-        SXScalar[] generalRotorValues =  l.eq(0, new SXScalar[]{}, new SXScalar[]{});
+        SXScalar[] generalRotorValues;
         
+        // 5,6,7,8,9,10 --> 0,1,2,3,4,5
+        // coefficient 9(4) hat anderes Vorzeichen
+        SXColVec B = new SXColVec(expr.getSX(), CGACayleyTable.getBivectorIndizes());
         
-       
+        // java if-else is possible because only test for structural zeros
+        if (B.get(3).isZero() && B.get(4).isZero() && B.get(5).isZero())
+            generalRotorValues = new SXScalar[]{new SXScalar(1),B.get(0),B.get(1),B.get(2),
+            ZERO_SXScalar,ZERO_SXScalar,ZERO_SXScalar,ZERO_SXScalar};
+        else {
+            // B3²+B4²+B5² corresponding to e12 + e31 + e23
+            SXScalar l = SXScalar.sumSq(B, new int[]{3,4,5});
+            SXScalar m = B.get(0).mul(B.get(5)).sub(B.get(1).mul(B.get(4)).
+                    add(B.get(2).mul(B.get(3))));
+            SXScalar a = l.sqrt();
+            SXScalar c = a.cos();
+            SXScalar s = a.sin().div(a);
+            SXScalar t = m.div(l).mul(c.sub(s));
+            generalRotorValues = new SXScalar[]{
+                    c, 
+                    s.mul(B.get(0)).add(t.mul(B.get(5))),
+                    s.mul(B.get(1)).sub(t.mul(B.get(4))),
+                    s.mul(B.get(2)).add(t.mul(B.get(3))),
+                    s.mul(B.get(3)),
+                    s.mul(B.get(4)).negate(),
+                    s.mul(B.get(5)),
+                    m.mul(s)};
+        }
 
         SXElem[] generalRotorValuesSXElem = Arrays.stream(generalRotorValues)
             .map(SXScalar::sx)
             .map(SX::scalar)
             .toArray(SXElem[]::new);
         
-        SX result = new SXColVec(getCayleyTable().getBladesCount(), 
+        SX result = new SXColVec(expr.getCayleyTable().getBladesCount(), 
             generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
         
         return create(result);
     }
-
    
     /**
      * CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1<p>
@@ -96,123 +132,44 @@ public class PgaNonLinearFunctions {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
         
-        int[] evenIndizes = CGACayleyTable.getEvenIndizes();
-        SXColVec R = new SXColVec(sx, evenIndizes);
+        SXColVec R = getRotor(expr);
 
-        // var S = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
-        // +R[2]*R[2]+R[3]*R[3]-R[4]*R[4]+R[5]*R[5]+R[6]*R[6]-R[7]*R[7]+R[8]*R[8]-R[9]*R[9];
-        SXScalar S = SXScalar.sumSq(R, new int[]{0,11,1,2,3,5,6,8}).
-            sub(SXScalar.sumSq(R, new int[]{10,12,13,14,15,4,7,9}));
-
-        // var T1 = 2*(R[0]*R[11]-R[10]*R[12]+R[13]*R[9]-R[14]*R[7]+R[15]*R[4]-R[1]*R[8]+R[2]*R[6]-R[3]*R[5]);
-        SXScalar T1 = SXScalar.sumProd(R, new int[]{0,13,15,2}, new int[]{11,9,4,6}).
-            sub(SXScalar.sumProd(R, new int[]{10,14,1,3}, new int[]{12,7,8,5})).muls(2d);
-
-        // var T2 = 2*(R[0]*R[12]-R[10]*R[11]+R[13]*R[8]-R[14]*R[6]+R[15]*R[3]-R[1]*R[9]+R[2]*R[7]-R[4]*R[5]);
-        SXScalar T2 = SXScalar.sumProd(R, new int[]{0,13,15,2}, new int[]{12,8,3,7}).
-            sub(SXScalar.sumProd(R, new int[]{10,14,1,4}, new int[]{11,6,9,5})).muls(2d);
-
-        //var T3 = 2*(R[0]*R[13]-R[10]*R[1]+R[11]*R[9]-R[12]*R[8]+R[14]*R[5]-R[15]*R[2]+R[3]*R[7]-R[4]*R[6]);
-        SXScalar T3 = SXScalar.sumProd(R, new int[]{0,11,14,3}, new int[]{13,9,5,7}).
-            sub(SXScalar.sumProd(R, new int[]{10,12,15,4}, new int[]{1,8,2,6})).muls(2d);
-
-        //var T4 = 2*(R[0]*R[14]-R[10]*R[2]-R[11]*R[7]+R[12]*R[6]-R[13]*R[5]+R[15]*R[1]+R[3]*R[9]-R[4]*R[8]);
-        SXScalar T4 = SXScalar.sumProd(R, new int[]{0,12,15,3}, new int[]{14,6,1,9}).
-            sub(SXScalar.sumProd(R, new int[]{10,11,13,4}, new int[]{2,7,5,8})).muls(2d);
-
-        //var T5 = 2*(R[0]*R[15]-R[10]*R[5]+R[11]*R[4]-R[12]*R[3]+R[13]*R[2]-R[14]*R[1]+R[6]*R[9]-R[7]*R[8]);
-        SXScalar T5 = SXScalar.sumProd(R, new int[]{0,11,13,6}, new int[]{15,4,2,9}).
-            sub(SXScalar.sumProd(R, new int[]{10,12,14,7}, new int[]{5,3,1,8})).muls(2d);
-
-        //var TT = -T1*T1+T2*T2+T3*T3+T4*T4+T5*T5;
-        SXScalar TT = T1.sq().negate().add(T2.sq()).add(T3.sq()).add(T4.sq()).add(T5.sq());
-
-        //var N = ((S*S+TT)**0.5+S)**0.5, N2 = N*N;
-        SXScalar N = S.sq().add(TT).pow(0.5).add(S).pow(0.5);
-        SXScalar N2 = N.sq();
-
-        //var M = 2**0.5*N/(N2*N2+TT);
-        SXScalar M = new SXScalar(Math.pow(2d, 0.5)).mul(N).div(N2.sq().add(TT));
-        //var A = N2*M, [B1,B2,B3,B4,B5] = [-T1*M,-T2*M,-T3*M,-T4*M,-T5*M];
-        SXScalar A = N2.mul(M);
-        //TODO
-        // neue Methode mit function als argument um negate().mul(M) übergeben zu können
-        // damit die nachfolgenden Zeilen in eine zusammengezogen werden können
-        SXScalar B1 = T1.negate().mul(M);
-        SXScalar B2 = T2.negate().mul(M);
-        SXScalar B3 = T3.negate().mul(M);
-        SXScalar B4 = T4.negate().mul(M);
-        SXScalar B5 = T5.negate().mul(M);
-         
+        SXScalar s = (new SXScalar(1)).div(
+                (R.get(0).sq().add(R.get(4).sq()).
+             add(R.get(5).sq()).add(R.get(6).sq())).sqrt());
+        SXScalar d = (R.get(7).mul(R.get(0)).sub(
+                R.get(1).mul(R.get(6)).add(R.get(2).mul(R.get(5)))
+               .sub(R.get(3).mul(R.get(4)))  )).mul(s.sq());
         
-        SXScalar[] values = new SXScalar[]{
-            // A*R[0] + B1*R[11] - B2*R[12] - B3*R[13] - B4*R[14] - B5*R[15],
-            A.mul(R.get(0)).add(B1.mul(R.get(11))).sub(B2.mul(R.get(12))).
-            sub(B3.mul(R.get(13))).sub(B4.mul(R.get(14))).sub(B5.mul(R.get(15))),
-            // A*R[1] - B1*R[8] + B2*R[9] + B3*R[10] - B4*R[15] + B5*R[14],
-            A.mul(R.get(1)).sub(B1.mul(R.get(8))).add(B2.mul(R.get(9))).
-            add(B3.mul(R.get(10))).sub(B4.mul(R.get(15))).add(B5.mul(R.get(14))),
-            // A*R[2] + B1*R[6] - B2*R[7] + B3*R[15] + B4*R[10] - B5*R[13],
-            A.mul(R.get(2)).add(B1.mul(R.get(6))).sub(B2.mul(R.get(7))).
-            add(B3.mul(R.get(15))).add(B4.mul(R.get(10))).sub(B5.mul(R.get(13))),
-            //A*R[3] - B1*R[5] - B2*R[15] - B3*R[7] - B4*R[9] + B5*R[12],
-            A.mul(R.get(3)).sub(B1.mul(R.get(5))).sub(B2.mul(R.get(15))).
-            sub(B3.mul(R.get(7))).sub(B4.mul(R.get(9))).add(B5.mul(R.get(12))),
-            //A*R[4] - B1*R[15] - B2*R[5] - B3*R[6] - B4*R[8] + B5*R[11],
-SXScalar.sumProd(new SXScalar[]{A,B5}, R, new int[]{4,11}).
-            sub(SXScalar.sumProd(new SXScalar[]{B1, B2, B3, B4}, R, new int[]{15, 5, 6, 8})),
-            //A*R[5] - B1*R[3] + B2*R[4] - B3*R[14] + B4*R[13] + B5*R[10],
-SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{5,4,13,10}).
-            sub(SXScalar.sumProd(new SXScalar[]{B1, B3}, R, new int[]{3, 14})),
-            //A*R[6] + B1*R[2] + B2*R[14] + B3*R[4] - B4*R[12] - B5*R[9],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B3}, R, new int[]{6,2,14,4}).
-            sub(SXScalar.sumProd(new SXScalar[]{B4, B5}, R, new int[]{12, 9})),
-            //A*R[7] + B1*R[14] + B2*R[2] + B3*R[3] - B4*R[11] - B5*R[8],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B3}, R, new int[]{7,14,2,3}).
-            sub(SXScalar.sumProd(new SXScalar[]{B4, B5}, R, new int[]{11, 8})),
-            //A*R[8] - B1*R[1] - B2*R[13] + B3*R[12] + B4*R[4] + B5*R[7],
-SXScalar.sumProd(new SXScalar[]{A,B3,B4,B5}, R, new int[]{8,12,4,7}).
-            sub(SXScalar.sumProd(new SXScalar[]{B1, B2}, R, new int[]{1, 13})),
-            //A*R[9] - B1*R[13] - B2*R[1] + B3*R[11] + B4*R[3] + B5*R[6],
-SXScalar.sumProd(new SXScalar[]{A,B3,B4,B5}, R, new int[]{9,11,3,6}).
-            sub(SXScalar.sumProd(new SXScalar[]{B1, B2}, R, new int[]{13, 1})),
-            //A*R[10] + B1*R[12] - B2*R[11] - B3*R[1] - B4*R[2] - B5*R[5],
-SXScalar.sumProd(new SXScalar[]{A,B1}, R, new int[]{10,12}).
-            sub(SXScalar.sumProd(new SXScalar[]{B2, B3, B4, B5}, R, new int[]{11, 1, 2, 5})),
-            //A*R[11] + B1*R[0] + B2*R[10] - B3*R[9] + B4*R[7] - B5*R[4],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B4}, R, new int[]{11,0,10,7}).
-            sub(SXScalar.sumProd(new SXScalar[]{B3, B5}, R, new int[]{9, 4})),
-            //A*R[12] + B1*R[10] + B2*R[0] - B3*R[8] + B4*R[6] - B5*R[3],
-SXScalar.sumProd(new SXScalar[]{A,B1,B2,B4}, R, new int[]{12,10,0,6}).
-            sub(SXScalar.sumProd(new SXScalar[]{B3, B5}, R, new int[]{8, 3})),
-            //A*R[13] - B1*R[9] + B2*R[8] + B3*R[0] - B4*R[5] + B5*R[2],
-SXScalar.sumProd(new SXScalar[]{A,B2,B3,B5}, R, new int[]{13,8,0,2}).
-            sub(SXScalar.sumProd(new SXScalar[]{B1, B4}, R, new int[]{9, 5})),
-            //A*R[14] + B1*R[7] - B2*R[6] + B3*R[5] + B4*R[0] - B5*R[1],
-SXScalar.sumProd(new SXScalar[]{A,B1,B3,B4}, R, new int[]{14,7,5,0}).
-            sub(SXScalar.sumProd(new SXScalar[]{B2, B5}, R, new int[]{6, 1})),
-            //A*R[15] - B1*R[4] + B2*R[3] - B3*R[2] + B4*R[1] + B5*R[0]
-SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
-            sub(SXScalar.sumProd(new SXScalar[]{B1, B3}, R, new int[]{4, 2}))
+        SXScalar[] generalRotorValues = new SXScalar[]{
+            R.get(0).mul(s),
+            R.get(1).mul(s).add(R.get(6).mul(d)),
+            R.get(2).mul(s).add(R.get(5).mul(d)),
+            R.get(3).mul(s).sub(R.get(4).mul(d)),
+            R.get(4).mul(s),
+            R.get(5).mul(s),
+            R.get(6).mul(s),
+            R.get(7).mul(s).sub(R.get(0).mul(d))
         };
-
-        SXElem[] valuesSXElem = Arrays.stream(values)
+        
+        SXElem[] valuesSXElem = Arrays.stream(generalRotorValues)
             .map(SXScalar::sx)
             .map(SX::scalar)
             .toArray(SXElem[]::new);
         
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(getCayleyTable().getBladesCount(), valuesSXElem, evenIndizes).sx);
+        return create(new SXColVec(expr.getCayleyTable().getBladesCount(), 
+                valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
     }
-
     
+    //TODO sieht generisch aus
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    public GaMvExpr sqrt(GaMvExpr expr) {
+    public GaMvExpr sqrtRotorOrScalar(GaMvExpr expr) {
         if (expr.isEven()) {
             if (expr.isScalar()){
                 return expr.scalarSqrt();
             } else {
-                return add(CONSTANTS.one()).normalizeRotor();
+                return normalizeRotor(expr.add(CONSTANTS.one()));
             }
         }
         throw new RuntimeException("sqrt() not yet implemented for non even elements. Should be implemented in the default method of the interface with a generic version.");
@@ -220,119 +177,37 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // log of a normalized rotor, result is a bivector
-    public GaMvExpr log() {
+    public GaMvExpr log(GaMvExpr expr) {
       
-        if (!isEven()) {
+        if (!expr.isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
         
-        SXColVec R = new SXColVec(sx, CGACayleyTable.getEvenIndizes());
+        // 0,5,6,7,8,9,10,15 --> 0,1,2,3,4,5,6,7
+        SXColVec R = getRotor(expr); 
         
-        SXScalar S = R.get(0).sq().add(R.get(11).sq()).sub(R.get(12).sq()). 
-                     sub(R.get(13).sq()).sub(R.get(14).sq()).sub(R.get(15).sq()).sub(new SXScalar(1d));
-  
-        SXScalar T1 = (new SXScalar(2d)).mul(R.get(0)).mul(R.get(15));   //e2345
-        SXScalar T2 = R.get(0).mul(R.get(14)).muls(2d);   //e1345
-        SXScalar T3 = R.get(0).mul(R.get(13)).muls(2d);   //e1245
-        SXScalar T4 = R.get(0).mul(R.get(12)).muls(2d);   //e1235
-        SXScalar T5 = R.get(0).mul(R.get(11)).muls(2d);    //e1234
-  
-        //-T1*T1-T2*T2-T3*T3-T4*T4+T5*T5;
-        SXScalar Tsq      = T1.sq().negate().sub(T2.sq()).sub(T3.sq()).sub(T4.sq()).add(T5.sq()); 
-        SXScalar norm     = S.sq().sub(Tsq).sqrt(); //Math.sqrt(S*S - Tsq);
-        //if (norm==0 && S==0)   // at most a single translation
-        //    return bivector(new double[]{R[1], R[2], R[3], R[4], R[5], R[6], R[7], R[8], R[9], R[10]});
-        SXScalar[] Bif = new SXScalar[]{R.get(1), R.get(2), R.get(3), R.get(4), 
-            R.get(5), R.get(6), R.get(7), R.get(8), R.get(9), R.get(10)};
+        // numerical test against 1, because we have no structural fix numbers (e.g. 1)
+        SXScalar[] bivectorValues = R.get(0).eq(1d, new SXScalar[]{R.get(1),R.get(2), R.get(3),
+                        ZERO_SXScalar,ZERO_SXScalar,ZERO_SXScalar}, logTemp(R));
+        
+        SXElem[] valuesSXElem = Arrays.stream(bivectorValues)
+            .map(SXScalar::sx)
+            .map(SX::scalar)
+            .toArray(SXElem[]::new);
        
-        SXScalar lambdap  = new SXScalar(0.5d).mul(S).add(new SXScalar(0.5).mul(norm));
-        // lm is always a rotation, lp can be boost, translation, rotation
-        //double lp = Math.sqrt(Math.abs(lambdap));
-        SXScalar lp = lambdap.abs().sqrt();
-        
-        //double lm = Math.sqrt(-0.5*S+0.5*norm);
-        SXScalar lm = (new SXScalar(-0.5d)).mul(S).add((new SXScalar(0.5)).mul(norm)).sqrt();
-        
-        //double theta2   = lm==0?0:atan2(lm, R[0]); 
-        //double theta2 = 0d;
-        //if (lm != 0d) theta2 = Math.atan2(lm, R[0]);
-        //SXScalar theta2 = lm.eq(0d, new SXScalar(0d),SXScalar.atan2(lm, R.get(0)));
-        SXScalar theta2 = lm.ne(0d, SXScalar.atan2(lm, R.get(0)));
-        
-        // var theta1   = lambdap<0?asin(lp/cos(theta2)):lambdap>0?atanh(lp/R[0]):lp/R[0];
-        //double theta1;
-        //if (lambdap < 0){
-        //    theta1 = Math.asin(lp/Math.cos(theta2));
-        //} else if (lambdap > 0){
-        //    theta1 = Trigometry.atanh(lp/R[0]);
-        //} else {
-        //    theta1 = lp/R[0];
-        //}
-        SXScalar temp = lambdap.gt(0d, lp.div(R.get(0)).atanh(), lp.div(R.get(0)));
-        SXScalar theta1 = lambdap.lt(0d, lp.div(theta2.cos()).asin(), temp);
-        // var [l1, l2] = [lp==0?0:theta1/lp, lm==0?0:theta2/lm]
-        //double l1=0d;
-        //if (lp != 0){
-        //    l1 = theta1/lp;
-        //}
-        //double l2=0d;
-        //if (lm != 0){
-        //    l2 = theta2/lm;
-        //}
-        //SXScalar l1 = lp.eq(0d, new SXScalar(0d), theta1.div(lp));
-        SXScalar l1 = lp.ne(0d, theta1.div(lp));
-        //SXScalar l2 = lm.eq(0d, new SXScalar(0d), theta2.div(lm));
-        SXScalar l2 = lm.ne(0d, theta2.div(lm));
-        
-        //var [A, B1, B2, B3, B4, B5]   = [
-        //  (l1-l2)*0.5*(1+S/norm) + l2,  -0.5*T1*(l1-l2)/norm, -0.5*T2*(l1-l2)/norm, 
-        //  -0.5*T3*(l1-l2)/norm,         -0.5*T4*(l1-l2)/norm, -0.5*T5*(l1-l2)/norm, 
-        //];
-
-        // (l1-l2)*0.5*(1+S/norm) + l2;
-        SXScalar A = l1.sub(l2).muls(0.5d).mul((new SXScalar(1d)).add(S.div(norm))).add(l2);
-        // -0.5*T1*(l1-l2)/norm;
-        SXScalar B1 = new SXScalar(-0.5).mul(T1).mul(l1.sub(l2)).div(norm);
-        // -0.5*T2*(l1-l2)/norm;
-        SXScalar B2 = new SXScalar(-0.5).mul(T2).mul(l1.sub(l2)).div(norm);
-        // -0.5*T3*(l1-l2)/norm;
-        SXScalar B3 = new SXScalar(-0.5).mul(T3).mul(l1.sub(l2)).div(norm);
-        // -0.5*T4*(l1-l2)/norm;
-        SXScalar B4 = new SXScalar(-0.5).mul(T4).mul(l1.sub(l2)).div(norm);
-        // -0.5*T5*(l1-l2)/norm;
-        SXScalar B5 = new SXScalar(-0.5).mul(T5).mul(l1.sub(l2)).div(norm);
-        
-        SXScalar[] Belse = new SXScalar[]{
-            //(A*R[1]+B3*R[10]+B4*R[9]-B5*R[8]),
-            A.mul(R.get(1)).add(B3.mul(R.get(10))).add(B4.mul(R.get(9))).sub(B5.mul(R.get(8))),
-            
-            //(A*R[2]+B2*R[10]-B4*R[7]+B5*R[6]),
-            A.mul(R.get(2)).add(B2.mul(R.get(10))).sub(B4.mul(R.get(7))).add(B5.mul(R.get(6))),
-            //(A*R[3]-B2*R[9]-B3*R[7]-B5*R[5]),
-            A.mul(R.get(3)).sub(B2.mul(R.get(9))).sub(B3.mul(R.get(7))).sub(B5.mul(R.get(5))),
-            
-            //(A*R[4]-B2*R[8]-B3*R[6]-B4*R[5]),
-            A.mul(R.get(4)).sub(B2.mul(R.get(8))).sub(B3.mul(R.get(6))).sub(B4.mul(R.get(5))),
-            //(A*R[5]+B1*R[10]+B4*R[4]-B5*R[3]),
-            A.mul(R.get(5)).add(B1.mul(R.get(10))).add(B4.mul(R.get(4))).sub(B5.mul(R.get(3))),
-            //(A*R[6]-B1*R[9]+B3*R[4]+B5*R[2]),
-            A.mul(R.get(6)).sub(B1.mul(R.get(9))).add(B3.mul(R.get(4))).add(B5.mul(R.get(2))),
-            //(A*R[7]-B1*R[8]+B3*R[3]+B4*R[2]),
-            A.mul(R.get(7)).sub(B1.mul(R.get(8))).add(B3.mul(R.get(3))).add(B4.mul(R.get(2))),
-            //(A*R[8]+B1*R[7]+B2*R[4]-B5*R[1]),
-            A.mul(R.get(8)).add(B1.mul(R.get(7))).add(B2.mul(R.get(4))).sub(B5.mul(R.get(1))),
-            //(A*R[9]+B1*R[6]+B2*R[3]-B4*R[1]),
-            A.mul(R.get(9)).add(B1.mul(R.get(6))).add(B2.mul(R.get(3))).sub(B4.mul(R.get(1))),
-            //(A*R[10]-B1*R[5]-B2*R[2]-B3*R[1])
-            A.mul(R.get(10)).sub(B1.mul(R.get(5))).sub(B2.mul(R.get(2))).sub(B3.mul(R.get(1)))
-        };
-        SXScalar[] B = SXScalar.eq(norm, new SXScalar(0d), S, new SXScalar(0d), Bif, Belse);
-         
-        //return bivector
-        SXElem[] values = conv(B);
-        return create(new SXColVec(getCayleyTable().getBladesCount(), 
-            values, CGACayleyTable.getBivectorIndizes()).sx);
+        return create(new SXColVec(expr.getCayleyTable().getBladesCount(), 
+            valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
     }
     
+    private SXScalar[] logTemp(SXColVec R){
+        SXScalar a = (new SXScalar(1d)).
+                div((new SXScalar(1d)).sub(R.get(0).sq())); // inv squared length
+        SXScalar b = R.get(0).acos().mul(a.sqrt()); // rotation scale
+        SXScalar c = a.mul(R.get(7)).mul((new SXScalar(1d)).sub(R.get(0).mul(b)));
+        return new SXScalar[]{c.mul(R.get(6)).add(b.mul(R.get(1))),
+                              c.mul(R.get(5)).add(b.mul(R.get(2))),
+                              c.mul(R.get(4)).add(b.mul(R.get(3))),
+                              b.mul(R.get(4)), b.mul(R.get(5), b.mul(R.get(6)))};
+    }
     
 }
