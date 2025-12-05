@@ -7,6 +7,7 @@ import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
+import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
@@ -270,22 +271,25 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
 
     @Override
     protected CgaMvExpr SXtoEXPR(SX sx) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return CgaMvExpr.create(sx);
     }
 
     @Override
     protected CgaMvValue DMtoVAL(DM dm) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return CgaMvValue.create(dm);
     }
 
     @Override
     public CgaMvExpr cachedEXPR(CgaMvExpr expr) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (expr instanceof CachedCgaMvExpr) {
+            return expr;
+        }
+        return new CachedCgaMvExpr(expr);
     }
 
     @Override
     public CgaMvVariable EXPRtoVAR(String name, CgaMvExpr from) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return createVariable(name, from);
     }
 
 }
