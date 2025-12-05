@@ -1,11 +1,10 @@
 package de.orat.math.gacasadi.specific.cga;
 
-import de.orat.math.gacasadi.genericInPart.CasADiUtil;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
 import de.orat.math.gacasadi.generic.GaMvVariable;
+import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAKVectorSparsity;
@@ -28,7 +27,7 @@ public class CgaMvVariable extends CachedCgaMvExpr implements GaMvVariable<CgaMv
     }
 
     public CgaMvVariable(String name, ColumnVectorSparsity sparsity) {
-        super(SxStatic.sym(name, CasADiUtil.toCasADiSparsity(sparsity)));
+        super(SxStatic.sym(name, CgaCasADiUtil.toCasADiSparsity(sparsity)));
         assert super.getSX().is_valid_input();
         this.name = name;
     }

@@ -1,6 +1,5 @@
 package de.orat.math.gacasadi.specific.cga;
 
-import de.orat.math.gacasadi.generic.GaMvValue;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
@@ -13,8 +12,8 @@ import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.GaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.genericInPart.*;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
@@ -112,7 +111,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements GaMvValue<CgaMvV
         if (nonzeros.length != rows.length) {
             throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
         }
-        var dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
+        var dm = CgaCasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
         return create(dm);
     }
 
@@ -159,7 +158,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements GaMvValue<CgaMvV
      */
     @Override
     public SparseDoubleMatrix elements() {
-        return CasADiUtil.elements(this.getDM());
+        return CgaCasADiUtil.elements(this.getDM());
     }
 
     /**

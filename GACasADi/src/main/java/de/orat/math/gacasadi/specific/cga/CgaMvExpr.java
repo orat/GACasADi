@@ -1,7 +1,5 @@
 package de.orat.math.gacasadi.specific.cga;
 
-import de.orat.math.gacasadi.generic.GaMvExpr;
-import de.orat.math.gacasadi.generic.GaFactory;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
@@ -14,14 +12,14 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
-import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.gacasadi.generic.GaFactory;
+import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.genericInPart.*;
 import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -90,7 +88,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     public static CgaMvExpr create(SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
-        SX sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
+        SX sx = new SX(CgaCasADiUtil.toCasADiSparsity(vector.getSparsity()),
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
         return new CachedCgaMvExpr(sx);
     }
@@ -124,7 +122,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     public static CgaMvExpr create(DM dm) {
-        var sx = CasADiUtil.toSX(dm);
+        var sx = CgaCasADiUtil.toSX(dm);
         return new CachedCgaMvExpr(sx);
     }
 
@@ -182,7 +180,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     @Override
     public String toString() {
-        SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(sx);
+        SparseStringMatrix stringMatrix = CgaCasADiUtil.toStringMatrix(sx);
         return stringMatrix.toString(true);
     }
 
@@ -197,7 +195,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     @Override
     public CGAMultivectorSparsity getSparsity() {
-        return CasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
+        return CgaCasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
     }
 
     @Override
@@ -270,7 +268,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public CgaMvExpr gradeSelection(int grade) {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
-        SX gradeSelectionMatrix = CasADiUtil.toSX(m); // bestimmt sparsity
+        SX gradeSelectionMatrix = CgaCasADiUtil.toSX(m); // bestimmt sparsity
         return create(SxStatic.mtimes(gradeSelectionMatrix, sx));
     }
 
@@ -282,7 +280,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public CgaMvExpr reverse() {
         SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
-        SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
+        SX result = SxStatic.mtimes(CgaCasADiUtil.toSX(revm), sx);
         return create(result);
     }
 
@@ -323,7 +321,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         System.out.println(getName()+": "+toString());
         // determine product matrix for the right side argument of the geometric product, the mv b
         // considering the sparsity of the cayley-table and the input mv b
-        SX opm = CasADiUtil.toSXProductMatrix(b, CGACayleyTableGeometricProduct.instance());
+        SX opm = CgaCasADiUtil.toSXProductMatrix(b, CGACayleyTableGeometricProduct.instance());
         //System.out.println("--- end of gp matrix creation ---");
         SX result = SxStatic.mtimes(opm.T(), this.getSX());
         if (this == b) {
@@ -359,7 +357,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Uncached
     public CgaMvExpr gpWithScalar(double s) {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
-        SX result = SxStatic.mtimes(CasADiUtil.toSX(m), sx);
+        SX result = SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx);
         return create(result);
     }
 
@@ -375,7 +373,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public CgaMvExpr gradeInversion() {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createInvolutionOperatorMatrix(baseCayleyTable);
-        return create(SxStatic.mtimes(CasADiUtil.toSX(m), sx));
+        return create(SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx));
     }
 
     /**
@@ -430,7 +428,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public CgaMvExpr conjugate() {
         SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
-        SX result = SxStatic.mtimes(CasADiUtil.toSX(m), sx);
+        SX result = SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx);
         return create(result);
     }
 
@@ -511,7 +509,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public CgaMvExpr negate14() {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createNegate14MultiplicationMatrix(baseCayleyTable);
-        return create(SxStatic.mtimes(CasADiUtil.toSX(m), sx));
+        return create(SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx));
     }
 
     @Override

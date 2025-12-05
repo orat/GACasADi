@@ -1,8 +1,10 @@
 package de.orat.math.gacasadi.caching;
 
+import de.orat.math.gacalc.spi.IMultivectorExpression;
+import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
-import de.orat.math.gacasadi.generic.GaMvVariable;
 import de.orat.math.gacasadi.generic.GaMvExpr;
+import de.orat.math.gacasadi.generic.GaMvVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,8 +16,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import de.orat.math.gacalc.spi.IMultivectorExpression;
-import de.orat.math.gacasadi.generic.GaFactory;
 
 public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvExpr<EXPR> & GaMvVariable<EXPR>> implements IFunctionCache {
 

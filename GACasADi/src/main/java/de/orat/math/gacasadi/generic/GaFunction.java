@@ -8,8 +8,8 @@ import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.api.GAFunction;
 import de.orat.math.gacalc.spi.IGAFunction;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
-import de.orat.math.gacasadi.generic.IGetSX;
-import de.orat.math.gacasadi.genericInPart.CasADiUtil;
+import static de.orat.math.gacasadi.generic.CasADiUtil.areSparsitiesSupersetsOfSubsets;
+import static de.orat.math.gacasadi.generic.CasADiUtil.toSparsities;
 import java.util.List;
 
 /**
@@ -63,7 +63,7 @@ public class GaFunction<EXPR extends GaMvExpr<EXPR>, VAL extends GaMvValue<VAL, 
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
                     this.arity, arguments.size()));
             }
-            assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
+            assert areSparsitiesSupersetsOfSubsets(this.paramsSparsities, toSparsities(arguments));
 
             StdVectorSX call_sym_in = transformImpl(arguments);
             StdVectorSX call_sym_out = new StdVectorSX();
@@ -81,7 +81,7 @@ public class GaFunction<EXPR extends GaMvExpr<EXPR>, VAL extends GaMvValue<VAL, 
                 throw new IllegalArgumentException(String.format("Expected %s arguments, but got %s.",
                     this.arity, arguments.size()));
             }
-            assert CasADiUtil.areSparsitiesSupersetsOfSubsets(this.paramsSparsities, CasADiUtil.toSparsities(arguments));
+            assert areSparsitiesSupersetsOfSubsets(this.paramsSparsities, toSparsities(arguments));
 
             // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the correct value.
             StdVectorSX call_num_in = new StdVectorSX(arguments.stream()

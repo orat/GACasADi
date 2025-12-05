@@ -5,16 +5,14 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import java.util.List;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 import de.orat.math.gacalc.spi.ILoopService;
 import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
-import de.orat.math.gacasadi.generic.IGetSX;
-import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.genericInPart.CasADiUtil;
+import static de.orat.math.gacasadi.generic.CasADiUtil.areMVSparsitiesSupersetsOfSubsets;
 import static de.orat.math.gacasadi.generic.GaFunction.transformImpl;
+import java.util.List;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 /**
  * <pre>
@@ -103,7 +101,7 @@ public class GaLoopService<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVariable
             assert argsArr.size() == iterations;
             assert argsArr.areSparsitiesSubsetsOf(param.getSX().sparsity());
         }
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
 
         var def_sym_in = new StdVectorSX(
             Stream.concat(
@@ -171,9 +169,9 @@ public class GaLoopService<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVariable
             assert argsArr.size() == iterations;
             assert argsArr.areSparsitiesSubsetsOf(param.getSX().sparsity());
         }
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, returnsAccum);
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, argsAccumInitial);
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsAccum, returnsAccum);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsAccum, argsAccumInitial);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(
@@ -246,9 +244,9 @@ public class GaLoopService<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVariable
             assert argsArr.size() == iterations;
             assert argsArr.areSparsitiesSubsetsOf(param.getSX().sparsity());
         }
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, returnsAccum);
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsAccum, argsAccumInitial);
-        assert CasADiUtil.areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsAccum, returnsAccum);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsAccum, argsAccumInitial);
+        assert areMVSparsitiesSupersetsOfSubsets(paramsSimple, argsSimple);
 
         var def_sym_in = new StdVectorSX(
             StreamConcat(
