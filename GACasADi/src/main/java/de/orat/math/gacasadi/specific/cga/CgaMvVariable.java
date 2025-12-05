@@ -3,14 +3,14 @@ package de.orat.math.gacasadi.specific.cga;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
-import de.orat.math.gacasadi.generic.GaMvVariable;
 import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAKVectorSparsity;
 import util.cga.CGAMultivectorSparsity;
+import de.orat.math.gacasadi.generic.IGaMvVariable;
 
-public class CgaMvVariable extends CachedCgaMvExpr implements GaMvVariable<CgaMvExpr>, IMultivectorVariable<CgaMvExpr> {
+public class CgaMvVariable extends CachedCgaMvExpr implements IGaMvVariable<CgaMvVariable, CachedCgaMvExpr, CgaMvExpr>, IMultivectorVariable<CgaMvExpr> {
 
     private final String name;
 

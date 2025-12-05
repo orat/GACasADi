@@ -3,8 +3,6 @@ package de.orat.math.gacasadi.caching;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
-import de.orat.math.gacasadi.generic.GaMvExpr;
-import de.orat.math.gacasadi.generic.GaMvVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,8 +14,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import de.orat.math.gacasadi.generic.IGaMvExpr;
+import de.orat.math.gacasadi.generic.IGaMvExprCached;
+import de.orat.math.gacasadi.generic.IGaMvVariable;
 
-public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvExpr<EXPR> & GaMvVariable<EXPR>> implements IFunctionCache {
+public class GaFunctionCache<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>> implements IFunctionCache {
 
     private final Map<String, GaFunction<EXPR, ?>> functionCache
         = new HashMap<>(1024, 0.5f);
@@ -26,9 +27,9 @@ public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvExpr<E
 
     private static final boolean NOCACHE = false;
 
-    private final GaFactory<EXPR, VAR, ?> fac;
+    private final GaFactory<EXPR, CACHED, VAR, ?> fac;
 
-    public GaFunctionCache(GaFactory<EXPR, VAR, ?> fac) {
+    public GaFunctionCache(GaFactory<EXPR, CACHED, VAR, ?> fac) {
         this.fac = fac;
     }
 
@@ -38,9 +39,9 @@ public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvExpr<E
      * name, symbolic arguments and their sparsities, and need to take identity of the arguments into account.
      * Use createFuncName() for this. Example usage is in CachedGaMvExpr.
      */
-    public EXPR getOrCreateSymbolicFunction(String name, List<EXPR> args, Function<List<? extends GaMvExpr<EXPR>>, EXPR> res) {
+    public CACHED getOrCreateSymbolicFunction(String name, List<EXPR> args, Function<List<CACHED>, EXPR> res) {
         if (NOCACHE) {
-            List<EXPR> params = args.stream().map(expr -> fac.cachedEXPR(expr)).toList();
+            List<CACHED> params = args.stream().map(expr -> fac.cachedEXPR(expr)).toList();
             return fac.cachedEXPR(res.apply(params));
         } else {
             GaFunction<EXPR, ?> func = functionCache.get(name);
@@ -57,7 +58,7 @@ public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvExpr<E
         }
     }
 
-    private GaFunction<EXPR, ?> createSymbolicFunction(String name, List<EXPR> args, Function<List<? extends GaMvExpr<EXPR>>, EXPR> res) {
+    private GaFunction<EXPR, ?> createSymbolicFunction(String name, List<EXPR> args, Function<List<CACHED>, EXPR> res) {
         final int size = args.size();
         List<VAR> casadiFuncParams = new ArrayList<>(size);
         List<VAR> symbolicMultivectorParams = new ArrayList<>(size);
@@ -76,8 +77,10 @@ public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvExpr<E
             var symbolicMultivectorParam = casadiFuncParams.get(firstOccurrence);
             symbolicMultivectorParams.add(symbolicMultivectorParam);
         }
+        List<CACHED> paramsEXPR = symbolicMultivectorParams.stream().map(VAR::toCACHED).toList();
+
         // Specific type: CachedGaMvExpr.
-        EXPR symbolicReturn = res.apply(symbolicMultivectorParams).simplifySparsify();
+        EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsify();
         GaFunction<EXPR, ?> func = fac.createFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }

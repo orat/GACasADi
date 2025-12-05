@@ -19,7 +19,7 @@ import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 
 @AutoService(IGAFactory.class)
-public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
+public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVariable, CgaMvValue> {
 
     /**
      * Needs to be public in order to make ServiceLoader work.
@@ -280,9 +280,9 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
     }
 
     @Override
-    public CgaMvExpr cachedEXPR(CgaMvExpr expr) {
-        if (expr instanceof CachedCgaMvExpr) {
-            return expr;
+    public CachedCgaMvExpr cachedEXPR(CgaMvExpr expr) {
+        if (expr instanceof CachedCgaMvExpr cached) {
+            return cached;
         }
         return new CachedCgaMvExpr(expr);
     }

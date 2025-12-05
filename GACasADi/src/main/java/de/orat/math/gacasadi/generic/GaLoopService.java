@@ -20,12 +20,12 @@ import java.util.stream.Stream;
  * https://web.casadi.org/api/html/da/da4/classcasadi_1_1Function.html
  * </pre>
  */
-public class GaLoopService<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVariable<EXPR>>
+public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariable<VAR, ?, EXPR>>
     implements ILoopService<EXPR, VAR, GaExprArray<EXPR>> {
 
-    private final GaFactory<EXPR, VAR, ?> fac;
+    private final GaFactory<EXPR, ?, VAR, ?> fac;
 
-    public GaLoopService(GaFactory<EXPR, VAR, ?> fac) {
+    public GaLoopService(GaFactory<EXPR, ?, VAR, ?> fac) {
         this.fac = fac;
     }
 

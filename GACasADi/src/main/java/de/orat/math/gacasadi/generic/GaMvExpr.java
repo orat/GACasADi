@@ -1,20 +1,5 @@
 package de.orat.math.gacasadi.generic;
 
-import de.orat.math.gacalc.spi.IMultivectorExpression;
+public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
 
-public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>>
-    implements IMultivectorExpression<EXPR>, IGetSX, IGetSparsityCasadi {
-
-    /**
-     * Retrofit
-     */
-    @Deprecated
-    public String getName() {
-        // Value will be different if this instanceof CgaMvVariable.
-        return "(CgaMvExpr)";
-    }
-
-    public abstract int getBladesCount();
-
-    public abstract EXPR simplifySparsify();
 }

@@ -12,7 +12,6 @@ import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
-import de.orat.math.gacasadi.generic.GaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -22,9 +21,10 @@ import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
+import de.orat.math.gacasadi.generic.IGaMvValue;
 
 @GenerateDelegate(to = CgaMvExpr.class)
-public class CgaMvValue extends DelegatingCgaMvValue implements GaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
+public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 

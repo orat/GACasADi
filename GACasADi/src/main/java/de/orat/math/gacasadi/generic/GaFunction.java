@@ -15,13 +15,13 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class GaFunction<EXPR extends GaMvExpr<EXPR>, VAL extends GaMvValue<VAL, EXPR>> implements IGAFunction<EXPR, VAL> {
+public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL, EXPR>> implements IGAFunction<EXPR, VAL> {
 
     private final String name;
     private final int arity;
     private final int resultCount;
     private final List<Sparsity> paramsSparsities;
-    private final GaFactory<EXPR, ?, VAL> fac;
+    private final GaFactory<EXPR, ?, ?, VAL> fac;
 
     // available after plugging the impl into the api object
     private GAFunction.Callback callback;
@@ -36,7 +36,7 @@ public class GaFunction<EXPR extends GaMvExpr<EXPR>, VAL extends GaMvValue<VAL, 
      * @param name A valid CasADi function name starts with a letter followed by letters, numbers or
      * non-consecutive underscores.
      */
-    public <MV extends IGetSX & IMultivectorVariable> GaFunction(GaFactory<EXPR, ?, VAL> fac, String name, List<MV> parameters, List<? extends GaMvExpr> returns) {
+    public <MV extends IGetSX & IMultivectorVariable> GaFunction(GaFactory<EXPR, ?, ?, VAL> fac, String name, List<MV> parameters, List<? extends IGaMvExpr> returns) {
         try {
             this.fac = fac;
             this.paramsSparsities = parameters.stream().map(IGetSX::getSX).map(SX::sparsity).toList();
@@ -85,7 +85,7 @@ public class GaFunction<EXPR extends GaMvExpr<EXPR>, VAL extends GaMvValue<VAL, 
 
             // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the correct value.
             StdVectorSX call_num_in = new StdVectorSX(arguments.stream()
-                .map(GaMvValue::getDM)
+                .map(IGaMvValue::getDM)
                 .map(CasADiUtil::toSX)
                 .toList()
             );

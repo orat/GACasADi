@@ -51,6 +51,10 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     private final static CgaFactory fac = CgaFactory.instance;
 
+    protected static CgaFactory getFactory() {
+        return fac;
+    }
+
     // a multivector is represented by a sparse column vector
     private final SX sx;
 
@@ -1212,4 +1216,8 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return result;
     }*/
     //----------------------
+    @Override
+    public CgaMvExpr toEXPR() {
+        return this;
+    }
 }

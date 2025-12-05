@@ -10,13 +10,13 @@ import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import static de.orat.math.gacasadi.generic.CasADiUtil.nonzeros;
 import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
-import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseStringMatrix;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
+import de.orat.math.gacasadi.generic.IGaMvExpr;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -40,7 +40,7 @@ public class CgaCasADiUtil extends CasADiUtil {
      * @param cgaCayleyTable Cayley-table representing the specific product
      *
      */
-    public static SX toSXProductMatrix(GaMvExpr mv, CGACayleyTable cgaCayleyTable) {
+    public static SX toSXProductMatrix(CgaMvExpr mv, CGACayleyTable cgaCayleyTable) {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
 
@@ -125,7 +125,7 @@ public class CgaCasADiUtil extends CasADiUtil {
      * @param mv sparse multivector
      * @return sparsity of the matrix representation of the given multivector for the given cayley table
      */
-    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, GaMvExpr mv) {
+    private static MatrixSparsity createSparsity(CayleyTable cayleyTable, IGaMvExpr mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
         MatrixSparsity sparsity = mv.getSparsity();
         for (int i = 0; i < cayleyTable.getRows(); i++) {

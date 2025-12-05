@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public abstract class GaFactory<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVariable<EXPR>, VAL extends GaMvValue<VAL, EXPR>>
+public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>, VAL extends IGaMvValue<VAL, EXPR>>
     implements IGAFactory<EXPR, VAR, VAL> {
 
     static {
@@ -21,7 +21,7 @@ public abstract class GaFactory<EXPR extends GaMvExpr<EXPR>, VAR extends GaMvVar
 
     protected abstract VAL DMtoVAL(DM dm);
 
-    public abstract EXPR cachedEXPR(EXPR expr);
+    public abstract CACHED cachedEXPR(EXPR expr);
 
     public abstract VAR EXPRtoVAR(String name, EXPR from);
 
