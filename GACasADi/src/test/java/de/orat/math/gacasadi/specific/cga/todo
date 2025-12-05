@@ -1,0 +1,10 @@
+- test für scp bauen, geht impl auch auf Basis rc oder gp? oder auf Basis von gradeselection?
+- norm/euclidian norm vervollständigen
+- Test vergleich Matrix-Impl von inner product mit ip, dot, lc
+- Test für generalInverse, versorInverse, div - dafür habe ich keine ganja.js impl zum Vergleichen
+- fix lc
+- test rc
+- matrix based op funktioniert nicht
+- implement ip
+- implement exp, join, meet, atan2
+- Euclidian Type conversion function in unserer DSL implementieren und tests schreiben
