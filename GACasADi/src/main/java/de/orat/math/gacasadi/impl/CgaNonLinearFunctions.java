@@ -6,8 +6,8 @@ import de.dhbw.rahmlab.casadi.api.SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import static de.orat.math.gacasadi.impl.GaMvExpr.create;
-import static de.orat.math.gacasadi.impl.GaMvExpr.createSparse;
+import de.orat.math.gacasadi.specific.cga.CgaConstantsExpr;
+import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import java.util.Arrays;
 import util.cga.CGACayleyTable;
 
@@ -16,41 +16,37 @@ import util.cga.CGACayleyTable;
  */
 public class CgaNonLinearFunctions {
     
-     private SX asScalar(GaMvExpr expr) {
+    private SX asScalar(CgaMvExpr expr) {
         if (!expr.isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return expr.getSX().at(0);
     }
-    private static GaMvExpr createFromScalar(SX sx) {
+    private static CgaMvExpr createFromScalar(SX sx) {
         // 1x1
         if (!sx.sparsity().is_scalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
-        SX result = createSparse("").getSX();
+        SX result = CgaMvExpr.createSparse("").getSX();
         result.at(0).assign(sx);
-        return create(result);
+        return CgaMvExpr.create(result);
     }
-    private GaMvExpr computeScalar(java.util.function.Function<SX, SX> computer, GaMvExpr expr) {
+    private CgaMvExpr computeScalar(java.util.function.Function<SX, SX> computer, CgaMvExpr expr) {
         SX inputScalar = asScalar(expr);
         SX outputScalar = computer.apply(inputScalar);
-        GaMvExpr mv = createFromScalar(outputScalar);
+        CgaMvExpr mv = createFromScalar(outputScalar);
         return mv;
     }
     
     private static final SX ZERO_SX = new SX(new Sparsity(1, 1));
     
-    private SXColVec getRotor(GaMvExpr expr){
+    private SXColVec getRotor(CgaMvExpr expr) {
         // 0,5,6,7,8,9,10,15 --> 0,1,2,3,4,5,6,7
         int[] evenIndizes = CGACayleyTable.getEvenIndizes();
         return new SXColVec(expr.getSX(), evenIndizes);
     }
     
-    private static final GaConstantsExpr CONSTANTS = GaConstantsExpr.instance;
-
-    private GaConstantsExpr constants() {
-        return CONSTANTS;
-    }
+    private static final CgaConstantsExpr CONSTANTS = CgaConstantsExpr.instance;
     
      
     // non linear operators/functions
@@ -59,7 +55,7 @@ public class CgaNonLinearFunctions {
     // https://arxiv.org/pdf/2107.03771
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // exponential of a bivector or a scalar for CGA (R41)
-    public GaMvExpr exp(GaMvExpr expr) {
+    public CgaMvExpr exp(CgaMvExpr expr) {
         if (expr.isScalar()) {
             return computeScalar(SxStatic::exp, expr);
         } else if (!expr.isBivector()) {
@@ -187,7 +183,7 @@ public class CgaNonLinearFunctions {
         /*if (){
             result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.get4VectorIndizes())));
         }*/
-        return create(result);
+        return CgaMvExpr.create(result);
     }
 
    
@@ -201,7 +197,7 @@ public class CgaNonLinearFunctions {
      * Geometric Algebras of Less than 6D<br>
      * S. de. Keninck, M. Roelfs, 2022
      */
-    public GaMvExpr normalizeRotor(GaMvExpr expr) {
+    public CgaMvExpr normalizeRotor(CgaMvExpr expr) {
         if (!expr.isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
@@ -312,12 +308,12 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
             .toArray(SXElem[]::new);
         
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(expr.getCayleyTable().getBladesCount(), valuesSXElem, evenIndizes).sx);
+        return CgaMvExpr.create(new SXColVec(expr.getCayleyTable().getBladesCount(), valuesSXElem, evenIndizes).sx);
     }
 
     //TODO sieht generisch aus
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    public GaMvExpr sqrt(GaMvExpr expr) {
+    public CgaMvExpr sqrt(CgaMvExpr expr) {
         if (expr.isEven()) {
             if (expr.isScalar()){
                 return expr.scalarSqrt();
@@ -331,7 +327,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // log of a normalized rotor, result is a bivector
-    public GaMvExpr log(GaMvExpr expr) {
+    public CgaMvExpr log(CgaMvExpr expr) {
       
         if (!expr.isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
@@ -446,7 +442,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
             .toArray(SXElem[]::new);
         //SXElem[] values = conv(B);
         
-        return create(new SXColVec(expr.getCayleyTable().getBladesCount(), 
+        return CgaMvExpr.create(new SXColVec(expr.getCayleyTable().getBladesCount(),
             valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
     }
     

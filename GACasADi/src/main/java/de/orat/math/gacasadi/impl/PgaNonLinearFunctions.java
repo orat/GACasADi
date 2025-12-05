@@ -7,8 +7,8 @@ import static de.dhbw.rahmlab.casadi.api.SXScalar.ZERO_SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import static de.orat.math.gacasadi.impl.GaMvExpr.create;
-import static de.orat.math.gacasadi.impl.GaMvExpr.createSparse;
+import de.orat.math.gacasadi.specific.pga.PgaConstantsExpr;
+import de.orat.math.gacasadi.specific.pga.PgaMvExpr;
 import java.util.Arrays;
 import util.cga.CGACayleyTable;
 
@@ -17,42 +17,38 @@ import util.cga.CGACayleyTable;
  */
 public class PgaNonLinearFunctions {
     
-    private SX asScalar(GaMvExpr expr) {
+    private SX asScalar(PgaMvExpr expr) {
         if (!expr.isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         return expr.getSX().at(0);
     }
-    private static GaMvExpr createFromScalar(SX sx) {
+    private static PgaMvExpr createFromScalar(SX sx) {
         // 1x1
         if (!sx.sparsity().is_scalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
-        SX result = createSparse("").getSX();
+        SX result = PgaMvExpr.createSparse("").getSX();
         result.at(0).assign(sx);
-        return create(result);
+        return PgaMvExpr.create(result);
     }
-    private GaMvExpr computeScalar(java.util.function.Function<SX, SX> computer, GaMvExpr expr) {
+    private PgaMvExpr computeScalar(java.util.function.Function<SX, SX> computer, PgaMvExpr expr) {
         SX inputScalar = asScalar(expr);
         SX outputScalar = computer.apply(inputScalar);
-        GaMvExpr mv = createFromScalar(outputScalar);
+        PgaMvExpr mv = createFromScalar(outputScalar);
         return mv;
     }
     
     private static final SX ZERO_SX = new SX(new Sparsity(1, 1));
     
-    private SXColVec getRotor(GaMvExpr expr){
+    private SXColVec getRotor(PgaMvExpr expr) {
         // 0,5,6,7,8,9,10,15 --> 0,1,2,3,4,5,6,7
         int[] evenIndizes = CGACayleyTable.getEvenIndizes();
         return new SXColVec(expr.getSX(), evenIndizes);
     }
     
-    private static final GaConstantsExpr CONSTANTS = GaConstantsExpr.instance;
+    private static final PgaConstantsExpr CONSTANTS = PgaConstantsExpr.instance;
 
-    private GaConstantsExpr constants() {
-        return CONSTANTS;
-    }
-    
     
     // non linear operators/functions
     // [8] M Roelfs and S De Keninck. 2021.
@@ -69,7 +65,7 @@ public class PgaNonLinearFunctions {
      * 
      * @return Rotor = R0 + R1e01 + R2e02 + R3e03 + R4e11 + R5e31 + R6e23 + R7e0123
      */
-    public GaMvExpr exp(GaMvExpr expr) {
+    public PgaMvExpr exp(PgaMvExpr expr) {
         if (expr.isScalar()) {
             return computeScalar(SxStatic::exp, expr);
         } else if (!expr.isBivector()) {
@@ -114,7 +110,7 @@ public class PgaNonLinearFunctions {
         SX result = new SXColVec(expr.getCayleyTable().getBladesCount(), 
             generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
         
-        return create(result);
+        return PgaMvExpr.create(result);
     }
    
     /**
@@ -127,7 +123,7 @@ public class PgaNonLinearFunctions {
      * Geometric Algebras of Less than 6D<br>
      * S. de. Keninck, M. Roelfs, 2022
      */
-    public GaMvExpr normalizeRotor(GaMvExpr expr) {
+    public PgaMvExpr normalizeRotor(PgaMvExpr expr) {
         if (!expr.isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
@@ -158,13 +154,12 @@ public class PgaNonLinearFunctions {
             .toArray(SXElem[]::new);
         
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(expr.getCayleyTable().getBladesCount(), 
-                valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
+        return PgaMvExpr.create(new SXColVec(expr.getCayleyTable().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
     }
     
     //TODO sieht generisch aus
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-    public GaMvExpr sqrtRotorOrScalar(GaMvExpr expr) {
+    public PgaMvExpr sqrtRotorOrScalar(PgaMvExpr expr) {
         if (expr.isEven()) {
             if (expr.isScalar()){
                 return expr.scalarSqrt();
@@ -177,7 +172,7 @@ public class PgaNonLinearFunctions {
 
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // log of a normalized rotor, result is a bivector
-    public GaMvExpr log(GaMvExpr expr) {
+    public PgaMvExpr log(PgaMvExpr expr) {
       
         if (!expr.isEven()) {
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
@@ -195,7 +190,7 @@ public class PgaNonLinearFunctions {
             .map(SX::scalar)
             .toArray(SXElem[]::new);
        
-        return create(new SXColVec(expr.getCayleyTable().getBladesCount(), 
+        return PgaMvExpr.create(new SXColVec(expr.getCayleyTable().getBladesCount(),
             valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
     }
     
