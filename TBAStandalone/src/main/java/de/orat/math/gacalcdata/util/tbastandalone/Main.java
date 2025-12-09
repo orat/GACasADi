@@ -20,8 +20,9 @@ public class Main extends JFrame {
       
     private static File determineAlgebraFolder(String name) throws URISyntaxException {
         URI gaalopSRCFolder = Main.class.getProtectionDomain().getCodeSource().
-            getLocation().toURI().normalize().resolve("de/gaalop/algebra/algebra/" + name);
-        File file = new File(gaalopSRCFolder);
+            getLocation().toURI();
+        URI algebraFolder = gaalopSRCFolder.normalize().resolve("de/gaalop/algebra/algebra/" + name);
+        File file = new File(algebraFolder);
         return file;
     }
 
