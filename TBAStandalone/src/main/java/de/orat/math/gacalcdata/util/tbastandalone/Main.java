@@ -5,6 +5,8 @@ import de.gaalop.tba.Products;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -16,20 +18,20 @@ import javax.swing.JScrollPane;
  */
 public class Main extends JFrame {
       
-    private static File determineAlgebraFolder(String name){
-        File gaalopSRCFolder = (new File(Main.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath()));
-        return new File(gaalopSRCFolder.getAbsolutePath(), "/de/gaalop/algebra/algebra/"+name);
+    private static File determineAlgebraFolder(String name) throws URISyntaxException {
+        URI gaalopSRCFolder = Main.class.getProtectionDomain().getCodeSource().
+            getLocation().toURI().normalize().resolve("de/gaalop/algebra/algebra/" + name);
+        File file = new File(gaalopSRCFolder);
+        return file;
     }
-    
-    
+
     
     // Show JTable of a given algebra definition
     
     // TODO
     // https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0024706
     // Speicherverbrauch bestimmen
-    public static void main(String[] args){
+    public static void main(String[] args) throws URISyntaxException {
         try {
             String algebraName = "3dpga"; //cga";//d41";//cga";
             Products product = Products.GEO;
