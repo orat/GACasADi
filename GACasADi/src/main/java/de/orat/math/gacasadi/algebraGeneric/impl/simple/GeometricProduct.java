@@ -1,17 +1,17 @@
 package de.orat.math.gacasadi.algebraGeneric.impl.simple;
 
+import de.orat.math.gacasadi.algebraGeneric.api.Multivector;
 import de.orat.math.gacasadi.algebraGeneric.api.CoefficientAndBasisBlade;
 import de.orat.math.gacasadi.algebraGeneric.api.BasisBlade;
 import de.orat.math.gacasadi.algebraGeneric.api.Coefficient;
 import de.orat.math.gacasadi.algebraGeneric.api.CoefficientAndBasisBladeIndex;
-import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GeometricProduct implements IProduct<Multivector> {
+public class GeometricProduct {
 
     private final Algebra algebra;
 
@@ -22,7 +22,7 @@ public class GeometricProduct implements IProduct<Multivector> {
     /**
      * Das hier könnte auch gecached sein durch eine Cayley-Table.
      */
-    @Override
+    // @Override
     public CoefficientAndBasisBladeIndex product(int basisBladeIndex1, int basisBladeIndex2) {
         List<BasisBlade> basisBlades = this.algebra.basisBlades;
         BasisBlade aBlade = basisBlades.get(basisBladeIndex1);
@@ -122,19 +122,19 @@ public class GeometricProduct implements IProduct<Multivector> {
      */
     // @Override
     public Multivector product(Multivector a, Multivector b) {
-        final int aLen = a.basisBladeIndices().size();
-        final int bLen = b.basisBladeIndices().size();
+        final int aLen = a.entries().size();
+        final int bLen = b.entries().size();
         final List<BasisBlade> basisBlades = algebra.basisBlades;
 
         // calculate product
         List<CoefficientAndBasisBlade> sum = new ArrayList<>(bLen);
         for (int i = 0; i < aLen; ++i) {
             BasisBlade aBlade = basisBlades.get(i);
-            float aCoeff = a.coefficents().get(i).coefficient();
+            float aCoeff = a.entries().get(i).coefficient();
             for (int k = 0; k < bLen; ++k) {
                 BasisBlade bBlade = basisBlades.get(k);
                 CoefficientAndBasisBlade cbb = product(aBlade, bBlade);
-                float retCoeff = aCoeff * b.coefficents().get(i).coefficient() * cbb.coefficient().coefficient();
+                float retCoeff = aCoeff * b.entries().get(i).coefficient() * cbb.coefficient().coefficient();
                 var retCbb = new CoefficientAndBasisBlade(new Coefficient(retCoeff), cbb.basisBlade());
                 sum.add(retCbb);
             }
@@ -149,10 +149,17 @@ public class GeometricProduct implements IProduct<Multivector> {
         // sort
         List<BasisBlade> sortedBasisBlades = sumGrouped.keySet().stream().sorted(new BasisBladeComparator()).toList();
         List<Integer> retBasisBladeIndices = sortedBasisBlades.stream().map(algebra.basisBladesToIndices::get).toList();
-        List<Coefficient> retCoefficients = sortedBasisBlades.stream().map(bl -> sumGrouped.get(bl)).toList();
+        List<Float> retCoefficients = sortedBasisBlades.stream().map(bl -> sumGrouped.get(bl)).map(Coefficient::coefficient).toList();
+
+        final int count = retBasisBladeIndices.size();
+        List<CoefficientAndBasisBladeIndex> entries = new ArrayList<>(count);
+        for (int i = 0; i < count; ++i) {
+            var cbbi = new CoefficientAndBasisBladeIndex(retCoefficients.get(i), retBasisBladeIndices.get(i));
+            entries.add(cbbi);
+        }
 
         // return
-        Multivector ret = new Multivector(retBasisBladeIndices, retCoefficients);
+        Multivector ret = new Multivector(entries);
         return ret;
     }
 

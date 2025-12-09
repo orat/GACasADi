@@ -1,14 +1,13 @@
 package de.orat.math.gacasadi.algebraGeneric.impl.simple;
 
 import de.orat.math.gacasadi.algebraGeneric.api.BasisBlade;
-import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class Algebra implements IAlgebra {
+public class Algebra {
 
     // ToDo: Change to Methods.
     /**

@@ -4,10 +4,8 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import de.orat.math.gacasadi.algebraGeneric.api.CoefficientAndBasisBladeIndex;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
-import de.orat.math.gacasadi.algebraGeneric.impl.simple.Algebra;
-import de.orat.math.gacasadi.algebraGeneric.impl.simple.GeometricProduct;
+import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.Product;
 
 public class CasADiMvExpr {
 
@@ -20,7 +18,8 @@ public class CasADiMvExpr {
         this.sx = sx;
     }
 
-    private static GeometricProduct gp = new GeometricProduct(new Algebra());
+    // ToDo: get Computer for correct product.
+    private static Product gp = new Product(null);
 
     // Precondition: a and b are of same length, column vectors, same algebra.
     private static SX product(IProduct product, SX a, SX b) {
@@ -32,16 +31,20 @@ public class CasADiMvExpr {
             var aCell = a.at(ai, 0);
             for (int bk : bIndices) {
                 var bCell = b.at(bk, 0);
-                CoefficientAndBasisBladeIndex cbbi = product.product(ai, bk);
-                if (cbbi == CoefficientAndBasisBladeIndex.ZERO) {
+                var mv = product.product(ai, bk);
+                /*
+                if (mv == Multivector.ZERO) {
                     continue;
                 }
-                int bbi = cbbi.basisBladeIndex();
-                float coeff = cbbi.coefficient();
-                var resCell = result.at(bbi, 0);
-                SX factor = SxStatic.mtimes_(new StdVectorSX(new SX[]{new SX(coeff), aCell, bCell}));
-                SX newSum = SxStatic.plus(resCell, factor);
-                resCell.assign(newSum);
+                 */
+                for (var cbbi : mv.entries()) {
+                    int bbi = cbbi.basisBladeIndex();
+                    float coeff = cbbi.coefficient();
+                    var resCell = result.at(bbi, 0);
+                    SX factor = SxStatic.mtimes_(new StdVectorSX(new SX[]{new SX(coeff), aCell, bCell}));
+                    SX newSum = SxStatic.plus(resCell, factor);
+                    resCell.assign(newSum);
+                }
             }
         }
         return result;
