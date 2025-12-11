@@ -5,6 +5,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
+import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.Product;
 
 public class CasADiMvExpr {
@@ -19,6 +20,7 @@ public class CasADiMvExpr {
     }
 
     // ToDo: get Computer for correct product.
+    // private static IAlgebra algebra = new GaalopAlgebra(algebraName);
     private static Product gp = new Product(null);
 
     // Precondition: a and b are of same length, column vectors, same algebra.

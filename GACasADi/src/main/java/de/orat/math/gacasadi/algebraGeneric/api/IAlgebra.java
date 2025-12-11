@@ -9,4 +9,9 @@ package de.orat.math.gacasadi.algebraGeneric.api;
  */
 public interface IAlgebra {
 
+    IProduct gp();
+
+    IProduct inner();
+
+    IProduct outer();
 }
