@@ -4,8 +4,6 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
-import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import util.cga.CGACayleyTableGeometricProduct;
 import de.orat.math.gacasadi.generic.IGaMvVariable;
 
 public class PgaMvVariable extends CachedPgaMvExpr implements IGaMvVariable<PgaMvVariable, CachedPgaMvExpr, PgaMvExpr>, IMultivectorVariable<PgaMvExpr> {

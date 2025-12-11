@@ -15,4 +15,10 @@ public interface IGaMvExpr<EXPR extends IGaMvExpr<EXPR>>
     int getBladesCount();
 
     EXPR simplifySparsify();
+
+    boolean isGeneralEven();
+
+    boolean isEven();
+
+    boolean isBivector();
 }

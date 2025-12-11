@@ -6,7 +6,6 @@ import de.dhbw.rahmlab.casadi.api.SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
-import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
@@ -120,8 +119,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return CgaMvVariable.createDense(name);
     }
 
-    public static CgaMvVariable createSparse(String name) {
-        return CgaMvVariable.createSparse(name);
+    @Override
+    protected CgaMvExpr createSparse() {
+        return CgaMvVariable.createSparse("");
     }
 
     public static CgaMvExpr create(DM dm) {
@@ -137,31 +137,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     protected static CgaMvExpr createFromSX(SX sx) {
         return new CachedCgaMvExpr(sx);
-    }
-
-    public static CgaMvExpr createFromScalar(SX sx) {
-        // 1x1
-        if (!sx.sparsity().is_scalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        SX result = createSparse("").getSX();
-        result.at(0).assign(sx);
-        return createFromSX(result);
-    }
-
-    public SX asScalar() {
-        if (!this.isScalar()) {
-            throw new IllegalArgumentException("This is no scalar!");
-        }
-        return this.getSX().at(0);
-    }
-
-    @Uncached
-    public CgaMvExpr computeScalar(java.util.function.Function<SX, SX> computer) {
-        SX inputScalar = this.asScalar();
-        SX outputScalar = computer.apply(inputScalar);
-        CgaMvExpr mv = createFromScalar(outputScalar);
-        return mv;
     }
 
     //======================================================
@@ -212,23 +187,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return CgaCasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
     }
 
-    @Override
-    public Sparsity getSparsityCasadi() {
-        return this.sx.sparsity();
-    }
-
-    @Override
-    public SX getSX() {
-        return this.sx;
-    }
-
-    @Uncached
-    public CgaMvExpr simplifySparsify() {
-        SX simple = SxStatic.simplify(this.sx);
-        SX sparse = SxStatic.sparsify(simple);
-        return create(sparse);
-    }
-
     /**
      * Get SX representation of a blade.
      *
@@ -250,17 +208,22 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return null;
     }
 
+    @Override
     public int getBladesCount() {
         return baseCayleyTable.getBladesCount();
     }
 
+    @Override
     public boolean isGeneralEven() {
         return getSparsity().isGeneralEven();
     }
+
+    @Override
     public boolean isEven(){
         return getSparsity().isEven();
     }
 
+    @Override
     public boolean isBivector(){
         return (grade() == 2);
     }
@@ -541,47 +504,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return createFromScalar(sxres);
     }
 
-    // ist nicht CGA-spezifisch
-    /**
-     * Add.
-     *
-     * Multivector addition
-     *
-     * @param a
-     * @param b
-     * @return a + b
-     */
-    @Override
-    public CgaMvExpr add(CgaMvExpr b) {
-        //System.out.println("sparsity(a)="+sx.sparsity().toString(true));
-        //System.out.println("sparsity(b)="+( b).getSX().sparsity().toString(true));
-        SX result = SxStatic.plus(sx, b.getSX());
-        //System.out.println("sparsity(add)="+result.sparsity().toString(true));
-        return create(result);
-    }
-
-    // ist nicht CGA-spezifisch
-    @Override
-    public CgaMvExpr hadamard(CgaMvExpr b) {
-        // element-wise mulitplication (linear mapping)
-        SX result = SxStatic.times(sx, b.getSX());
-        return create(result);
-    }
-    
-    // ist nicht CGA-spezifisch
-    /**
-     * Multivector subtraction.
-     *
-     * @param a
-     * @param b
-     * @return a - b
-     */
-    @Override
-    public CgaMvExpr sub(CgaMvExpr b) {
-        SX result = SxStatic.minus(sx, b.getSX());
-        return create(result);
-    }
-
     /**
      * Negates the signs of the vector and 4-vector parts of an multivector.
      *
@@ -593,53 +515,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx));
     }
 
-    @Override
-    public CgaMvExpr scalarAbs() {
-        return computeScalar(SxStatic::abs);
-    }
-
-    @Override
-    public CgaMvExpr scalarAtan2(CgaMvExpr y) {
-        if (!isScalar()) {
-            throw new IllegalArgumentException("The argument x of atan2(y,x) is no scalar!");
-        }
-        if (!y.isScalar()) {
-            throw new IllegalArgumentException("The argument y of atan2(y,x) is no scalar!");
-        }
-        SX result = SxStatic.atan2(y.asScalar(), this.asScalar());
-        return createFromScalar(result);
-    }
-
-    @Override
-    public CgaMvExpr scalarSqrt() {
-        return computeScalar(SxStatic::sqrt);
-    }
-
-    
-    // new scalar functions
-    
-    public CgaMvExpr scalarSign() {
-        return computeScalar(SxStatic::sign);
-    }
-    public CgaMvExpr scalarSin() {
-        return computeScalar(SxStatic::sin);
-    }
-    public CgaMvExpr scalarCos() {
-        return computeScalar(SxStatic::cos);
-    }
-    public CgaMvExpr scalarTan() {
-        return computeScalar(SxStatic::tan);
-    }
-    public CgaMvExpr scalarAtan() {
-        return computeScalar(SxStatic::atan);
-    }
-    public CgaMvExpr scalarAsin() {
-        return computeScalar(SxStatic::asin);
-    }
-    public CgaMvExpr scalarAcos() {
-        return computeScalar(SxStatic::acos);
-    }
-    
     // non linear operators/functions
     // [8] M Roelfs and S De Keninck. 2021.
     // Graded Symmetry Groups: Plane and Simple. arXiv:2107.03771 [math-ph]
@@ -1191,6 +1066,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return create(SxStatic.rdivide(sx, svec));
     }
 
+    /*
     // strict positive?
     private static CgaMvExpr norm_e(CgaMvExpr a) {
         SX norme = SxStatic.sqrt(norm_e2(a).getSX().at(0));
@@ -1205,6 +1081,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         //if (s < 0.0) return 0.0; // avoid FP round off causing negative 's'
         return createFromScalar(norme2);
     }
+     */
 
     
     //-------- voraussichtlich deprecated
