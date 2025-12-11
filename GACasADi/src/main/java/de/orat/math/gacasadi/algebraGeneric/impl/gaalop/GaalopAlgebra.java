@@ -21,29 +21,32 @@ public class GaalopAlgebra implements IAlgebra {
 
     public final Algebra algebra;
     public final AlgebraDefinitionFile algebraDefinitionFile;
+    private final Product gp;
+    private final Product inner;
+    private final Product outer;
 
     public GaalopAlgebra(String algebraName) {
         Path algebraPath = getAlgebraPath(algebraName);
         this.algebraDefinitionFile = getADF(algebraPath);
         this.algebra = getAlgebra(this.algebraDefinitionFile);
+        this.gp = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new GeoProductCalculator()));
+        this.inner = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new InnerProductCalculator()));
+        this.outer = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new OuterProductCalculator()));
     }
 
     @Override
     public Product gp() {
-        var comp = new MultTableAbsDirectComputer(this.algebraDefinitionFile, new GeoProductCalculator());
-        return new Product(comp);
+        return this.gp;
     }
 
     @Override
     public Product inner() {
-        var comp = new MultTableAbsDirectComputer(this.algebraDefinitionFile, new InnerProductCalculator());
-        return new Product(comp);
+        return this.inner;
     }
 
     @Override
     public Product outer() {
-        var comp = new MultTableAbsDirectComputer(this.algebraDefinitionFile, new OuterProductCalculator());
-        return new Product(comp);
+        return this.outer;
     }
 
     private static final Path algebrasDir = resolveAlgebrasDir();

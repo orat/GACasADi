@@ -5,7 +5,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
-import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
@@ -31,13 +30,8 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
 
     }
 
-    // Es gibt nur eine Factory.
-    // Alles andere kann man an die Instanz binden.
     // cga_2 hat den Basiswechsel nicht und hat dadurch das gleiche gp wie vorherige Implementierung.
-    private final IAlgebra alDef = new GaalopAlgebra("cga_2");
-    protected final IProduct gp = alDef.gp();
-    protected final IProduct inner = alDef.inner();
-    protected final IProduct outer = alDef.outer();
+    protected final IAlgebra alDef = new GaalopAlgebra("cga_2");
 
     private static final CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
@@ -282,7 +276,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
 
     @Override
     protected CgaMvExpr SXtoEXPR(SX sx) {
-        return CgaMvExpr.create(sx);
+        return CgaMvExpr.createFromSX(sx);
     }
 
     @Override

@@ -7,6 +7,8 @@ import de.orat.math.gacalc.spi.IConstantsExpression;
 import de.orat.math.gacalc.spi.IConstantsValue;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacalc.spi.ILoopService;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
@@ -18,6 +20,8 @@ import java.util.List;
 public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVariable, PgaMvValue> {
 
     public final static PgaFactory instance = new PgaFactory();
+
+    protected final IAlgebra alDef = new GaalopAlgebra("3dpga");
 
     /**
      * Needs to be public in order to make ServiceLoader work.

@@ -11,6 +11,7 @@ import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacalc.util.CayleyTable;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.gacasadi.generic.GaMvExpr;
@@ -38,11 +39,17 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         super(sx);
     }
 
+    @Uncached
+    @Override
+    protected PgaMvExpr create(SX sx) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public static PgaMvExpr createSparse(String string) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    public static PgaMvExpr create(SX result) {
+    public static PgaMvExpr createFromSX(SX result) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -258,7 +265,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         }
         SX result = PgaMvExpr.createSparse("").getSX();
         result.at(0).assign(sx);
-        return PgaMvExpr.create(result);
+        return PgaMvExpr.createFromSX(result);
     }
 
     private static PgaMvExpr computeScalar(java.util.function.Function<SX, SX> computer, PgaMvExpr expr) {
@@ -340,7 +347,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         SX result = new SXColVec(this.getCayleyTable().getBladesCount(),
             generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
 
-        return PgaMvExpr.create(result);
+        return create(result);
     }
 
     /**
@@ -387,7 +394,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .toArray(SXElem[]::new);
 
         // create SX with sparsity corresponding to a rotor (even element)
-        return PgaMvExpr.create(new SXColVec(this.getCayleyTable().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
+        return create(new SXColVec(this.getCayleyTable().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
     }
 
     @Override
@@ -429,7 +436,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .map(SX::scalar)
             .toArray(SXElem[]::new);
 
-        return PgaMvExpr.create(new SXColVec(this.getCayleyTable().getBladesCount(),
+        return create(new SXColVec(this.getCayleyTable().getBladesCount(),
             valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
     }
 
@@ -442,6 +449,11 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             c.mul(R.get(5)).add(b.mul(R.get(2))),
             c.mul(R.get(4)).add(b.mul(R.get(3))),
             b.mul(R.get(4)), b.mul(R.get(5), b.mul(R.get(6)))};
+    }
+
+    @Override
+    protected IAlgebra getIAlgebra() {
+        return PgaFactory.instance.alDef;
     }
 
 }

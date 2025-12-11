@@ -80,7 +80,7 @@ public class ExpNanTest {
         CgaMvValue t1 = fac.createValue(0);
         CgaMvValue t2 = fac.createValue(0);
         SX div = SxStatic.rdivide(t1.getDelegate().getSX(), t2.getDelegate().getSX());
-        CgaMvExpr expr = CgaMvExpr.create(div).simplifySparsify();
+        CgaMvExpr expr = CgaMvExpr.createFromSX(div).simplifySparsify();
         CgaMvValue nanEval = evalPoint(List.of(t1, t2), expr);
         // Das gibt NaN. Also liegt es wo anders.
         // Wenn ich nur mit t1 mache, gibt es 1.

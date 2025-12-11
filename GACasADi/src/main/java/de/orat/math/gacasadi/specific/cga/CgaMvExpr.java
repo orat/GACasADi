@@ -1,23 +1,18 @@
 package de.orat.math.gacasadi.specific.cga;
 
-import de.dhbw.rahmlab.casadi.DmStatic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
-import de.dhbw.rahmlab.casadi.api.Util;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacalc.util.CayleyTable;
-import de.orat.math.gacasadi.algebraGeneric.api.CoefficientAndBasisBladeIndex;
-import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
-import de.orat.math.gacasadi.algebraGeneric.api.Multivector;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.gacasadi.generic.GaFactory;
@@ -28,9 +23,7 @@ import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -136,7 +129,13 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return new CachedCgaMvExpr(sx);
     }
 
-    public static CgaMvExpr create(SX sx) {
+    @Uncached
+    @Override
+    protected CgaMvExpr create(SX sx) {
+        return new CachedCgaMvExpr(sx);
+    }
+
+    protected static CgaMvExpr createFromSX(SX sx) {
         return new CachedCgaMvExpr(sx);
     }
 
@@ -147,7 +146,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         }
         SX result = createSparse("").getSX();
         result.at(0).assign(sx);
-        return create(result);
+        return createFromSX(result);
     }
 
     public SX asScalar() {
@@ -171,6 +170,11 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public void init(MultivectorExpression.Callback callback) {
         this.callback = callback;
+    }
+
+    @Override
+    protected IAlgebra getIAlgebra() {
+        return CgaFactory.instance.alDef;
     }
 
     @Override
@@ -323,18 +327,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return result;
     }
 
-    @Override
-    public CgaMvExpr gp(CgaMvExpr b) {
-        SX gp = GaMvExpr.product(CgaFactory.instance.gp, super.sx, b.sx);
-        CgaMvExpr mv = create(gp);
-        System.out.println("---gp()---");
-        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
-        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
-        System.out.println(mv.getName() + ": input identical? = " + (this == b));
-        System.out.println(mv.getName() + ": output multivector" + mv.toString());
-        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
-        return mv;
-    }
     // Vorherige Implementierung.
  /*
     @Override
@@ -419,32 +411,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         }
     }
      */
-
-    @Override
-    public CgaMvExpr ip(CgaMvExpr b) {
-        SX ip = GaMvExpr.product(CgaFactory.instance.inner, super.sx, b.sx);
-        CgaMvExpr mv = create(ip);
-        System.out.println("---ip()---");
-        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
-        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
-        System.out.println(mv.getName() + ": input identical? = " + (this == b));
-        System.out.println(mv.getName() + ": output multivector" + mv.toString());
-        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
-        return mv;
-    }
-
-    @Override
-    public CgaMvExpr op(CgaMvExpr b) {
-        SX op = GaMvExpr.product(CgaFactory.instance.outer, super.sx, b.sx);
-        CgaMvExpr mv = create(op);
-        System.out.println("---op()---");
-        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
-        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
-        System.out.println(mv.getName() + ": input identical? = " + (this == b));
-        System.out.println(mv.getName() + ": output multivector" + mv.toString());
-        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
-        return mv;
-    }
 
     /**
      * <pre>

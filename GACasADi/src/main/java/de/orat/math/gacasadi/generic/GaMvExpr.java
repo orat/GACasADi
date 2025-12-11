@@ -4,6 +4,7 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
@@ -19,6 +20,52 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     protected GaMvExpr(EXPR other) {
         this.sx = other.sx;
+    }
+
+    protected abstract IAlgebra getIAlgebra();
+
+    /**
+     * Implemented needs to annotate: @Uncached
+     */
+    protected abstract EXPR create(SX sx);
+
+    @Override
+    public EXPR gp(EXPR b) {
+        SX gp = GaMvExpr.product(getIAlgebra().gp(), this.sx, b.sx);
+        EXPR mv = create(gp);
+        System.out.println("---gp()---");
+        System.out.println(": input multivector a = " + this.toString());
+        System.out.println(": input multivector b = " + b.toString());
+        System.out.println(": input identical? = " + (this == b));
+        System.out.println(": output multivector" + mv.toString());
+        System.out.println(": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
+    }
+
+    @Override
+    public EXPR ip(EXPR b) {
+        SX gp = GaMvExpr.product(getIAlgebra().inner(), this.sx, b.sx);
+        EXPR mv = create(gp);
+        System.out.println("---ip()---");
+        System.out.println(": input multivector a = " + this.toString());
+        System.out.println(": input multivector b = " + b.toString());
+        System.out.println(": input identical? = " + (this == b));
+        System.out.println(": output multivector" + mv.toString());
+        System.out.println(": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
+    }
+
+    @Override
+    public EXPR op(EXPR b) {
+        SX gp = GaMvExpr.product(getIAlgebra().outer(), this.sx, b.sx);
+        EXPR mv = create(gp);
+        System.out.println("---op()---");
+        System.out.println(": input multivector a = " + this.toString());
+        System.out.println(": input multivector b = " + b.toString());
+        System.out.println(": input identical? = " + (this == b));
+        System.out.println(": output multivector" + mv.toString());
+        System.out.println(": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
     }
 
     // protected abstract EXPR create(SX sx);

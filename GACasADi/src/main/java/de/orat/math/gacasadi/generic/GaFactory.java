@@ -4,6 +4,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.gacalc.spi.IGAFactory;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import java.util.List;
 
 /**
