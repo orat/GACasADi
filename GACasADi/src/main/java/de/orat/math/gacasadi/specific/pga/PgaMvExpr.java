@@ -30,12 +30,12 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         return fac;
     }
 
-    public PgaMvExpr(PgaMvExpr mv) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    protected PgaMvExpr(PgaMvExpr mv) {
+        super(mv);
     }
 
-    public PgaMvExpr(SX sx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    protected PgaMvExpr(SX sx) {
+        super(sx);
     }
 
     public static PgaMvExpr createSparse(String string) {

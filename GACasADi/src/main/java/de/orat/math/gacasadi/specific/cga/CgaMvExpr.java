@@ -1,5 +1,6 @@
 package de.orat.math.gacasadi.specific.cga;
 
+import de.dhbw.rahmlab.casadi.DmStatic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
@@ -14,6 +15,9 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacalc.util.CayleyTable;
+import de.orat.math.gacasadi.algebraGeneric.api.CoefficientAndBasisBladeIndex;
+import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
+import de.orat.math.gacasadi.algebraGeneric.api.Multivector;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.gacasadi.generic.GaFactory;
@@ -24,7 +28,9 @@ import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import de.orat.math.sparsematrix.SparseStringMatrix;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -56,7 +62,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     // a multivector is represented by a sparse column vector
-    private final SX sx;
+    // private final SX sx;
 
     //======================================================
     // Constructors and static creators.
@@ -68,7 +74,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
      */
     @Deprecated
     protected CgaMvExpr(CgaMvExpr other) {
-        this.sx = other.getSX();
+        super(other);
     }
 
     /**
@@ -76,8 +82,8 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
      */
     @Deprecated
     protected CgaMvExpr(SX sx) {
+        super(sx);
         Objects.requireNonNull(sx);
-        this.sx = sx;
         if (sx.rows() != baseCayleyTable.getBladesCount()) {
             throw new IllegalArgumentException(String.format("Invalid row count: %s", sx.rows()));
         }
@@ -316,7 +322,21 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         //result.getSX().erase(new StdVectorCasadiInt(new long[]{4l, 5l}));
         return result;
     }
-    
+
+    @Override
+    public CgaMvExpr gp(CgaMvExpr b) {
+        SX gp = GaMvExpr.product(CgaFactory.instance.gp, super.sx, b.sx);
+        CgaMvExpr mv = create(gp);
+        System.out.println("---gp()---");
+        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
+        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
+        System.out.println(mv.getName() + ": input identical? = " + (this == b));
+        System.out.println(mv.getName() + ": output multivector" + mv.toString());
+        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
+    }
+    // Vorherige Implementierung.
+ /*
     @Override
     public CgaMvExpr gp(CgaMvExpr b) {
         System.out.println("---gp()---");
@@ -333,6 +353,97 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
             result.erase(new StdVectorCasadiInt(Util.toLongArr(CGACayleyTable.getNonScalarIndizes())));
         }
         return create(result); // result sollte die richtige sparsity haben
+    }
+    */
+    // Test auf Unterschiede in gp Cayley-Table Einträgen zwischen alter und neuer Implementierung.
+ /*
+    @Override
+    public CgaMvExpr gp(CgaMvExpr b) {
+        SX gp = GaMvExpr.product(GPProduct.GPPROD, super.sx, b.sx);
+        CgaMvExpr mv = create(gp);
+        System.out.println("---gp()---");
+        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
+        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
+        System.out.println(mv.getName() + ": input identical? = " + (this == b));
+        System.out.println(mv.getName() + ": output multivector" + mv.toString());
+        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
+    }
+
+    public static class GPProduct implements IProduct {
+
+        public static final GPProduct GPPROD = new GPProduct();
+
+        @Override
+        public Multivector product(int basisBladeIndex1, int basisBladeIndex2) {
+        SX aSX = CONSTANTS.getSparseEmptyInstance().simplifySparsify().sx;
+            aSX.at(basisBladeIndex1, 0).assign(new SX(1));
+
+        SX bSX = CONSTANTS.getSparseEmptyInstance().simplifySparsify().sx;
+            bSX.at(basisBladeIndex2, 0).assign(new SX(1));
+        var bExpr = create(bSX);
+
+        // determine product matrix for the right side argument of the geometric product, the mv b
+        // considering the sparsity of the cayley-table and the input mv b
+        SX opm = CgaCasADiUtil.toSXProductMatrix(bExpr, CGACayleyTableGeometricProduct.instance());
+        //System.out.println("--- end of gp matrix creation ---");
+        SX result = SxStatic.mtimes(opm.T(), aSX);
+            result = SxStatic.sparsify(SxStatic.simplify(result));
+            DM numRes = DmStatic.sparsify(SxStatic.evalf(result));
+
+            List<CoefficientAndBasisBladeIndex> entries = new ArrayList<>(1);
+            int[] indices = numRes.get_row().stream().mapToInt(Long::intValue).toArray();
+            for (int index : indices) {
+                float factor = (float) numRes.at(index, 0).scalar();
+                CoefficientAndBasisBladeIndex entry = new CoefficientAndBasisBladeIndex(factor, index);
+                entries.add(entry);
+            }
+
+            Multivector gaalopMV = CgaFactory.instance.gp.product(basisBladeIndex1, basisBladeIndex2);
+            final int entriesSize = entries.size();
+            if (gaalopMV.entries().size() != entriesSize) {
+                throw new RuntimeException("Different entries size.");
+            }
+            for (int i = 0; i < entriesSize; ++i) {
+                var cbbi1 = entries.get(i);
+                var cbbi2 = gaalopMV.entries().get(i);
+                if (cbbi1.coefficient() != cbbi2.coefficient()) {
+                    throw new RuntimeException("Different coefficients.");
+                }
+                if (cbbi1.basisBladeIndex() != cbbi2.basisBladeIndex()) {
+                    throw new RuntimeException("Different indices.");
+                }
+            }
+
+            return new Multivector(entries);
+        }
+    }
+     */
+
+    @Override
+    public CgaMvExpr ip(CgaMvExpr b) {
+        SX ip = GaMvExpr.product(CgaFactory.instance.inner, super.sx, b.sx);
+        CgaMvExpr mv = create(ip);
+        System.out.println("---ip()---");
+        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
+        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
+        System.out.println(mv.getName() + ": input identical? = " + (this == b));
+        System.out.println(mv.getName() + ": output multivector" + mv.toString());
+        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
+    }
+
+    @Override
+    public CgaMvExpr op(CgaMvExpr b) {
+        SX op = GaMvExpr.product(CgaFactory.instance.outer, super.sx, b.sx);
+        CgaMvExpr mv = create(op);
+        System.out.println("---op()---");
+        System.out.println(mv.getName() + ": input multivector a = " + this.toString());
+        System.out.println(mv.getName() + ": input multivector b = " + b.toString());
+        System.out.println(mv.getName() + ": input identical? = " + (this == b));
+        System.out.println(mv.getName() + ": output multivector" + mv.toString());
+        System.out.println(mv.getName() + ": output multivector sparsity = " + mv.getSparsity().toString());
+        return mv;
     }
 
     /**

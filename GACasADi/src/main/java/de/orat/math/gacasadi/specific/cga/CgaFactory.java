@@ -4,6 +4,9 @@ import com.google.auto.service.AutoService;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.orat.math.gacalc.spi.IGAFactory;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
+import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
@@ -28,9 +31,17 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
 
     }
 
-    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+    // Es gibt nur eine Factory.
+    // Alles andere kann man an die Instanz binden.
+    // cga_2 hat den Basiswechsel nicht und hat dadurch das gleiche gp wie vorherige Implementierung.
+    private final IAlgebra alDef = new GaalopAlgebra("cga_2");
+    protected final IProduct gp = alDef.gp();
+    protected final IProduct inner = alDef.inner();
+    protected final IProduct outer = alDef.outer();
 
-    public final static CgaFactory instance = new CgaFactory();
+    private static final CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
+
+    public static final CgaFactory instance = new CgaFactory();
 
     public int getBasisBladesCount() {
         return baseCayleyTable.getBladesCount();
