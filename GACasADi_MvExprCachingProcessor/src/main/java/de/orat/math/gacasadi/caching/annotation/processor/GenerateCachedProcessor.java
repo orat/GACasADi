@@ -36,7 +36,7 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
 
     private volatile boolean initialized = false;
 
-    protected static final Set<String> supportedAnnotationTypes = Set.of(GenerateCached.class.getCanonicalName());
+    protected static final Set<String> supportedAnnotationTypes = Set.of(GenerateCached.class.getCanonicalName(), Uncached.class.getCanonicalName());
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
