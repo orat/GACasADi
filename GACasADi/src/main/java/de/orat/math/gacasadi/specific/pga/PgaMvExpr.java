@@ -355,4 +355,9 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     public boolean isBivector() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+    @Override
+    public PgaMvExpr dual() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

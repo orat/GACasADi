@@ -14,7 +14,9 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
@@ -32,10 +34,16 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
 
     // cga_2 hat den Basiswechsel nicht und hat dadurch das gleiche gp wie vorherige Implementierung.
     protected final IAlgebra alDef = new GaalopAlgebra("cga_2");
+    protected final Optional<Path> alLibFile = ((GaalopAlgebra) alDef).algebraLibFile;
 
     private static final CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
     public static final CgaFactory instance = new CgaFactory();
+
+    @Override
+    public Optional<Path> getAlgebraLibFile() {
+        return alLibFile;
+    }
 
     public int getBasisBladesCount() {
         return baseCayleyTable.getBladesCount();

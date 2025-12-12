@@ -16,19 +16,23 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class GaalopAlgebra implements IAlgebra {
 
     public final Algebra algebra;
     public final AlgebraDefinitionFile algebraDefinitionFile;
+    public final Optional<Path> algebraLibFile;
+    protected final Path algebraPath;
     private final Product gp;
     private final Product inner;
     private final Product outer;
 
     public GaalopAlgebra(String algebraName) {
-        Path algebraPath = getAlgebraPath(algebraName);
-        this.algebraDefinitionFile = getADF(algebraPath);
+        this.algebraPath = getAlgebraPath(algebraName);
+        this.algebraDefinitionFile = getADF(this.algebraPath);
         this.algebra = getAlgebra(this.algebraDefinitionFile);
+        this.algebraLibFile = getAlgebraLibFile(this.algebraPath);
         this.gp = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new GeoProductCalculator()));
         this.inner = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new InnerProductCalculator()));
         this.outer = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new OuterProductCalculator()));
@@ -77,6 +81,14 @@ public class GaalopAlgebra implements IAlgebra {
             throw new IllegalArgumentException(String.format("%s does not exist.", algebraPath));
         }
         return algebraPath;
+    }
+
+    public static Optional<Path> getAlgebraLibFile(Path algebraPath) {
+        Path libFile = algebraPath.resolve("lib.ocga");
+        if (Files.notExists(libFile)) {
+            return Optional.empty();
+        }
+        return Optional.of(libFile);
     }
 
     public static AlgebraDefinitionFile getADF(Path algebraPath) {

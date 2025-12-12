@@ -249,6 +249,11 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(SxStatic.mtimes(gradeSelectionMatrix, sx));
     }
 
+    @Override
+    public CgaMvExpr dual() {
+        return lc(CONSTANTS.getInversePseudoscalar());
+    }
+
     /**
      * Generic GA reverse function implementation based on matrix calculations.
      *

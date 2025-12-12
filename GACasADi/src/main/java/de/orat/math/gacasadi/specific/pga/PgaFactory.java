@@ -14,7 +14,9 @@ import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 @AutoService(IGAFactory.class)
 public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVariable, PgaMvValue> {
@@ -22,12 +24,18 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
     public final static PgaFactory instance = new PgaFactory();
 
     protected final IAlgebra alDef = new GaalopAlgebra("3dpga");
+    protected final Optional<Path> alLibFile = ((GaalopAlgebra) alDef).algebraLibFile;
 
     /**
      * Needs to be public in order to make ServiceLoader work.
      */
     public PgaFactory() {
 
+    }
+
+    @Override
+    public Optional<Path> getAlgebraLibFile() {
+        return alLibFile;
     }
 
     @Override
