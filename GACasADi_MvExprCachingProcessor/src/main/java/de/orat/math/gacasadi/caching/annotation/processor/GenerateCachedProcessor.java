@@ -2,19 +2,23 @@ package de.orat.math.gacasadi.caching.annotation.processor;
 
 import com.google.auto.service.AutoService;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
+import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.gacasadi.caching.annotation.processor.common.ExceptionHandler;
 import de.orat.math.gacasadi.caching.annotation.processor.generation.ClassesGenerator;
 import de.orat.math.gacasadi.caching.annotation.processor.representation.Clazz;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -80,6 +84,9 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
     private static List<Clazz> computeClasses(RoundEnvironment roundEnv, Utils utils) {
         // Safe cast because "@Target(ElementType.TYPE)" of Annotation.
         Set<TypeElement> annotatedTypes = (Set<TypeElement>) roundEnv.getElementsAnnotatedWith(GenerateCached.class);
+        Map<String, List<ExecutableElement>> uncachedMethods = ((Set<ExecutableElement>) roundEnv.getElementsAnnotatedWith(Uncached.class))
+            .stream()
+            .collect(Collectors.groupingBy(e -> e.getSimpleName().toString()));
 
         List<Clazz> classes = new ArrayList<>(annotatedTypes.size());
         for (TypeElement annotatedType : annotatedTypes) {
@@ -92,7 +99,7 @@ public final class GenerateCachedProcessor extends AbstractProcessor {
                 utils.typeUtils());
 
             adjustedUtils.exceptionHandler().handle(() -> {
-                Clazz classRepr = new Clazz(annotatedType, adjustedUtils);
+                Clazz classRepr = new Clazz(annotatedType, adjustedUtils, uncachedMethods);
                 classes.add(classRepr);
             });
         }

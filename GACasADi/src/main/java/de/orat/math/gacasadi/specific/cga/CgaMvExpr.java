@@ -119,6 +119,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return CgaMvVariable.createDense(name);
     }
 
+    @Uncached
     @Override
     protected CgaMvExpr createSparse() {
         return CgaMvVariable.createSparse("");
@@ -1175,7 +1176,6 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return result;
     }*/
     //----------------------
-    @Uncached
     @Override
     public CgaMvExpr toEXPR() {
         return this;

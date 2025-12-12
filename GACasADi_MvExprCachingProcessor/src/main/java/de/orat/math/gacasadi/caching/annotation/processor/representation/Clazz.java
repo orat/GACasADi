@@ -32,7 +32,7 @@ public class Clazz {
      */
     public final List<Method> methods;
 
-    public Clazz(TypeElement correspondingElement, Utils utils) throws ErrorException, Exception {
+    public Clazz(TypeElement correspondingElement, Utils utils, Map<String, List<ExecutableElement>> uncachedMethods) throws ErrorException, Exception {
         this.correspondingElement = correspondingElement;
         this.simpleName = correspondingElement.getSimpleName().toString();
         this.enclosingQualifiedName = ((QualifiedNameable) correspondingElement.getEnclosingElement()).getQualifiedName().toString();
@@ -65,10 +65,10 @@ public class Clazz {
                 "Needs to implement \"%s\", but does not.", T_IMultivectorExpression.canonicalName());
         }
 
-        this.methods = Collections.unmodifiableList(Clazz.computeMethods(correspondingElement, this.qualifiedName, utils));
+        this.methods = Collections.unmodifiableList(Clazz.computeMethods(correspondingElement, this.qualifiedName, utils, uncachedMethods));
     }
 
-    private static List<Method> computeMethods(TypeElement correspondingElement, String enclosingClassQualifiedName, Utils utils) throws FailedToCacheException, ErrorException {
+    private static List<Method> computeMethods(TypeElement correspondingElement, String enclosingClassQualifiedName, Utils utils, Map<String, List<ExecutableElement>> uncachedMethods) throws FailedToCacheException, ErrorException {
         // Safe cast because
         // - filtered for Methods
         // - Methods are ExceutableElements.
@@ -106,7 +106,7 @@ public class Clazz {
 
         List<Method> allMethods = new ArrayList<>();
         {
-            List<Method> classMethods = checkCreateMethods(classMethodElements, utils, enclosingClassQualifiedName, new TypeParametersToArguments());
+            List<Method> classMethods = checkCreateMethods(classMethodElements, utils, enclosingClassQualifiedName, new TypeParametersToArguments(), uncachedMethods);
             allMethods.addAll(classMethods);
         }
 
@@ -124,7 +124,7 @@ public class Clazz {
             previousMethodElementsNames.addAll(methodElementsNames);
 
             TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments((DeclaredType) superType);
-            List<Method> defaultMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
+            List<Method> defaultMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments, uncachedMethods);
             allMethods.addAll(defaultMethods);
         }
 
@@ -132,13 +132,13 @@ public class Clazz {
     }
 
     // private static
-    private static List<Method> checkCreateMethods(List<ExecutableElement> methodElements, Utils utils, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments) {
+    private static List<Method> checkCreateMethods(List<ExecutableElement> methodElements, Utils utils, String enclosingClassQualifiedName, TypeParametersToArguments typeParametersToArguments, Map<String, List<ExecutableElement>> uncachedMethods) {
         List<Method> methods = new ArrayList<>(methodElements.size());
         Set<String> methodNames = new HashSet<>(methodElements.size());
 
         for (ExecutableElement methodElement : methodElements) {
             utils.exceptionHandler().handle(() -> {
-                Method methodRepr = new Method(methodElement, enclosingClassQualifiedName, typeParametersToArguments, utils);
+                Method methodRepr = new Method(methodElement, enclosingClassQualifiedName, typeParametersToArguments, utils, uncachedMethods);
 
                 if (methodNames.contains(methodRepr.name)) {
                     throw ErrorException.create(methodElement,

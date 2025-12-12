@@ -28,6 +28,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     @Uncached
     protected abstract EXPR create(SX sx);
 
+    @Uncached
     protected abstract EXPR createSparse();
 
     @Override
