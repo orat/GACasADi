@@ -110,11 +110,10 @@ public class Clazz {
             allMethods.addAll(classMethods);
         }
 
-        for (TypeMirror superInterface : allSuperTypes.values()) {
-            List<ExecutableElement> interfaceDefaultMethodElements = ((TypeElement) ((DeclaredType) superInterface).asElement()).getEnclosedElements().stream()
+        for (TypeMirror superType : allSuperTypes.values()) {
+            List<ExecutableElement> interfaceDefaultMethodElements = ((TypeElement) ((DeclaredType) superType).asElement()).getEnclosedElements().stream()
                 .filter(el -> el.getKind() == ElementKind.METHOD)
                 .map(m -> (ExecutableElement) m)
-                .filter(m -> m.isDefault())
                 // Remove overrides
                 .filter(m -> !previousMethodElementsNames.contains(m.getSimpleName().toString()))
                 .toList();
@@ -124,7 +123,7 @@ public class Clazz {
                 .toList();
             previousMethodElementsNames.addAll(methodElementsNames);
 
-            TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments((DeclaredType) superInterface);
+            TypeParametersToArguments typeParametersToArguments = new TypeParametersToArguments((DeclaredType) superType);
             List<Method> defaultMethods = checkCreateMethods(interfaceDefaultMethodElements, utils, enclosingClassQualifiedName, typeParametersToArguments);
             allMethods.addAll(defaultMethods);
         }

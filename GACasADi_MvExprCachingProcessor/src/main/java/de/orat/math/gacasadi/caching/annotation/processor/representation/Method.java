@@ -52,9 +52,9 @@ public final class Method {
             throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": static method will not be cached.", this.name);
         }
-        if (this.modifiers.contains(Modifier.ABSTRACT)) {
+        if (this.modifiers.contains(Modifier.FINAL)) {
             throw FailedToCacheException.create(correspondingElement,
-                "\"%s\": abstract method will not be cached.", this.name);
+                "\"%s\": final method will not be cached.", this.name);
         }
 
         if (!this.returnType.equals(enclosingClassQualifiedName)) {

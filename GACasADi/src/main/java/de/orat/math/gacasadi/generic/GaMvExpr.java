@@ -25,9 +25,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     protected abstract IAlgebra getIAlgebra();
 
-    /**
-     * Implementer needs to annotate: @Uncached
-     */
+    @Uncached
     protected abstract EXPR create(SX sx);
 
     protected abstract EXPR createSparse();
@@ -155,6 +153,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(result);
     }
 
+    @Uncached
     public EXPR createFromScalar(SX sx) {
         // 1x1
         if (!sx.sparsity().is_scalar()) {
