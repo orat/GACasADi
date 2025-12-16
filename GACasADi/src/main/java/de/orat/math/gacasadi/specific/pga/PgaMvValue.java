@@ -48,11 +48,6 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     }
 
     @Override
-    public DM getDM() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
     public void init(MultivectorValue.Callback callback) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -78,7 +73,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
                 break;
             case GeometricObject.GeometricType.SCREW:
                 throw new RuntimeException("not yet implemented!");
-            case GeometricObject.GeometricType.ROUND_POINT:
+            case GeometricObject.GeometricType.POINT:
                 result = createPoint(obj);
                 break;
             default:
@@ -109,12 +104,25 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         //mv.gpWithScalar(signedWeight);
         return mv.dual();
     }
+    /**
+     * Get base vector indices.
+     * 
+     * @return  e0,e1,e2,e3
+     */
     private static List<Integer> getBaseVectorIndizes(){
         List<Integer> result = new ArrayList();
         result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0"));
         result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e1"));
         result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e2"));
         result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e3"));
+        return result;
+    }
+    private static List<Integer> getBaseVectorIndizes2(){
+        List<Integer> result = new ArrayList();
+        result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e1"));
+        result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e2"));
+        result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e3"));
+        result.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0"));
         return result;
     }
     private static int getE0Index(){
@@ -124,6 +132,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         return createPoint(obj.location[0], obj.getSignedWeight());
     }
     
+    
     public static PgaMvValue createPlane(Tuple abcd){
         // a*1e1 + b*1e2 + c*1e3 + d*1e0
         List<Double> values = new ArrayList<>();
@@ -131,6 +140,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         values.add(abcd.values[0]);
         values.add(abcd.values[1]);
         values.add(abcd.values[2]);
+        // e0, e1, e2, e3
         return  PgaFactory.instance.create(getBaseVectorIndizes(), values);
     }
     private static PgaMvValue createPlane(GeometricObject obj) {
@@ -168,11 +178,6 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     }
     @Override
     public GeometricObject decompose(boolean isIPNS) {
-        
-        //PgaMvValue probePoint; // = constants2().getBaseVectorOrigin();
-        //TODO
-        Tuple probePoint = null;
-        //probePoint = createPoint(new Tuple(new double[]{0,0,0}), 1d);
         switch (grade()){
             case 0:
                 // scalar
@@ -182,21 +187,17 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
                 
             // plane
             case 1:
-                //return decomposePlane(true, probePoint);
+                Tuple[] attitudeAndLocation = decomposePlane();
                 //TODO
-                Tuple attitude = null;
-                Tuple location = null;
                 double squaredWeight = 0d;
                 return new GeometricObject(GeometricObject.GeometricType.PLANE, isIPNS,
-                        attitude, location,
+                        attitudeAndLocation[0], attitudeAndLocation[1],
                         true, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
                 
             // line
             case 2:
-                //this.elements()
-                Tuple plucker =  decomposeLine();
-                Tuple[] attitudeAndLocation = decomposePlucker(plucker, probePoint);
-                squaredWeight = 0d; // ToDo func. of attitude?
+                attitudeAndLocation = decomposePlucker(decomposeLine());
+                squaredWeight = 0d; // ToDo squaredWeight as func. of attitude?
                 return new GeometricObject(GeometricObject.GeometricType.LINE, isIPNS,
                         attitudeAndLocation[0], 
                         attitudeAndLocation[1],
@@ -205,10 +206,9 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
             // point 
             case 3:
                 //TODO
-                location = null;
                 squaredWeight = 0d;
-                return new GeometricObject(GeometricObject.GeometricType.ROUND_POINT, isIPNS, null, 
-                        location,
+                return new GeometricObject(GeometricObject.GeometricType.POINT, isIPNS, null, 
+                        decomposePoint(),
                         0d, squaredWeight,
                         GeometricObject.Sign.UNKNOWN, grade());
                  
@@ -222,26 +222,73 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         }
         return null;
     }
-
-    private Tuple decomposeLine(){
-        /*if (grade() != 2) throw new IllegalArgumentException("Lines are of grade 2!");
-        List<Integer> indices = pluckerIndices();
-        for (int i)
-        double value = getDM().at(i, 0).scalar();
-        */
-        throw new RuntimeException("not yet implemeted!");
-        
+    
+    /**
+     * Decompose plane.
+     * 
+     * @return attitude (normal vector of the plane), location (projection of the origin into the plane)
+     */
+    private Tuple[] decomposePlane(){
+        Tuple[] result = new Tuple[2];
+        // e1,e2,e3,e0
+        List<Integer> indices = getBaseVectorIndizes2();
+        // a*1e1 + b*1e2 + c*1e3 + d*1e0
+        Double[] abcd = new Double[4];
+        get(indices).toArray(abcd);
+        result[0] = new Tuple(abcd);
+        // (-D/n^2)n_vec
+        double[] p = new double[3];
+        double fac = -abcd[3]/(abcd[0]*abcd[0]+abcd[1]*abcd[1]+abcd[2]*abcd[2]);
+        p[0] = abcd[0]*fac;
+        p[1] = abcd[1]*fac;
+        p[2] = abcd[2]*fac;
+        result[1] = new Tuple(p);
+        return result;
     }
+
+    private Tuple decomposePoint(){
+        // dual(1e0 + xe1 + ye2 + ze3)
+        Double[] p = new Double[4];
+        // e0,e1,e2,e3
+        undual().get(getBaseVectorIndizes()).toArray(p);
+        //TODO
+        // squaredWeight mit rausziehen und irgendwie weiterreichen
+        return new Tuple(new double[]{p[1], p[2],p[3]});
+    }
+    
+    /**
+     * Decompose this pga multivector value into a tuple representing plucker coordinates of a line.
+     * 
+     * @return plucker coordinates
+     */
+    private Tuple decomposeLine(){
+        if (grade() != 2) throw new IllegalArgumentException("Lines are of grade 2!");
+        Double[] result = new Double[6];
+        get(pluckerIndices()).toArray(result);
+        return new Tuple(result);
+    }
+    
     // plucker: attitude, moment
-    private Tuple[] decomposePlucker(Tuple plucker, Tuple probePoint){
+    private static Tuple[] decomposePlucker(Tuple plucker){
         Tuple[] result = new Tuple[2]; // attitude, location
+        
+        // attitude, u
         result[0] = new Tuple(new double[]{plucker.values[0], plucker.values[1], plucker.values[2]});
-        // wenn das Moment == 0 dann geht die Gerade durch den Ursprung
-        if (plucker.values[3] == 0 && plucker.values[4] == 0 && plucker.values[5] == 0) result[1] = new Tuple(
-            new double[]{0d,0d,0d});
+        
+        // wenn das Moment m == 0 dann geht die Gerade durch den Ursprung
+        //TODO eventuell nicht auf exakte Gleichheit testen sondern auf einen Mindestabstand?
+        if (plucker.values[3] == 0 && plucker.values[4] == 0 && plucker.values[5] == 0) 
+            result[1] = new Tuple(new double[]{0d,0d,0d});
         else {
-            // (u x m)/u
-            //TODO
+            // (u x m)/u^2
+            double u2 = plucker.values[0]*plucker.values[0]+ 
+                plucker.values[1]*plucker.values[1] + plucker.values[2]*plucker.values[2];
+            double[] p = new double[3];
+            // cross product: y1z2-z1y2, z1x2-x1z2, x1y2-y1x2
+            p[0] = (plucker.values[1]*plucker.values[5] - plucker.values[2]*plucker.values[4])/u2;
+            p[1] = (plucker.values[2]*plucker.values[3] - plucker.values[0]*plucker.values[5])/u2;
+            p[2] = (plucker.values[0]*plucker.values[4] - plucker.values[1]*plucker.values[3])/u2;
+            result[1] = new Tuple(p);
         }
         return result;
     }
@@ -249,6 +296,21 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     @Override
     public boolean isNull(double precision) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public DM getDM() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public double get(int index) {
+        return IGaMvValue.super.get(index); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
+    @Override
+    public List<Double> get(List<Integer> indices) {
+        return IGaMvValue.super.get(indices); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 
 }
