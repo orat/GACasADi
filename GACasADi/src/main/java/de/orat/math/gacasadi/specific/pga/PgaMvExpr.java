@@ -41,7 +41,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
 
     @Uncached
     @Override
-    protected PgaMvExpr create(SX sx) {
+    public PgaMvExpr create(SX sx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -226,12 +226,12 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     }
 
     @Override
-    protected IAlgebra getIAlgebra() {
+    public IAlgebra getIAlgebra() {
         return PgaFactory.instance.alDef;
     }
 
     @Override
-    protected PgaMvExpr createSparse() {
+    public PgaMvExpr createSparse() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

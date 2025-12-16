@@ -15,7 +15,9 @@ import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import util.cga.CGACayleyTable;
@@ -57,6 +59,35 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     @Override
     public CgaConstantsValue constantsValue() {
         return CgaConstantsValue.instance;
+    }
+
+    private static Map<String, CgaMvExpr> createConstants() {
+        var map = new HashMap<String, CgaMvExpr>();
+
+        map.put("ε₀", CgaConstantsExpr.instance.getBaseVectorOrigin());
+        map.put("εᵢ", CgaConstantsExpr.instance.getBaseVectorInfinity());
+        map.put("ε₁", CgaConstantsExpr.instance.getBaseVectorX());
+        map.put("ε₂", CgaConstantsExpr.instance.getBaseVectorY());
+        map.put("ε₃", CgaConstantsExpr.instance.getBaseVectorZ());
+        map.put("ε₊", CgaConstantsExpr.instance.getEpsilonPlus());
+        map.put("ε₋", CgaConstantsExpr.instance.getEpsilonMinus());
+        map.put("π", CgaConstantsExpr.instance.getPi());
+        map.put("∞", CgaConstantsExpr.instance.getBaseVectorInfinityDorst());
+        map.put("o", CgaConstantsExpr.instance.getBaseVectorOriginDorst());
+        map.put("n", CgaConstantsExpr.instance.getBaseVectorInfinityDoran());
+        map.put("ñ", CgaConstantsExpr.instance.getBaseVectorOriginDorst());
+        map.put("E₀", CgaConstantsExpr.instance.getMinkovskiBiVector());
+        map.put("E₃", CgaConstantsExpr.instance.getEuclideanPseudoscalar());
+        map.put("E", CgaConstantsExpr.instance.getPseudoscalar());
+
+        return map;
+    }
+
+    public static final Map<String, CgaMvExpr> constants = createConstants();
+
+    @Override
+    public Map<String, CgaMvExpr> getConstants() {
+        return constants;
     }
 
     // create symbolic multivectors
@@ -305,4 +336,8 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return createVariable(name, from);
     }
 
+    @Override
+    public IAlgebra getIAlgebra() {
+        return this.alDef;
+    }
 }

@@ -121,7 +121,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     @Uncached
     @Override
-    protected CgaMvExpr createSparse() {
+    public CgaMvExpr createSparse() {
         return CgaMvVariable.createSparse("");
     }
 
@@ -132,7 +132,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     @Uncached
     @Override
-    protected CgaMvExpr create(SX sx) {
+    public CgaMvExpr create(SX sx) {
         return new CachedCgaMvExpr(sx);
     }
 
@@ -149,7 +149,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     @Override
-    protected IAlgebra getIAlgebra() {
+    public IAlgebra getIAlgebra() {
         return CgaFactory.instance.alDef;
     }
 

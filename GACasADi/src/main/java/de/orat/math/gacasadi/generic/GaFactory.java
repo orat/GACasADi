@@ -28,4 +28,6 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGa
 
     @Override
     public abstract GaFunction<EXPR, VAL> createFunction(String name, List<? extends VAR> parameters, List<? extends EXPR> returns);
+
+    public abstract IAlgebra getIAlgebra();
 }

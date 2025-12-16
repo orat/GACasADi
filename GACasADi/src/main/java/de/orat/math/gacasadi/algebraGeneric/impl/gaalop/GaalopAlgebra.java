@@ -6,6 +6,7 @@ import de.gaalop.productComputer.GeoProductCalculator;
 import de.gaalop.productComputer.InnerProductCalculator;
 import de.gaalop.productComputer.OuterProductCalculator;
 import de.gaalop.tba.Algebra;
+import de.gaalop.tba.Blade;
 import de.gaalop.tba.MultTableAbsDirectComputer;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import java.io.IOException;
@@ -16,14 +17,16 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class GaalopAlgebra implements IAlgebra {
 
-    public final Algebra algebra;
-    public final AlgebraDefinitionFile algebraDefinitionFile;
+    private final Algebra algebra;
+    private final AlgebraDefinitionFile algebraDefinitionFile;
     public final Optional<Path> algebraLibFile;
-    protected final Path algebraPath;
+    private final Path algebraPath;
     private final Product gp;
     private final Product inner;
     private final Product outer;
@@ -110,5 +113,34 @@ public class GaalopAlgebra implements IAlgebra {
     public static Algebra getAlgebra(AlgebraDefinitionFile adf) {
         Algebra algebra = new Algebra(adf);
         return algebra;
+    }
+
+    @Override
+    public int getBaseSize() {
+        return this.algebra.getBaseCount();
+    }
+
+    @Override
+    public int indexOfBlade(String baseVector) {
+        Blade blade = new Blade(List.of(baseVector));
+        int index;
+        try {
+            index = this.algebra.getIndex(blade);
+        } catch (NullPointerException npe) {
+            throw new IllegalArgumentException(String.format("blade \"%s\" not found.", baseVector), npe);
+        }
+        return index;
+    }
+
+    @Override
+    public int indexOfBlade(String... bladeOfBasevectors) {
+        Blade blade = new Blade(bladeOfBasevectors);
+        int index;
+        try {
+            index = this.algebra.getIndex(blade);
+        } catch (NullPointerException npe) {
+            throw new IllegalArgumentException(String.format("blade \"%s\" not found.", Arrays.toString(bladeOfBasevectors)), npe);
+        }
+        return index;
     }
 }

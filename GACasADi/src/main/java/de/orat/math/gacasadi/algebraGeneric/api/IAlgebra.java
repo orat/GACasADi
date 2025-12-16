@@ -14,4 +14,24 @@ public interface IAlgebra {
     IProduct inner();
 
     IProduct outer();
+
+    //n
+    int getBaseSize();
+
+    // 2^n
+    // n can be at most 31.
+    default int getBladesCount() {
+        return 1 << getBaseSize();
+    }
+
+    //einf
+    int indexOfBlade(String baseVector);
+
+    //[e1, e3, einf]
+    /**
+     *
+     * @param bladeOfBasevectors Strings of base vectors representing a basis blade.
+     * @return
+     */
+    int indexOfBlade(String... bladeOfBasevectors);
 }
