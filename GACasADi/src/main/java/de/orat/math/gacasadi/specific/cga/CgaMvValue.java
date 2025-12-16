@@ -5,7 +5,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.orat.math.gacalc.api.MultivectorValue;
-import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
@@ -187,13 +186,8 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
         return (CgaMvVariable) super.delegate;
     }
 
-    @Override
-    public IConstants<CgaMvValue> constants() {
-        return CgaFactory.instance.constantsValue();
-    }
-
-    public static IConstants<CgaMvValue> constants2() {
-        return CgaFactory.instance.constantsValue();
+    protected static CgaConstantsValue constants2() {
+        return CgaConstantsValue.instance;
     }
     
     // compose multivectors corresponding to specific geometric objets to test the decomposition methods

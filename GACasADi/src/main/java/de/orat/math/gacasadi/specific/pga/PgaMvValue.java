@@ -3,7 +3,6 @@ package de.orat.math.gacasadi.specific.pga;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.api.MultivectorValue;
-import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
@@ -11,8 +10,6 @@ import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.specific.cga.CgaMvValue;
-import static de.orat.math.gacasadi.specific.cga.CgaMvValue.constants2;
 import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.ArrayList;
@@ -30,11 +27,6 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     private PgaMvValue(PgaMvExpr sym, ComposableImmutableBinaryTree<PgaMvValue> inputs) {
         super(sym);
         this.inputs = inputs;
-    }
-
-    @Override
-    public IConstants<PgaMvValue> constants() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

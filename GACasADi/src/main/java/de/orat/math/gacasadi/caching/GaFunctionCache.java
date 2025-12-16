@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import de.orat.math.gacasadi.generic.IGaMvExpr;
 import de.orat.math.gacasadi.generic.IGaMvExprCached;
 import de.orat.math.gacasadi.generic.IGaMvVariable;
+import java.util.Objects;
 
 public class GaFunctionCache<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>> implements IFunctionCache {
 
@@ -30,6 +31,7 @@ public class GaFunctionCache<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvE
     private final GaFactory<EXPR, CACHED, VAR, ?> fac;
 
     public GaFunctionCache(GaFactory<EXPR, CACHED, VAR, ?> fac) {
+        Objects.requireNonNull(fac);
         this.fac = fac;
     }
 

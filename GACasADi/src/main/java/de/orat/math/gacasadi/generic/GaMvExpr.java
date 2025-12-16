@@ -35,6 +35,20 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(sparse);
     }
 
+    protected abstract GaFactory<EXPR, ?, ?, ?> fac();
+
+    @Uncached
+    @Override
+    public EXPR getSparseEmptyInstance() {
+        return this.fac().createSparse();
+    }
+
+    @Uncached
+    @Override
+    public EXPR createScalar(double scalar) {
+        return this.fac().createExpr(scalar);
+    }
+
     @Override
     public SX getSX() {
         return this.sx;

@@ -16,7 +16,7 @@ public class LoopsExample1To1 {
         var aArr = new MultivectorExpressionArray(List.of(aArr0, aArr1));
         var arAcc = new MultivectorExpressionArray();
         var arAcc0 = fac.createExpr(3);
-        arAcc.ensureSize(1, fac.constantsExpr().getSparseEmptyInstance());
+        arAcc.ensureSize(1, fac.createVariableSparse(""));
         arAcc.set(0, arAcc0);
         var rArr = new MultivectorExpressionArray();
 

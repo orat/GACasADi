@@ -61,7 +61,7 @@ public class ExpNanTest {
         CgaMvValue ae = fac.createValue(SparseCGAColumnVector.createEuclid(new double[]{0d, 1d, 0d}));
         CgaMvExpr d6 = fac.createExpr(0.0996);
         CgaMvExpr vec = d6.gp(ae.getDelegate());
-        CgaMvExpr expInput = fac.createExpr(-0.5).gp(vec).gp(fac.constantsExpr().getBaseVectorInfinity());
+        CgaMvExpr expInput = fac.createExpr(-0.5).gp(vec).gp(CgaConstantsExpr.instance.getBaseVectorInfinity());
         CgaMvExpr exp = expInput.exp();
         CgaMvValue expNum = evalPoint(List.of(ae), exp);
         System.out.println(exp);
