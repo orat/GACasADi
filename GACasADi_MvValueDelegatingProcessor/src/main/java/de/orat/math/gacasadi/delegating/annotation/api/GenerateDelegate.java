@@ -6,12 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Doc:
- * https://github.com/orat/GACasADi/blob/master/GACasADi_MvValueDelegatingProcessor/README.md
+ * Doc: https://github.com/orat/GACasADi/blob/master/GACasADi_MvValueDelegatingProcessor/README.md
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateDelegate {
 
     Class<?> to();
+
+    Class<?> extend();
 }

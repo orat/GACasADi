@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>, VAL extends IGaMvValue<VAL, EXPR>>
+public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>, VAL extends GaMvValue<VAL, EXPR>>
     implements IGAFactory<EXPR, VAR, VAL> {
 
     static {

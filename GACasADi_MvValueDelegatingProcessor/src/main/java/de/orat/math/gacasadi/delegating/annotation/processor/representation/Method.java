@@ -57,6 +57,10 @@ public final class Method {
                 throw WarningException.create(correspondingElement,
                     "\"%s\": static method will not be delegated.", this.name);
             }
+            if (modifiers.contains(Modifier.FINAL)) {
+                throw WarningException.create(correspondingElement,
+                    "\"%s\": final method will not be delegated.", this.name);
+            }
         }
 
         this.parameters = computeParameters(correspondingElement, typeParametersToArguments, utils);

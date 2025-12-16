@@ -21,10 +21,10 @@ import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
-import de.orat.math.gacasadi.generic.IGaMvValue;
+import de.orat.math.gacasadi.generic.GaMvValue;
 
-@GenerateDelegate(to = CgaMvExpr.class)
-public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
+@GenerateDelegate(to = CgaMvExpr.class, extend = GaMvValue.class)
+public class CgaMvValue extends DelegatingCgaMvValue implements IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 

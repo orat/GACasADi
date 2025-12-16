@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import static de.orat.math.gacasadi.delegating.annotation.processor.generation.Classes.T_Override;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 
 final class ClassGenerator {
 
@@ -29,21 +31,21 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        TypeName annotatedToType = TypeName.get(c.annotatedTo);
-        FieldSpec delegate = FieldSpec.builder(annotatedToType, "delegate", Modifier.PROTECTED, Modifier.FINAL)
+        TypeName T_to = TypeName.get(c.to);
+        FieldSpec delegate = FieldSpec.builder(T_to, "delegate", Modifier.PROTECTED, Modifier.FINAL)
             .build();
 
-        MethodSpec constructor1 = ClassGenerator.constructor1(annotatedToType);
+        MethodSpec constructor1 = ClassGenerator.constructor1(T_to);
 
         MethodSpec createMethod = MethodSpec.methodBuilder("create")
             .addModifiers(Modifier.PROTECTED, Modifier.ABSTRACT)
-            .addParameter(annotatedToType, "delegate")
+            .addParameter(T_to, "delegate")
             .returns(T_c)
             .build();
 
         MethodSpec create2Method = MethodSpec.methodBuilder("create")
             .addModifiers(Modifier.PROTECTED, Modifier.ABSTRACT)
-            .addParameter(annotatedToType, "delegate")
+            .addParameter(T_to, "delegate")
             .addParameter(T_c, "other")
             .returns(T_c)
             .build();
@@ -56,9 +58,13 @@ final class ClassGenerator {
             methods.add(delegateMethod);
         }
 
+        ClassName T_extend = ClassName.get((TypeElement) c.extend.asElement());
+        ParameterizedTypeName T_extendFull = ParameterizedTypeName.get(T_extend, T_c, T_to);
+
         TypeSpec genClassSpec = TypeSpec.classBuilder(genClass)
             .addJavadoc("@see $L", T_c.canonicalName())
             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            .superclass(T_extendFull)
             .addSuperinterfaces(c.commonSuperTypes.stream().map(TypeName::get).toList())
             .addField(delegate)
             .addMethod(constructor1)

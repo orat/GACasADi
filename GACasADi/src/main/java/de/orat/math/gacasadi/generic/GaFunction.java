@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL, EXPR>> implements IGAFunction<EXPR, VAL> {
+public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends GaMvValue<VAL, EXPR>> implements IGAFunction<EXPR, VAL> {
 
     private final String name;
     private final int arity;
@@ -85,7 +85,7 @@ public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL
 
             // For unknown reasons under certain circumstances, calling with DM produces NaN, while calling with SX produces the correct value.
             StdVectorSX call_num_in = new StdVectorSX(arguments.stream()
-                .map(IGaMvValue::getDM)
+                .map(GaMvValue::getDM)
                 .map(CasADiUtil::toSX)
                 .toList()
             );

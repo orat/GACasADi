@@ -9,7 +9,6 @@ import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
-import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.CgaMvValue;
 import static de.orat.math.gacasadi.specific.cga.CgaMvValue.constants2;
@@ -17,9 +16,10 @@ import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.ArrayList;
 import java.util.List;
+import de.orat.math.gacasadi.generic.GaMvValue;
 
-@GenerateDelegate(to = PgaMvExpr.class)
-public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMvValue, PgaMvExpr>, IMultivectorValue<PgaMvValue, PgaMvExpr>, IGetSparsityCasadi {
+@GenerateDelegate(to = PgaMvExpr.class, extend = GaMvValue.class)
+public class PgaMvValue extends DelegatingPgaMvValue implements IMultivectorValue<PgaMvValue, PgaMvExpr>, IGetSparsityCasadi {
 
     private final ComposableImmutableBinaryTree<PgaMvValue> inputs;
 
@@ -302,15 +302,4 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     public DM getDM() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
-    @Override
-    public double get(int index) {
-        return IGaMvValue.super.get(index); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
-    @Override
-    public List<Double> get(List<Integer> indices) {
-        return IGaMvValue.super.get(indices); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
 }

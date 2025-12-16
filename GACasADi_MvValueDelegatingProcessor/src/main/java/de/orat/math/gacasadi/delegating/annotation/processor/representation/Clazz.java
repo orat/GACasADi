@@ -33,7 +33,8 @@ public class Clazz {
      * Unmodifiable
      */
     public final List<Method> methods;
-    public final DeclaredType annotatedTo;
+    public final DeclaredType to;
+    public final DeclaredType extend;
 
     /**
      * Unmodifiable
@@ -62,7 +63,18 @@ public class Clazz {
             // Save assumption because classes are DeclaredTypes.
             to = (DeclaredType) mte.getTypeMirror();
         }
-        this.annotatedTo = to;
+        this.to = to;
+
+        DeclaredType extend;
+        try {
+            GenerateDelegate annotation = correspondingElement.getAnnotation(GenerateDelegate.class);
+            annotation.extend().getClass();
+            throw new AssertionError("Should have thrown a MirroredTypeException before this.");
+        } catch (MirroredTypeException mte) {
+            // Save assumption because classes are DeclaredTypes.
+            extend = (DeclaredType) mte.getTypeMirror();
+        }
+        this.extend = extend;
 
         var toSuperTypeElements = computeSuperTypes(to, utils).values().stream().map(tm -> ((DeclaredType) tm).asElement()).collect(Collectors.toSet());
         Map<String, DeclaredType> commonSuperTypes = computeSuperTypes((DeclaredType) correspondingElement.asType(), utils);
