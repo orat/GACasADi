@@ -198,7 +198,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     
     // compose multivectors corresponding to specific geometric objets to test the decomposition methods
     
-    // TODO in welches Interface muss das? welches Interface soll returned werden
+    // TODO 
     // eventuell hier sign für weight als argument einführen
     public static CgaMvValue compose(GeometricObject obj) {
         CgaMvValue result = null;
