@@ -99,6 +99,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         // dual(1e0 + xe1 + ye2 + ze3)
         //PgaMvValue mv;
         //mv.dual();
+        //PgaMvValue.
         //TODO
         //PgaMvValue inf = constants2().getBaseVectorInfinity();
         //return o.add(c).add(inf.gpWithScalar(0.5*location.squaredNorm())).
@@ -131,7 +132,42 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     }
     @Override
     public GeometricObject decompose(boolean isIPNS) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        
+        PgaMvValue probePoint; // = constants2().getBaseVectorOrigin();
+        probePoint = createPoint(new Tuple(new double[]{0,0,0}), 1d);
+        switch (grade()){
+            case 0:
+                // scalar
+                System.out.println("Scalar (grade 0) found: "+toString()+
+                                   ". No geometric object for visualization available!");
+                return null;
+            case 1:
+                //return decomposePlane(true, probePoint);
+                
+            case 2:
+                
+                    System.out.println("Illegal ipns object of grade 2 found: "+toString());
+                    break;
+                    
+                
+                
+            case 3:
+               
+                //return decomposePoint(true);
+                    // ipns point pair (round)
+                 
+            case 4:
+               
+                break;
+                
+            case 5:
+                // ipns scalar
+                //return new CGAScalarIPNS(attitude);
+                return null;
+            default:
+                System.out.println("Illegal object of unknown grade found: "+toString());
+        }
+        return null;
     }
 
     @Override
