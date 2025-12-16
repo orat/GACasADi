@@ -7,7 +7,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
-import java.util.List;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
 
@@ -31,38 +30,9 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     @Uncached
     public EXPR createSparse() {
-        return create(createSparseSX());
-    }
-
-    public SX createSparseSX() {
         int basisBladeCount = getIAlgebra().getBladesCount();
         SX sparse = new SX(new Sparsity(basisBladeCount, 1)); // fullSparse
-        return sparse;
-    }
-
-    @Uncached
-    public EXPR create(int index, double value) {
-        SX mv = createSparseSX();
-        mv.at(index, 0).assign(new SX(value));
-        return create(mv);
-    }
-
-    /**
-     * Precondition: same size
-     */
-    @Uncached
-    public EXPR create(List<Integer> indices, List<Double> values) {
-        final int size = indices.size();
-        if (values.size() != size) {
-            throw new IllegalArgumentException("indices and values are not of same size.");
-        }
-        SX mv = createSparseSX();
-        for (int i = 0; i < size; ++i) {
-            int index = indices.get(i);
-            double value = values.get(i);
-            mv.at(index, 0).assign(new SX(value));
-        }
-        return create(mv);
+        return create(sparse);
     }
 
     @Override
@@ -270,6 +240,5 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR scalarAcos() {
         return computeScalar(SxStatic::acos);
     }
-    
-    
+
 }
