@@ -1,20 +1,11 @@
 package de.orat.math.gacasadi.algebraGeneric.impl.gaalop;
 
-import de.dhbw.rahmlab.casadi.SxStatic;
-import de.dhbw.rahmlab.casadi.api.Util;
-import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.gaalop.tba.MultTableAbsDirectComputer;
 import de.orat.math.gacasadi.algebraGeneric.api.CoefficientAndBasisBladeIndex;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.algebraGeneric.api.Multivector;
-import de.orat.math.gacasadi.specific.cga.CgaCasADiUtil;
-import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
-import static de.orat.math.gacasadi.specific.cga.CgaMvExpr.create;
 import java.util.ArrayList;
 import java.util.List;
-import util.cga.CGACayleyTable;
-import util.cga.CGACayleyTableGeometricProduct;
 
 public class Product implements IProduct {
 
