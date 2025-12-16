@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Doc:
- * https://github.com/orat/CGACasADi/blob/master/CGACasADi_NumericMultivectorDelegatingProcessor/README.md
+ * https://github.com/orat/GACasADi/blob/master/GACasADi_MvValueDelegatingProcessor/README.md
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)

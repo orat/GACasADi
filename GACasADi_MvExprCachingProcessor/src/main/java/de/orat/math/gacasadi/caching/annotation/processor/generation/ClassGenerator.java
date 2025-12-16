@@ -4,8 +4,11 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import com.squareup.javapoet.WildcardTypeName;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_List;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_Override;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_SX;
@@ -23,6 +26,7 @@ import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_GaFunctionCache;
+import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_IGaMvExprCached;
 
 final class ClassGenerator {
 
@@ -36,8 +40,9 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        FieldSpec CACHE = FieldSpec.builder(T_GaFunctionCache, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("new $T()", T_GaFunctionCache)
+        ParameterizedTypeName cacheType = ParameterizedTypeName.get(T_GaFunctionCache, T_c, genClass, TypeVariableName.get("?"));
+        FieldSpec CACHE = FieldSpec.builder(cacheType, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+            .initializer("new $T<>($T.getFactory())", T_GaFunctionCache, T_c)
             .build();
 
         MethodSpec getCache = ClassGenerator.getCache();
@@ -53,9 +58,12 @@ final class ClassGenerator {
             methods.add(superMethod);
         }
 
+        ParameterizedTypeName interfaceType = ParameterizedTypeName.get(T_IGaMvExprCached, genClass, T_c);
+
         TypeSpec genClassSpec = TypeSpec.classBuilder(genClass)
             .addModifiers(Modifier.PUBLIC)
             .superclass(T_c)
+            .addSuperinterface(interfaceType)
             .addField(CACHE)
             .addMethod(getCache)
             .addMethod(constructor1)
@@ -119,6 +127,8 @@ final class ClassGenerator {
     private static MethodSpec cacheMethod(Clazz c, Method m, ClassName genClass, ClassName T_c) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(m.name);
 
+        // Is actually always ever: T_c.
+        // This is ensured in Method.
         TypeName T_ret = betterGuess(m.returnType);
 
         Set<Modifier> modifiers = new HashSet<>(m.modifiers);
@@ -165,7 +175,7 @@ final class ClassGenerator {
             .addStatement("String funName = CACHE.createFuncName($S, $L)", m.name, args)
             .addCode("""
                 return CACHE.getOrCreateSymbolicFunction(funName, List.of($L),
-                    ($T<? extends $T> params) -> params.get(0).$L($L));""",
+                    ($T<$T> params) -> params.get(0).$L($L));""",
                 superTypeArgs, T_List, genClass, m.name + "_super", params);
 
         //
@@ -175,6 +185,8 @@ final class ClassGenerator {
     private static MethodSpec superMethod(Method m) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(m.name + "_super");
 
+        // Is actually always ever: T_c.
+        // This is ensured in Method.
         TypeName T_ret = betterGuess(m.returnType);
 
         // Signature

@@ -53,7 +53,7 @@ public abstract class SparseCGASymbolicMultivector implements iMultivectorSymbol
 #### Methods warnings
 - `private` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
 - `static` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
-- `abstract` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
+- `final` methods will not be cached. A warning will be issued if `warnFailedToCache == true`.
 
 
 ## Hint: `@Uncached` default methods

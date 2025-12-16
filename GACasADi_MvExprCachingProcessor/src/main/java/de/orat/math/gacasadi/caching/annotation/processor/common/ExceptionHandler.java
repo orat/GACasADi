@@ -18,7 +18,7 @@ public class ExceptionHandler {
     public ExceptionHandler(Messager messager) {
         this.messager = messager;
         this.warnFailedToCache = true;
-        this.warnUncached = false;
+        this.warnUncached = true;
     }
 
     public ExceptionHandler(ExceptionHandler handler, boolean warnFailedToCache, boolean warnUncached) {

@@ -1,0 +1,10 @@
+*.log
+nbproject
+
+#Ignore temporary files
+**/.*.kate-swp
+**/.directory
+
+#Ignore generated folders
+**/target
+

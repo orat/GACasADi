@@ -6,7 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Doc: https://github.com/orat/CGACasADi/blob/master/CGACasADi_SymbolicMultivectorCachingProcessor/README.md
+ * <pre>
+ * This annotation is contagious to overridden methods.
+ * Doc: https://github.com/orat/GACasADi/blob/master/GACasADi_MvExprCachingProcessor/README.md
+ * </pre>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
