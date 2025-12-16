@@ -34,4 +34,6 @@ public interface IAlgebra {
      * @return
      */
     int indexOfBlade(String... bladeOfBasevectors);
+
+    //TODO erweitern und dann auch die impl in GaalopAlgebra in impl.gaalop
 }

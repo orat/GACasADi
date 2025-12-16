@@ -270,4 +270,6 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR scalarAcos() {
         return computeScalar(SxStatic::acos);
     }
+    
+    
 }
