@@ -76,11 +76,9 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
                 break;
             case GeometricObject.GeometricType.SCREW:
                 throw new RuntimeException("not yet implemented!");
-            
             case GeometricObject.GeometricType.ROUND_POINT:
                 result = createPoint(obj);
                 break;
-            //TODO
             default:
                 throw new RuntimeException("Composition of the given type is not yet supported!");
         }
@@ -99,8 +97,8 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
      */
     public static PgaMvValue createPoint(Tuple location, double signedWeight) {
         // dual(1e0 + xe1 + ye2 + ze3)
-        //PgaMvValue mv;
-        //mv.dual();
+        PgaMvValue mv;
+        mv.dual();
         //TODO
         //PgaMvValue inf = constants2().getBaseVectorInfinity();
         //return o.add(c).add(inf.gpWithScalar(0.5*location.squaredNorm())).

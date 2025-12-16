@@ -14,4 +14,7 @@ public interface IAlgebra {
     IProduct inner();
 
     IProduct outer();
+    
+    //TODO erweitern und dann auch die impl in GaalopAlgebra in impl.gaalop
+    
 }
