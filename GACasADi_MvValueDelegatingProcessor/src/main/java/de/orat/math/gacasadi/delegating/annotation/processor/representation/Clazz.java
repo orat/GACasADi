@@ -14,12 +14,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Convention: representation of target structure, not source structure. With other words, being directly
@@ -36,8 +34,9 @@ public class Clazz {
      */
     public final List<Method> methods;
     public final DeclaredType to;
-    public final DeclaredType extend;
-    public final List<ExecutableElement> extendConstructors;
+    public final String genericType;
+    public final String delegateType;
+    public final String wrapType;
 
     /**
      * Unmodifiable
@@ -58,8 +57,8 @@ public class Clazz {
         }
 
         DeclaredType to;
+        GenerateDelegate annotation = correspondingElement.getAnnotation(GenerateDelegate.class);
         try {
-            GenerateDelegate annotation = correspondingElement.getAnnotation(GenerateDelegate.class);
             annotation.to().getClass();
             throw new AssertionError("Should have thrown a MirroredTypeException before this.");
         } catch (MirroredTypeException mte) {
@@ -68,22 +67,9 @@ public class Clazz {
         }
         this.to = to;
 
-        DeclaredType extend;
-        try {
-            GenerateDelegate annotation = correspondingElement.getAnnotation(GenerateDelegate.class);
-            annotation.extend().getClass();
-            throw new AssertionError("Should have thrown a MirroredTypeException before this.");
-        } catch (MirroredTypeException mte) {
-            // Save assumption because classes are DeclaredTypes.
-            extend = (DeclaredType) mte.getTypeMirror();
-        }
-        this.extend = utils.typeUtils().getDeclaredType((TypeElement) extend.asElement(), correspondingElement.asType(), to);
-
-        this.extendConstructors = extend.asElement().getEnclosedElements().stream()
-            .filter(e -> e.getKind().equals(ElementKind.CONSTRUCTOR))
-            .filter(e -> !e.getModifiers().contains(Modifier.PRIVATE))
-            .map(e -> (ExecutableElement) e)
-            .toList();
+        this.genericType = annotation.genericType();
+        this.delegateType = annotation.delegateType();
+        this.wrapType = annotation.wrapType();
 
         var toSuperTypeElements = computeSuperTypes(to, utils).values().stream().map(tm -> ((DeclaredType) tm).asElement()).collect(Collectors.toSet());
         Map<String, DeclaredType> commonSuperTypes = computeSuperTypes((DeclaredType) correspondingElement.asType(), utils);

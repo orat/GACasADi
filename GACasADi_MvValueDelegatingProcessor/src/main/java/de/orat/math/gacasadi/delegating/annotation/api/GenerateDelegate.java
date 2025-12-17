@@ -14,5 +14,9 @@ public @interface GenerateDelegate {
 
     Class<?> to();
 
-    Class<?> extend();
+    String genericType();
+
+    String delegateType();
+
+    String wrapType();
 }
