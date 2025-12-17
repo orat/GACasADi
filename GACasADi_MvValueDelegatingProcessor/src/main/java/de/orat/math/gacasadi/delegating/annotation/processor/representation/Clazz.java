@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -35,6 +36,7 @@ public class Clazz {
     public final List<Method> methods;
     public final DeclaredType to;
     public final DeclaredType extend;
+    public final List<ExecutableElement> extendConstructors;
 
     /**
      * Unmodifiable
@@ -75,6 +77,12 @@ public class Clazz {
             extend = (DeclaredType) mte.getTypeMirror();
         }
         this.extend = extend;
+
+        this.extendConstructors = extend.asElement().getEnclosedElements().stream()
+            .filter(e -> e.getKind().equals(ElementKind.CONSTRUCTOR))
+            .filter(e -> !e.getModifiers().contains(Modifier.PRIVATE))
+            .map(e -> (ExecutableElement) e)
+            .toList();
 
         var toSuperTypeElements = computeSuperTypes(to, utils).values().stream().map(tm -> ((DeclaredType) tm).asElement()).collect(Collectors.toSet());
         Map<String, DeclaredType> commonSuperTypes = computeSuperTypes((DeclaredType) correspondingElement.asType(), utils);

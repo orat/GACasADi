@@ -2,11 +2,18 @@ package de.orat.math.gacasadi.generic;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.orat.math.gacalc.spi.IMultivectorValue;
+import de.orat.math.gacasadi.specific.cga.CgaMvValue;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GaMvValue<VAL extends GaMvValue<VAL, EXPR>, EXPR extends IGaMvExpr<EXPR>>
     implements IMultivectorValue<VAL, EXPR>, IGetSparsityCasadi {
+
+    private final ComposableImmutableBinaryTree<CgaMvValue> inputs;
+
+    protected GaMvValue(ComposableImmutableBinaryTree<CgaMvValue> inputs) {
+        this.inputs = inputs;
+    }
 
     public abstract DM getDM();
 

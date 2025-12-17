@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Filer;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
 final class ClassGenerator {
 
@@ -35,7 +37,7 @@ final class ClassGenerator {
         FieldSpec delegate = FieldSpec.builder(T_to, "delegate", Modifier.PROTECTED, Modifier.FINAL)
             .build();
 
-        MethodSpec constructor1 = ClassGenerator.constructor1(T_to);
+        List<MethodSpec> ctors = constructors(T_to, c);
 
         MethodSpec createMethod = MethodSpec.methodBuilder("create")
             .addModifiers(Modifier.PROTECTED, Modifier.ABSTRACT)
@@ -67,7 +69,7 @@ final class ClassGenerator {
             .superclass(T_extendFull)
             .addSuperinterfaces(c.commonSuperTypes.stream().map(TypeName::get).toList())
             .addField(delegate)
-            .addMethod(constructor1)
+            .addMethods(ctors)
             .addMethods(methods)
             .build();
 
@@ -77,6 +79,40 @@ final class ClassGenerator {
             .build();
 
         javaFile.writeTo(filer);
+    }
+
+    private static List<MethodSpec> constructors(TypeName T_to, Clazz c) throws ClassNotFoundException {
+        List<MethodSpec> ctors = new ArrayList<>(c.extendConstructors.size());
+        if (c.extendConstructors.isEmpty()) {
+            MethodSpec ctor = ClassGenerator.constructor1(T_to);
+            ctors.add(ctor);
+        }
+        for (ExecutableElement exCtor : c.extendConstructors) {
+            MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
+
+            // Signature
+            constructorBuilder
+                .addModifiers(Modifier.PROTECTED)
+                .addParameter(T_to, "delegate");
+
+            List<String> paramNames = new ArrayList<>(exCtor.getParameters().size());
+            for (VariableElement param : exCtor.getParameters()) {
+                var type = TypeName.get(param.asType());
+                String name = param.getSimpleName().toString();
+                paramNames.add(name);
+                constructorBuilder.addParameter(type, name);
+            }
+
+            // Body
+            String argsString = paramNames.stream().collect(Collectors.joining(", "));
+            constructorBuilder
+                .addStatement("super($L)", argsString)
+                .addStatement("this.delegate = delegate");
+
+            MethodSpec ctor = constructorBuilder.build();
+            ctors.add(ctor);
+        }
+        return ctors;
     }
 
     private static MethodSpec constructor1(TypeName annotatedToType) throws ClassNotFoundException {
