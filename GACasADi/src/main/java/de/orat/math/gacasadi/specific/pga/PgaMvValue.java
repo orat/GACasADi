@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import de.orat.math.gacasadi.generic.GaMvValue;
 
-@GenerateDelegate(to = PgaMvExpr.class, extend = GaMvValue.class)
+//@GenerateDelegate(to = PgaMvExpr.class, genParams = {""})
 public class PgaMvValue extends DelegatingPgaMvValue implements IMultivectorValue<PgaMvValue, PgaMvExpr>, IGetSparsityCasadi {
 
     private final ComposableImmutableBinaryTree<PgaMvValue> inputs;
