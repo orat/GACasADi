@@ -19,6 +19,7 @@ import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * Convention: representation of target structure, not source structure. With other words, being directly
@@ -76,7 +77,7 @@ public class Clazz {
             // Save assumption because classes are DeclaredTypes.
             extend = (DeclaredType) mte.getTypeMirror();
         }
-        this.extend = extend;
+        this.extend = utils.typeUtils().getDeclaredType((TypeElement) extend.asElement(), correspondingElement.asType(), to);
 
         this.extendConstructors = extend.asElement().getEnclosedElements().stream()
             .filter(e -> e.getKind().equals(ElementKind.CONSTRUCTOR))

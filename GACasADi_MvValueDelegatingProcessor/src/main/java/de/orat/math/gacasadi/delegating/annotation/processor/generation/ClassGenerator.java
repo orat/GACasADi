@@ -11,6 +11,7 @@ import static de.orat.math.gacasadi.delegating.annotation.processor.generation.C
 import de.orat.math.gacasadi.delegating.annotation.processor.representation.Clazz;
 import de.orat.math.gacasadi.delegating.annotation.processor.representation.Method;
 import de.orat.math.gacasadi.delegating.annotation.processor.representation.Parameter;
+import de.orat.math.gacasadi.delegating.annotation.processor.representation.TypeParametersToArguments;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,31 +87,33 @@ final class ClassGenerator {
         if (c.extendConstructors.isEmpty()) {
             MethodSpec ctor = ClassGenerator.constructor1(T_to);
             ctors.add(ctor);
-        }
-        for (ExecutableElement exCtor : c.extendConstructors) {
-            MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
+        } else {
+            var typeParamsToArgs = new TypeParametersToArguments(c.extend);
+            for (ExecutableElement exCtor : c.extendConstructors) {
+                MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
 
-            // Signature
-            constructorBuilder
-                .addModifiers(Modifier.PROTECTED)
-                .addParameter(T_to, "delegate");
+                // Signature
+                constructorBuilder
+                    .addModifiers(Modifier.PROTECTED)
+                    .addParameter(T_to, "delegate");
 
-            List<String> paramNames = new ArrayList<>(exCtor.getParameters().size());
-            for (VariableElement param : exCtor.getParameters()) {
-                var type = TypeName.get(param.asType());
-                String name = param.getSimpleName().toString();
-                paramNames.add(name);
-                constructorBuilder.addParameter(type, name);
+                List<String> paramNames = new ArrayList<>(exCtor.getParameters().size());
+                for (VariableElement param : exCtor.getParameters()) {
+                    var type = TypeName.get(typeParamsToArgs.clearTypeParameterIfPresent(param.asType()));
+                    String name = param.getSimpleName().toString();
+                    paramNames.add(name);
+                    constructorBuilder.addParameter(type, name);
+                }
+
+                // Body
+                String argsString = paramNames.stream().collect(Collectors.joining(", "));
+                constructorBuilder
+                    .addStatement("super($L)", argsString)
+                    .addStatement("this.delegate = delegate");
+
+                MethodSpec ctor = constructorBuilder.build();
+                ctors.add(ctor);
             }
-
-            // Body
-            String argsString = paramNames.stream().collect(Collectors.joining(", "));
-            constructorBuilder
-                .addStatement("super($L)", argsString)
-                .addStatement("this.delegate = delegate");
-
-            MethodSpec ctor = constructorBuilder.build();
-            ctors.add(ctor);
         }
         return ctors;
     }

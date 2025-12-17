@@ -1,6 +1,5 @@
 package de.orat.math.gacasadi.delegating.annotation.processor.representation;
 
-import de.orat.math.gacasadi.delegating.annotation.processor.common.ErrorException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,7 @@ public class TypeParametersToArguments {
         }
     }
 
-    public TypeParametersToArguments(DeclaredType i) throws ErrorException {
+    public TypeParametersToArguments(DeclaredType i) {
         Map<String, TypeMirror> typeParametersToArguments = new HashMap<>();
 
         List<String> params = ((TypeElement) i.asElement()).getTypeParameters().stream()
