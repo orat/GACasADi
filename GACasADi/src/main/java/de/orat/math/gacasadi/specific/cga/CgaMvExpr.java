@@ -222,17 +222,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     //======================================================
     // Operators
     //======================================================
-    
-    // jede algebra
-    // generisch konzeptionell
-    // generisch implementation
-    @Override
-    public CgaMvExpr gradeSelection(int grade) {
-        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
-        SX gradeSelectionMatrix = CgaCasADiUtil.toSX(m); // bestimmt sparsity
-        return create(SxStatic.mtimes(gradeSelectionMatrix, sx));
-    }
-
     // jede algebra
     // spezifisch konzeptionell
     // spezifisch implementation

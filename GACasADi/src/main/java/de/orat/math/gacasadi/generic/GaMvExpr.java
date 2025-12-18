@@ -33,11 +33,15 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     @Uncached
     public abstract EXPR create(SX sx);
 
-    @Uncached
-    public EXPR createSparse() {
+    public SX createSparseSX() {
         int basisBladeCount = getIAlgebra().getBladesCount();
         SX sparse = new SX(new Sparsity(basisBladeCount, 1)); // fullSparse
-        return create(sparse);
+        return sparse;
+    }
+
+    @Uncached
+    public EXPR createSparse() {
+        return create(createSparseSX());
     }
 
     protected abstract GaFactory<EXPR, ?, ?, ?> fac();
@@ -59,11 +63,15 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return this.sx;
     }
 
+    public static SX simplifySparsifySX(SX input) {
+        SX simple = SxStatic.simplify(input);
+        SX sparse = SxStatic.sparsify(simple);
+        return sparse;
+    }
+
     @Uncached
     public EXPR simplifySparsify() {
-        SX simple = SxStatic.simplify(this.sx);
-        SX sparse = SxStatic.sparsify(simple);
-        return create(sparse);
+        return create(simplifySparsifySX(this.sx));
     }
 
     @Override
@@ -183,7 +191,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         if (!sx.sparsity().is_scalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
-        SX result = createSparse().getSX();
+        SX result = createSparseSX();
         result.at(0).assign(sx);
         return create(result);
     }
@@ -277,5 +285,18 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     @Override
     public int getBladesCount() {
         return this.getIAlgebra().getBladesCount();
+    }
+
+    @Override
+    public EXPR gradeSelection(int grade) {
+        int[] indicesOfGrade = this.getIAlgebra().getIndizes(grade);
+        SX res = createSparseSX();
+        for (int i : indicesOfGrade) {
+            // Structural zero will be propagated.
+            var thisCell = this.sx.at(i, 0);
+            res.at(i, 0).assign(thisCell);
+        }
+
+        return create(sx);
     }
 }
