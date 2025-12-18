@@ -55,6 +55,11 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public static PgaMvVariable create(String name, int[] grades) {
+        return new PgaMvVariable(name, grades);
+    }
+     
+    
     private static final SX ZERO_SX = new SX(new Sparsity(1, 1));
 
     private static SXColVec getRotor(PgaMvExpr expr) {

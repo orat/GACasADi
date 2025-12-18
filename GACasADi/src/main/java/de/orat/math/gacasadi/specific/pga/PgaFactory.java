@@ -7,18 +7,22 @@ import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacalc.spi.ILoopService;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
+import static de.orat.math.gacasadi.specific.pga.PgaMvExpr.create;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 @AutoService(IGAFactory.class)
 public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVariable, PgaMvValue> {
@@ -113,12 +117,12 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public PgaMvVariable createVariableDense(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvVariable.createDense(name);
     }
 
     @Override
     public PgaMvVariable createVariableSparse(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvVariable.createSparse(name);
     }
 
     @Override
@@ -128,27 +132,38 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public PgaMvVariable createVariable(String name, int[] grades) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+         return PgaMvExpr.create(name, grades);
     }
 
     @Override
     public PgaMvValue createValue(SparseDoubleMatrix vec) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return PgaMvValue.create(vec);
     }
 
     @Override
     public PgaMvValue createValue(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return PgaMvValue.create(scalar);
     }
 
     @Override
     public PgaMvValue createValueRandom() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        final int basisBladesCount = getBasisBladesCount();
+        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
+        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
+        var val = createValue(sdm);
+        return val;
     }
-
+    
     @Override
     public PgaMvValue createValueRandom(int[] grades) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Random random = new Random();
+        int[] indizes = PgaFactory.instance.getIAlgebra().getIndizes(grades);
+        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
+        var sparsity = CasADiUtil.determineSparsity(grades, PgaFactory.instance.getIAlgebra());
+        //var sparsity = CasADiUtil.toColumnVectorSparsity(sxSparsity)new CGAMultivectorSparsity(indizes);
+        var sdm = new SparseDoubleColumnVector(sparsity, values);
+        var val = createValue(sdm);
+        return val;
     }
 
     public SparseDoubleMatrix createE(double x, double y, double z) {

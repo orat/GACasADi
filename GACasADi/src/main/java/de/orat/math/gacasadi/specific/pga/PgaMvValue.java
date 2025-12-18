@@ -8,7 +8,9 @@ import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
 import de.orat.math.gacasadi.generic.IGaMvValue;
@@ -60,7 +62,13 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     public static PgaMvValue create(DM dm) {
         return new PgaMvValue(dm);
     }
-    
+   
+    public static PgaMvValue create(double scalar) {
+        //CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
+        ColumnVectorSparsity sparsity = CasADiUtil.determineSparsity(0, PgaFactory.instance.getIAlgebra());
+        SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
+        return create(sdm);
+    }
     /**
      * Only to be used from DelegatingGaMvValue! Otherwise will lead to inconsistencies!
      */
