@@ -23,6 +23,23 @@ public class PGAImplTest {
     
     //private static final IAlgebra algebra = PgaFactory.instance.getIAlgebra();
     
+    @Test 
+    public void testGetEvenIndizes(){
+         IAlgebra algebra = PgaFactory.instance.getIAlgebra();
+         System.out.println("even indizes for PGA = "+print(algebra.getEvenIndizes()));
+    }
+    public String print(int[] arr){
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i=0;i<arr.length;i++){
+            sb.append(String.valueOf(arr[i]));
+            sb.append(", ");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length()-1);
+        sb.append("]");
+        return sb.toString();
+    }
     //@Test
     public void testAdd() {
         

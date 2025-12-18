@@ -95,7 +95,7 @@ public class Algebra {
         indices.clear();
         int i=0;
         for (Blade b: blades){
-            indices.put(b, i++);
+            indices.put(b, i); // ehemals i++
             // new
             int grade = b.getBases().size();
             List<Integer> inds = grades.get(grade);
@@ -103,7 +103,7 @@ public class Algebra {
                 inds = new ArrayList<>();
                 grades.put(grade, inds);
             }
-            inds.add(i);
+            inds.add(i++);
         }
         dirty = false;
     }

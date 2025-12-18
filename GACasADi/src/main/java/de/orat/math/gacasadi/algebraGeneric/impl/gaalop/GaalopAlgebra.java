@@ -145,7 +145,6 @@ public class GaalopAlgebra implements IAlgebra {
         return index;
     }
     
-    //TODO auf int[] umstellen
     public int[] getIndizes(int grade){
         return algebra.getIndizes(grade);
     }
@@ -162,13 +161,15 @@ public class GaalopAlgebra implements IAlgebra {
         return indizes.stream().mapToInt(Integer::intValue).toArray();
     }
     
-    // ungetested
+    // ungetested bisher: even indizes for PGA = [1, 6, 7, 8, 9, 10, 11, 16]
+    //FIXME 1 ist falsch, da sollte 0 stehen und dann sollten es mit 5 statt mit 6 beginnen und 15 statt 16
+    // also alle indizes sind um 1 zu groß
     public int[] getEvenIndizes(){
         // 0, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 26, 27, 28, 29, 30 für cga
-        List<Integer> indizes = new ArrayList<>();
-        for (int i=0;i<this.getBaseSize();i = i+2){
-            indizes.add(i);
+        List<Integer> grades = new ArrayList<>();
+        for (int i=0;i<=getBaseSize();i = i+2){
+            grades.add(i);
         }
-        return indizes.stream().mapToInt(Integer::intValue).toArray();
+        return getIndizes(grades.stream().mapToInt(Integer::intValue).toArray());
     }
 }
