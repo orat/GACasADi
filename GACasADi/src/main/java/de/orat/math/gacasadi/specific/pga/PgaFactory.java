@@ -11,11 +11,18 @@ import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
+import de.orat.math.gacasadi.generic.GaLoopService;
+import de.orat.math.gacasadi.specific.cga.CgaConstantsExpr;
+import de.orat.math.gacasadi.specific.cga.CgaConstantsValue;
+import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @AutoService(IGAFactory.class)
@@ -40,67 +47,75 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     protected PgaMvExpr SXtoEXPR(SX sx) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvExpr.createFromSX(sx);
     }
 
     @Override
     protected PgaMvValue DMtoVAL(DM dm) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvValue.create(dm);
     }
 
     @Override
     public CachedPgaMvExpr cachedEXPR(PgaMvExpr expr) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (expr instanceof CachedPgaMvExpr cached) {
+            return cached;
+        }
+        return new CachedPgaMvExpr(expr);
     }
 
     @Override
     public PgaMvVariable EXPRtoVAR(String name, PgaMvExpr from) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return createVariable(name, from);
     }
 
+    // create function
     @Override
-    public GaFunction<PgaMvExpr, PgaMvValue> createFunction(String name, List<? extends PgaMvVariable> parameters, List<? extends PgaMvExpr> returns) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public GaFunction<PgaMvExpr, PgaMvValue> createFunction(String name,
+        List<? extends PgaMvVariable> parameters,
+        List<? extends PgaMvExpr> returns) {
+        return new GaFunction<>(this, name, parameters, returns);
     }
 
     @Override
     public String getAlgebra() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return "pga";
     }
 
     @Override
     public String getImplementationName() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return "pgacasadisx";
     }
 
     @Override
     public int getBasisBladesCount() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return alDef.getBaseSize();
     }
+
+    private final GaLoopService<PgaMvExpr, PgaMvVariable> loopService = new GaLoopService<>(this);
 
     @Override
     public ILoopService getLoopService() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return this.loopService;
     }
 
     @Override
     public IConstantsExpression<PgaMvExpr> constantsExpr() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return PgaConstantsExpr.instance;
     }
 
     @Override
     public IConstantsValue<PgaMvValue, PgaMvExpr> constantsValue() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+         return PgaConstantsValue.instance;
     }
 
     @Override
     public PgaMvVariable createVariable(String name, PgaMvExpr from) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return new PgaMvVariable(name, from);
     }
 
     @Override
     public PgaMvVariable createVariable(String name, MatrixSparsity sparsity) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
     }
 
     @Override
@@ -115,7 +130,7 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public PgaMvVariable createVariable(String name, int grade) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvExpr.create(name, grade);
     }
 
     @Override
@@ -145,62 +160,82 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public SparseDoubleMatrix createE(double x, double y, double z) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int index1 = alDef.indexOfBlade("e1");
+        int index2 = alDef.indexOfBlade("e2");
+        int index3 = alDef.indexOfBlade("e3");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(
+            alDef.getBladesCount(), new int[]{index1, index2, index3});
+        return new SparseDoubleMatrix(sparsity, new double[]{x, y, z});
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorOrigin(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        //PGAMultivectorSparsity sparsity = new PGAMultivectorSparsity(rows);
+        int index = alDef.indexOfBlade("e0");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
+        return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createScalar(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // the index of the scalar is 0 for all algebras
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{0});
+        return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorX(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int index = alDef.indexOfBlade("e1");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
+        return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorY(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int index = alDef.indexOfBlade("e2");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
+        return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorZ(double scalar) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int index = alDef.indexOfBlade("e3");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
+        return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
     @Override
     public SparseDoubleMatrix createEpsilonPlus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createEpsilonMinus() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createMinkovskiBiVector() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createEuclideanPseudoscalar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int index = alDef.indexOfBlade("e1","e2","e3");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
+        return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
     @Override
     public SparseDoubleMatrix createPseudoscalar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int index = alDef.indexOfBlade("e0","e1","e2","e3");
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
+        return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
     @Override
@@ -210,26 +245,48 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinityDorst() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorOriginDorst() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinityDoran() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorOriginDoran() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public IAlgebra getIAlgebra() {
         return this.alDef;
+    }
+    
+    public static final Map<String, PgaMvExpr> constants = createConstants();
+
+    @Override
+    public Map<String, PgaMvExpr> getConstants() {
+        return constants;
+    }
+    
+    private static Map<String, PgaMvExpr> createConstants() {
+        Map<String, PgaMvExpr> map = new HashMap<>();
+
+        map.put("ε₀", PgaConstantsExpr.instance.getBaseVectorOrigin());
+        map.put("ε₁", PgaConstantsExpr.instance.getBaseVectorX());
+        map.put("ε₂", PgaConstantsExpr.instance.getBaseVectorY());
+        map.put("ε₃", PgaConstantsExpr.instance.getBaseVectorZ());
+        map.put("π", PgaConstantsExpr.instance.getPi());
+        //map.put("o", PgaConstantsExpr.instance.getBaseVectorOriginDorst());
+        map.put("E₃", PgaConstantsExpr.instance.getEuclideanPseudoscalar());
+        map.put("E", PgaConstantsExpr.instance.getPseudoscalar());
+
+        return map;
     }
 }

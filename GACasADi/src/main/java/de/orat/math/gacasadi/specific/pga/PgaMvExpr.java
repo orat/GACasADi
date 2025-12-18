@@ -7,6 +7,8 @@ import static de.dhbw.rahmlab.casadi.api.SXScalar.ZERO_SXScalar;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
@@ -14,9 +16,12 @@ import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
+import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
@@ -49,14 +54,33 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
 
     private static SXColVec getRotor(PgaMvExpr expr) {
         // 0,5,6,7,8,9,10,15 --> 0,1,2,3,4,5,6,7
-        int[] evenIndizes = CGACayleyTable.getEvenIndizes();
+        //int[] evenIndizes = CGACayleyTable.getEvenIndizes();
+        int[] evenIndizes = PgaFactory.instance.getIAlgebra().getEvenIndizes();
         return new SXColVec(expr.getSX(), evenIndizes);
     }
 
     private static final PgaConstantsExpr CONSTANTS = PgaConstantsExpr.instance;
 
-    public static PgaMvExpr create(SparseDoubleMatrix mx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public static PgaMvExpr create(SparseDoubleMatrix vector) {
+        StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
+        SX sx = new SX(/*CgaCasADiUtil.*/CasADiUtil.toCasADiSparsity(vector.getSparsity()),
+            new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
+        return new CachedPgaMvExpr(sx);
+    }
+    
+    public static PgaMvVariable create(String name, ColumnVectorSparsity sparsity) {
+        return new PgaMvVariable(name, sparsity);
+    }
+    /**
+     * <pre>
+     * Creates a k-Vector.
+     * </pre>
+     *
+     * @param name
+     * @param grade
+     */
+    public static PgaMvVariable create(String name, int grade) {
+        return new PgaMvVariable(name, grade);
     }
 
     // non linear operators/functions
@@ -289,9 +313,14 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
 
     @Override
     public PgaMvExpr undual() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
+        //TODO see Gunns publications, copy auch in die dsl-helper-functions
     }
 
+    protected static PgaMvExpr createFromSX(SX sx) {
+        return new CachedPgaMvExpr(sx);
+    }
+    
     @Override
     public PgaMvExpr conjugate() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -309,17 +338,17 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
 
     @Override
     public PgaMvExpr negate14() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not available (cga only)."); 
     }
 
     @Override
     public PgaMvExpr meet(PgaMvExpr b) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
     public PgaMvExpr join(PgaMvExpr b) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override

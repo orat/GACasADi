@@ -240,9 +240,14 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return fac;
     }
 
+    
     //======================================================
     // Operators
     //======================================================
+    
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     @Override
     public CgaMvExpr gradeSelection(int grade) {
         SparseDoubleMatrix m = CGAOperatorMatrixUtils.createGradeSelectionOperatorMatrix(baseCayleyTable, grade);
@@ -250,11 +255,17 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(SxStatic.mtimes(gradeSelectionMatrix, sx));
     }
 
+    // jede algebra
+    // spezifisch konzeptionell
+    // spezifisch implementation
     @Override
     public CgaMvExpr dual() {
         return lc(CONSTANTS.getInversePseudoscalar());
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     /**
      * Generic GA reverse function implementation based on matrix calculations.
      *
@@ -267,6 +278,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(result);
     }
 
+    // jede algebra nein
+    // spezifisch konzeptionell
+    // spezifisch implementation
     @Override
     public CgaMvExpr up() {
         if (!isEuclidian()){
@@ -277,6 +291,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
             .add(CONSTANTS.getBaseVectorOrigin());
     }
     
+    // jede algebra
+    // spezifisch konzeptionell
+    // spezifisch implementation
     /**
      * Down projection into the euclidian space.
      * 
@@ -411,6 +428,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(result);
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     /**
      * Involute.
      *
@@ -467,6 +487,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return dual().gpWithScalar(-1d);
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     /**
      * Conjugate.
      *
@@ -492,6 +515,10 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         SX result = SxStatic.mtimes(gpm, ( b).getSX());
         return create(result);
     }*/
+    
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     /**
      * Scalar product.
      *
@@ -510,6 +537,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return createFromScalar(sxres);
     }
 
+    // cga algebra
+    // spezifisch konzeptionell
+    // spezifisch implementation
     /**
      * Negates the signs of the vector and 4-vector parts of an multivector.
      *
@@ -521,6 +551,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx));
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // spezifisch implementation
     // non linear operators/functions
     // [8] M Roelfs and S De Keninck. 2021.
     // Graded Symmetry Groups: Plane and Simple. arXiv:2107.03771 [math-ph]
@@ -659,7 +692,9 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return create(result);
     }
 
-   
+   // jede algebra
+    // generisch konzeptionell
+    // spezifisch implementation
     /**
      * CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1<p>
      * 
@@ -784,7 +819,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return create(new SXColVec(getCayleyTable().getBladesCount(), valuesSXElem, evenIndizes).sx);
     }
 
-    
+    // jede algebra
+    // generisch konzeptionell
+    // spezifisch implementation
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     @Override
     public CgaMvExpr sqrt() {
@@ -798,6 +835,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         throw new RuntimeException("sqrt() not yet implemented for non even elements. Should be implemented in the default method of the interface with a generic version.");
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // spezifisch implementation
     // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
     // log of a normalized rotor, result is a bivector
     @Override
@@ -930,6 +970,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // spezifsch implementation
     /**
      * Calculate the Euclidean norm. (strict positive, from squared norm).
      *
@@ -952,6 +995,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return create(SxStatic.sqrt(SxStatic.abs(sx1)));
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // spezifisch implementation
     /**
      * Calculate the Ideal norm. (signed)
      *
@@ -981,6 +1027,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     }
 
    
+    // jede algebra
+    // generisch? konzeptionell
+    // spezifisch implementation
     /**
      * General inverse implemented in an efficient cga specific way.
      *
@@ -1002,6 +1051,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return CGAOperations.generalInverse(this);
     }
 
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     /**
      * Scalar inverse.
      *
@@ -1054,6 +1106,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return create(SxStatic.times(sx, s.getSX()));
     }*/
 
+    // jede algebra
+    // generisch konzeptionell
+    // generisch implementation
     /**
      * Elementwise division with a scalar.
      *

@@ -179,7 +179,10 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return val;
     }
 
+    
     // create constants
+    
+    // based on e4e5
     @Override
     public SparseDoubleMatrix createBaseVectorOrigin(double scalar) {
         double[] nonzeros = new double[]{-0.5d * scalar, 0.5d * scalar};

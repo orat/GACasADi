@@ -17,6 +17,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -142,5 +143,32 @@ public class GaalopAlgebra implements IAlgebra {
             throw new IllegalArgumentException(String.format("blade \"%s\" not found.", Arrays.toString(bladeOfBasevectors)), npe);
         }
         return index;
+    }
+    
+    //TODO auf int[] umstellen
+    public int[] getIndizes(int grade){
+        return algebra.getIndizes(grade);
+    }
+    // ungetested
+    public int[] getIndizes(int[] grades){
+        List<Integer> indizes = new ArrayList<>();
+        for (int i=0;i<grades.length;i++){
+            int[] ints = getIndizes(grades[i]);
+            indizes.addAll(Arrays.stream(ints).boxed().toList());
+        }
+        // stream() converts given ArrayList to stream
+        // mapToInt() converts the obtained stream to IntStream
+        // toArray() is used to return an array
+        return indizes.stream().mapToInt(Integer::intValue).toArray();
+    }
+    
+    // ungetested
+    public int[] getEvenIndizes(){
+        // 0, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 26, 27, 28, 29, 30 für cga
+        List<Integer> indizes = new ArrayList<>();
+        for (int i=0;i<this.getBaseSize();i = i+2){
+            indizes.add(i);
+        }
+        return indizes.stream().mapToInt(Integer::intValue).toArray();
     }
 }

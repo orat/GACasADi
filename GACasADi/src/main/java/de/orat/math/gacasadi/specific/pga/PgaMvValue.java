@@ -1,5 +1,7 @@
 package de.orat.math.gacasadi.specific.pga;
 
+import de.dhbw.rahmlab.casadi.SxStatic;
+import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.api.MultivectorValue;
@@ -8,12 +10,15 @@ import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
+import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
+import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import de.orat.math.gacasadi.specific.cga.CgaMvValue;
 import static de.orat.math.gacasadi.specific.cga.CgaMvValue.constants2;
 import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +36,78 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         super(sym);
         this.inputs = inputs;
     }
+    
+     /**
+     * Creates a leaf. Only to be used by static create Method with DM input.
+     */
+    private PgaMvValue(DM dm) {
+        super(dmToPureSym(dm));
+        this.lazyDM = dm;
+        // Not "leaking this", because the passed "this" will not be used before fully constructed.
+        // Because ComposableImmutableBinaryTree instance just stores the "this" and is itself not visible from outside the constructor.
+        this.inputs = new ComposableImmutableBinaryTree<>(this);
+    }
+    
+    private static int num = 0;
+
+    private static PgaMvVariable dmToPureSym(DM dm) {
+        var nameSym = String.format("x%s", String.valueOf(num));
+        ++num;
+        var pureSym = new PgaMvVariable(nameSym, dm.sparsity());
+        return pureSym;
+    }
+
 
     @Override
     public IConstants<PgaMvValue> constants() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return PgaFactory.instance.constantsValue();
     }
 
+    public static PgaMvValue create(DM dm) {
+        return new PgaMvValue(dm);
+    }
+    
+    /**
+     * Only to be used from DelegatingGaMvValue! Otherwise will lead to inconsistencies!
+     */
+    @Deprecated
     @Override
-    protected PgaMvValue create(PgaMvExpr delegate) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    protected PgaMvValue create(PgaMvExpr sym) {
+        // Call permitted here.
+        return new PgaMvValue(sym, this.inputs);
+    }
+    
+    public static PgaMvValue create(SparseDoubleMatrix vec) {
+        double[] nonzeros = vec.nonzeros();
+        int[] rows = vec.getSparsity().getrow();
+        int bladesCount = PgaFactory.instance.getIAlgebra().getBladesCount();
+        if (bladesCount/*baseCayleyTable.getBladesCount()*/ < nonzeros.length) {
+            throw new IllegalArgumentException("Construction of PGA multivevector failed because given array has wrong length "
+                + String.valueOf(nonzeros.length));
+        }
+        if (nonzeros.length != rows.length) {
+            throw new IllegalArgumentException("Construction of PGA multivector failed because nonzeros.length != rows.length!");
+        }
+        var dm = /*CgaCasADiUtil.*/toDM(bladesCount, nonzeros, rows);
+        return create(dm);
     }
 
+    // wohin damit, das ist algebra unabhängig
+    //TODO
+    private static DM toDM(int n_row, double[] nonzeros, int[] rows) {
+        ColumnVectorSparsity sparsity = new ColumnVectorSparsity(n_row, rows);
+        return new DM(toCasADiSparsity(sparsity), toStdVectorDouble(nonzeros), false);
+    }
+    
+    /**
+     * Only to be used from DelegatingGaMvValue! Otherwise will lead to inconsistencies!
+     */
+    @Deprecated
     @Override
-    protected PgaMvValue create(PgaMvExpr delegate, PgaMvValue other) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    protected PgaMvValue create(PgaMvExpr sym, PgaMvValue other) {
+        var combinedInputs = this.inputs.append(other.inputs);
+        // Call permitted here.
+        return new PgaMvValue(sym, combinedInputs);
     }
 
     @Override
@@ -298,11 +361,46 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
+    
+    /**
+     * Nullable!
+     */
+    private DM lazyDM = null;
+    
+    /**
+     * Expensive for MVnum, which are not created directly from a numerical constructor, but through method
+     * chaining.
+     */
     public DM getDM() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (this.lazyDM == null) {
+            var allInputs = this.inputs.computeUniqueLeafs().stream().toList();
+            var allInputsParams = allInputs.stream().map(PgaMvValue::delegatePurelySym).toList();
+            var func = PgaFactory.instance.createFunction("getDM", allInputsParams, List.of(this.delegate));
+            var evalMV = func.callValue(allInputs).get(0);
+            // lazyDM is non-null for all leafs.
+            this.lazyDM = evalMV.lazyDM;
+        }
+        return lazyDM;
     }
 
+    
+    /**
+     * Only works on MVnum which were constructed from a DM.
+     */
+    private PgaMvVariable delegatePurelySym() {
+        return (PgaMvVariable) super.delegate;
+    }
+
+    public static PgaMvValue createFrom(PgaMvExpr sym) {
+        /*
+         * https://github.com/casadi/casadi/wiki/L_rf
+         * Evaluates the expression numerically.
+         * An error is raised when the expression contains symbols.
+         */
+        var dm = SxStatic.evalf(sym.getSX());
+        return create(dm);
+    }
+    
     @Override
     public double get(int index) {
         return IGaMvValue.super.get(index); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
