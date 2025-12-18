@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import java.util.List;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
 
@@ -24,6 +25,10 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     }
 
     public abstract IAlgebra getIAlgebra();
+
+    public List<Integer> indices() {
+        return sx.get_row().stream().map(Long::intValue).toList();
+    }
 
     @Uncached
     public abstract EXPR create(SX sx);
@@ -255,4 +260,17 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return computeScalar(SxStatic::acos);
     }
 
+    @Override
+    public int grade() {
+        List<Integer> grades = this.getIAlgebra().getGrades(indices());
+        if (grades.size() != 1) {
+            throw new IllegalArgumentException(String.format("grades count not equal to 1: %s", grades.toString()));
+        }
+        return grades.get(0);
+    }
+
+    @Override
+    public int[] grades() {
+        return this.getIAlgebra().getGrades(indices()).stream().mapToInt(Integer::intValue).toArray();
+    }
 }

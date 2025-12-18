@@ -1,5 +1,7 @@
 package de.orat.math.gacasadi.algebraGeneric.api;
 
+import java.util.List;
+
 /**
  * <pre>
  * Generic Algebra definition.
@@ -20,6 +22,8 @@ public interface IAlgebra {
 
     int[] getIndizes(int grade);
     int[] getIndizes(int[] grades);
+
+    List<Integer> getGrades(List<Integer> indices);
     
     // 2^n
     // n can be at most 31.

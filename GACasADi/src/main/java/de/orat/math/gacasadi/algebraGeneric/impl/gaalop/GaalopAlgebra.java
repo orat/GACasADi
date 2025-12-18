@@ -172,4 +172,13 @@ public class GaalopAlgebra implements IAlgebra {
         }
         return getIndizes(grades.stream().mapToInt(Integer::intValue).toArray());
     }
+
+    @Override
+    public List<Integer> getGrades(List<Integer> indices) {
+        return indices.stream()
+            .map(i -> this.algebra.getBlade(i).getBases().size())
+            .distinct()
+            .sorted()
+            .toList();
+    }
 }
