@@ -158,16 +158,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     @Override
-    public int grade() {
-        return this.getSparsity().getGrade();
-    }
-
-    @Override
-    public int[] grades() {
-        return this.getSparsity().getGrades();
-    }
-
-    @Override
     public String toString() {
         SparseStringMatrix stringMatrix = CgaCasADiUtil.toStringMatrix(sx);
         return stringMatrix.toString(true);
@@ -206,11 +196,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
             return sx.at(row, 0);
         }
         return null;
-    }
-
-    @Override
-    public int getBladesCount() {
-        return baseCayleyTable.getBladesCount();
     }
 
     @Override

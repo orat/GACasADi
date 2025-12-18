@@ -273,4 +273,9 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public int[] grades() {
         return this.getIAlgebra().getGrades(indices()).stream().mapToInt(Integer::intValue).toArray();
     }
+
+    @Override
+    public int getBladesCount() {
+        return this.getIAlgebra().getBladesCount();
+    }
 }
