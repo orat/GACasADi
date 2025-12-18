@@ -18,6 +18,9 @@ public interface IAlgebra {
     //n
     int getBaseSize();
 
+    int[] getIndizes(int grade);
+    int[] getIndizes(int[] grades);
+    
     // 2^n
     // n can be at most 31.
     default int getBladesCount() {
@@ -35,5 +38,7 @@ public interface IAlgebra {
      */
     int indexOfBlade(String... bladeOfBasevectors);
 
+    public int[] getEvenIndizes();
+    
     //TODO erweitern und dann auch die impl in GaalopAlgebra in impl.gaalop
 }

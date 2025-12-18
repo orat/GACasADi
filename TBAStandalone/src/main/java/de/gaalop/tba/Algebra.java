@@ -5,6 +5,8 @@ import de.gaalop.cfg.AlgebraDefinitionFile;
 import de.gaalop.dfg.Expression;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 //import java.util.Vector;
 
 /**
@@ -15,8 +17,11 @@ public class Algebra {
 
     private String[] base;
     private /*Vector*/ArrayList<Blade> blades = new /*Vector*/ArrayList<>();
-    private HashMap<Blade,Integer> indices = new HashMap<>();
+    private Map<Blade,Integer> indices = new HashMap<>();
 
+    // grade, indizes
+    private Map<Integer, List<Integer>> grades = new HashMap<>();
+    
     private boolean dirty;
     
 
@@ -89,8 +94,23 @@ public class Algebra {
     public void buildMap() {
         indices.clear();
         int i=0;
-        for (Blade b: blades)
+        for (Blade b: blades){
             indices.put(b, i++);
+            // new
+            int grade = b.getBases().size();
+            List<Integer> inds = grades.get(grade);
+            if (inds == null){
+                inds = new ArrayList<>();
+                grades.put(grade, inds);
+            }
+            inds.add(i);
+        }
         dirty = false;
+    }
+    
+    //new
+    public int[] getIndizes(int grade){
+        if (dirty) buildMap();
+        return grades.get(grade).stream().mapToInt(i->i).toArray();
     }
 }

@@ -11,6 +11,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
+import de.orat.math.gacasadi.specific.pga.PgaFactory;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -116,6 +117,19 @@ public class CasADiUtil {
      */
     public static DM toDM(SX sx) {
         return SxStatic.evalf(sx);
+    }
+    
+    // eigentlich nicht CasADi sonder SparseMatrix util
+    
+    public static ColumnVectorSparsity determineSparsity(int grade){
+        int[] indizes = PgaFactory.instance.getIAlgebra().getIndizes(grade);
+        int bladesCount = PgaFactory.instance.getIAlgebra().getBladesCount();
+        return new ColumnVectorSparsity(bladesCount, indizes);
+    }
+    public static ColumnVectorSparsity determineSparsity(int[] grades){
+        int[] indizes = PgaFactory.instance.getIAlgebra().getIndizes(grades);
+        int bladesCount = PgaFactory.instance.getIAlgebra().getBladesCount();
+        return new ColumnVectorSparsity(bladesCount, indizes);
     }
 
 }
