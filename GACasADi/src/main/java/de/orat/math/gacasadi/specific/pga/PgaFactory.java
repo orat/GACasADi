@@ -208,10 +208,13 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
         return this.alDef;
     }
     
-    public final Map<String, PgaMvExpr> constants = createConstants();
+    public Map<String, PgaMvExpr> constants = null;
 
     @Override
     public Map<String, PgaMvExpr> getConstants() {
+        if (constants == null) {
+            constants = createConstants();
+        }
         return constants;
     }
     
