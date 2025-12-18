@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import java.util.List;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
@@ -293,10 +294,29 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         SX res = createSparseSX();
         for (int i : indicesOfGrade) {
             // Structural zero will be propagated.
-            var thisCell = this.sx.at(i, 0);
+            SX thisCell = this.sx.at(i, 0);
             res.at(i, 0).assign(thisCell);
         }
 
-        return create(sx);
+        return create(res);
+    }
+
+    /**
+     * <pre>
+     * Beim direkten Aufruf so schneller.
+     * Wenn of verwendet, wäre es sinnvoller, das double s in ein EXPR zu verpacken und dann die normale gp Funktion aufzurufen.
+     * </pre>
+     */
+    @Uncached
+    @Override
+    public EXPR gpWithScalar(double s) {
+        SX res = createSparseSX();
+        SX scalar = new SX(s);
+        for (int i : indices()) {
+            SX thisCell = this.sx.at(i, 0);
+            SX cellRes = SxStatic.times(thisCell, scalar);
+            res.at(i, 0).assign(cellRes);
+        }
+        return create(res);
     }
 }

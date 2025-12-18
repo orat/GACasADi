@@ -364,37 +364,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         }
     }
      */
-
-    /**
-     * <pre>
-     * Anmerkung von Fabian:
-     * - Cache ich erst mal nicht.
-     * - Würde ich sogar eventuell entfernen.
-     * - Sparsities werden beim Caching beachtet. Falls CasADi die Sparsities beachtet, sollte es zur Laufzeit
-     *      keinen Unterschied geben zwischen gp mit einem Scalar Multivector und gpWithScalar.
-     *      Man könnte dann einfach gp verwenden.
-     * - Falls es doch einen Unterschied gibt, Vorschlag:
-     *      - In gp (ohne "withScalar") ein if-else machen, welches prüft, ob b ein Scalar ist.
-     *      - Dann den Code aus gpWithScalar rein kopieren mit folgender Anpassung:
-     *      - getScalarMultiplicationOperatorMatrix anstatt dem double eine 1x1 symbolic SX Variable übergeben.
-     *          Entsprechend darf auch keine SparseDoubleMatrix zurück geliefert werden.
-     * - Grund:
-     *      - Wird momentan nur intern an wenigen Stellen verwendet.
-     *      - Funktioniert nur mit Scalar rechts.
-     *      - Numerische Double Parameter zu cachen führt schnell zu einer Explosion an gecached'ten Functions.
-     *      - Bei den Doubles muss man eine Genauigkeit festlegen, wann sie als gleich gelten sollen.
-     *      - Ich vermute, dass es keinen großen Geschwindigkeitsvorteil gibt gegenüber der Variante mit einem
-     *          symbolischen Scalar.
-     * </pre>
-     */
-    @Override
-    @Uncached
-    public CgaMvExpr gpWithScalar(double s) {
-        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getScalarMultiplicationOperatorMatrix(s);
-        SX result = SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx);
-        return create(result);
-    }
-
     // jede algebra
     // generisch konzeptionell
     // generisch implementation
