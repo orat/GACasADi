@@ -227,10 +227,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         SX res = createSparseSX();
         for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
-            int exp = (grade * (grade - 1)) / 2;
-            int sign = minusOneToThePowerOf(exp);
-            SX thisCell = this.sx.at(i, 0);
-            SX resCell = SxStatic.times(new SX(sign), thisCell);
+            int sign = algebra.gradeToReverseSign(grade);
+            SX resCell = this.sx.at(i, 0);
+            if (sign != 1) {
+                resCell = SxStatic.times(new SX(sign), resCell);
+            }
             res.at(i, 0).assign(resCell);
         }
         return create(res);
@@ -334,25 +335,17 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(res);
     }
 
-    /**
-     * <pre>
-     * (-1)^exponent
-     * Precondition: exponent >= 0
-     * </pre>
-     */
-    public static int minusOneToThePowerOf(int exponent) {
-        return -1 + 2 * ((exponent + 1) & 0x1);
-    }
-
     @Override
     public EXPR gradeInversion() {
         IAlgebra algebra = this.getIAlgebra();
         SX res = createSparseSX();
         for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
-            int sign = minusOneToThePowerOf(grade);
-            SX thisCell = this.sx.at(i, 0);
-            SX resCell = SxStatic.times(new SX(sign), thisCell);
+            int sign = algebra.gradeToGradeInversionSign(grade);
+            SX resCell = this.sx.at(i, 0);
+            if (sign != 1) {
+                resCell = SxStatic.times(new SX(sign), resCell);
+            }
             res.at(i, 0).assign(resCell);
         }
         return create(res);
@@ -364,10 +357,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         SX res = createSparseSX();
         for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
-            int exp = (grade * (grade + 1)) / 2;
-            int sign = minusOneToThePowerOf(exp);
-            SX thisCell = this.sx.at(i, 0);
-            SX resCell = SxStatic.times(new SX(sign), thisCell);
+            int sign = algebra.gradeToConjugateSign(grade);
+            SX resCell = this.sx.at(i, 0);
+            if (sign != 1) {
+                resCell = SxStatic.times(new SX(sign), resCell);
+            }
             res.at(i, 0).assign(resCell);
         }
         return create(res);

@@ -31,6 +31,10 @@ public class GaalopAlgebra implements IAlgebra {
     private final Product gp;
     private final Product inner;
     private final Product outer;
+    private final List<Integer> gradeToConjugateSign;
+    private final List<Integer> gradeToGradeInversionSign;
+    private final List<Integer> gradeToReverseSign;
+
 
     public GaalopAlgebra(String algebraName) {
         this.algebraPath = getAlgebraPath(algebraName);
@@ -40,6 +44,10 @@ public class GaalopAlgebra implements IAlgebra {
         this.gp = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new GeoProductCalculator()));
         this.inner = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new InnerProductCalculator()));
         this.outer = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new OuterProductCalculator()));
+        final int gradesCount = 1 + this.algebra.getBaseCount();
+        gradeToConjugateSign = IAlgebra.computeGradeToConjugateSign(gradesCount);
+        gradeToGradeInversionSign = IAlgebra.computeGradeToGradeInversionSign(gradesCount);
+        gradeToReverseSign = IAlgebra.computeGradeToReverseSign(gradesCount);
     }
 
     @Override
@@ -185,5 +193,20 @@ public class GaalopAlgebra implements IAlgebra {
     @Override
     public int getGrade(int index){
         return algebra.getGrade(index);
+    }
+
+    @Override
+    public int gradeToConjugateSign(int grade) {
+        return gradeToConjugateSign.get(grade);
+    }
+
+    @Override
+    public int gradeToGradeInversionSign(int grade) {
+        return gradeToGradeInversionSign.get(grade);
+    }
+
+    @Override
+    public int gradeToReverseSign(int grade) {
+        return gradeToReverseSign.get(grade);
     }
 }
