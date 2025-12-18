@@ -17,6 +17,7 @@ public class Algebra {
 
     private String[] base;
     private /*Vector*/ArrayList<Blade> blades = new /*Vector*/ArrayList<>();
+    
     private Map<Blade,Integer> indices = new HashMap<>();
 
     // grade, indizes
@@ -113,4 +114,10 @@ public class Algebra {
         if (dirty) buildMap();
         return grades.get(grade).stream().mapToInt(i->i).toArray();
     }
+    
+    public int getGrade(int index){
+        Blade blade = blades.get(index);
+        return blade.getBases().size();
+    }
 }
+

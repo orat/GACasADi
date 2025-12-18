@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.sparsematrix.SparseDoubleMatrix;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
 
@@ -203,6 +204,14 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return computeScalar(SxStatic::abs);
     }
 
+    @Override
+    public EXPR reverse() {
+        SparseDoubleMatrix revm = GAOperatorMatrixUtils.createReversionOperatorMatrix(getIAlgebra());
+        SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
+        return create(result);
+    }
+    
+    
     @Override
     public EXPR scalarAtan2(EXPR y) {
         if (!isScalar()) {
