@@ -26,6 +26,10 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     public abstract IAlgebra getIAlgebra();
 
+    public int getBladesCount(){
+        return getIAlgebra().getBladesCount();
+    }
+    
     @Uncached
     public abstract EXPR create(SX sx);
 
