@@ -294,27 +294,6 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     }
 
     @Override
-    public int grade() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public int[] grades() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public PgaMvExpr gradeSelection(int grade) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Uncached
-    @Override
-    public PgaMvExpr gpWithScalar(double s) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
     public PgaMvExpr undual() {
         throw new UnsupportedOperationException("Not supported yet."); 
         //TODO see Gunns publications, copy auch in die dsl-helper-functions
@@ -328,11 +307,6 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         //var sx = CgaCasADiUtil.toSX(dm);
         var sx = CasADiUtil.toSX(dm);
         return new CachedPgaMvExpr(sx);
-    }
-    
-    @Override
-    public PgaMvExpr conjugate() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -372,11 +346,6 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
 
     @Override
     public PgaMvExpr generalInverse() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public PgaMvExpr scalarInverse() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
