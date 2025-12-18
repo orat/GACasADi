@@ -930,21 +930,6 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         return CGAOperations.generalInverse(this);
     }
 
-    // jede algebra
-    // generisch konzeptionell
-    // generisch implementation
-    /**
-     * Scalar inverse.
-     *
-     * @throws IllegalArgumentException if the multivector is no scalar.
-     * @return scalar inverse
-     */
-    @Override
-    public CgaMvExpr scalarInverse() {
-        // Throws exception for an empty sparse multivector, too.
-        return computeScalar(SxStatic::inv);
-    }
-
     //======================================================
     // Not in the interface
     //======================================================
