@@ -416,8 +416,18 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
      */
     @Override
     public CgaMvExpr negate14() {
-        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createNegate14MultiplicationMatrix(baseCayleyTable);
-        return create(SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx));
+        IAlgebra algebra = this.getIAlgebra();
+        SX res = createSparseSX();
+        SX minusOne = new SX(-1);
+        for (int i : indices()) {
+            int grade = algebra.getGrade(i);
+            SX resCell = this.sx.at(i, 0);
+            if (grade == 1 || grade == 4) {
+                resCell = SxStatic.times(minusOne, resCell);
+            }
+            res.at(i, 0).assign(resCell);
+        }
+        return create(res);
     }
 
     // jede algebra
