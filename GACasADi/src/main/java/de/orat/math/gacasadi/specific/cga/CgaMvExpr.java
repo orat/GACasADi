@@ -406,24 +406,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return dual().gpWithScalar(-1d);
     }
 
-    // jede algebra
-    // generisch konzeptionell
-    // generisch implementation
-    /**
-     * Conjugate.
-     *
-     * Clifford Conjugation
-     *
-     * @param a
-     * @return a.Conjugate()
-     */
-    @Override
-    public CgaMvExpr conjugate() {
-        SparseDoubleMatrix m = cgaOperatorMatrixUtils.getConjugationOperatorMatrix();
-        SX result = SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx);
-        return create(result);
-    }
-
     /*@Override
     public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b){
         //TODO mit transponieren und vertauschen von a und b wirds völlig falsch

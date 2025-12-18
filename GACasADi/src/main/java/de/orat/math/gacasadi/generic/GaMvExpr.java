@@ -322,8 +322,8 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         SX scalar = new SX(s);
         for (int i : indices()) {
             SX thisCell = this.sx.at(i, 0);
-            SX cellRes = SxStatic.times(thisCell, scalar);
-            res.at(i, 0).assign(cellRes);
+            SX resCell = SxStatic.times(thisCell, scalar);
+            res.at(i, 0).assign(resCell);
         }
         return create(res);
     }
@@ -346,8 +346,23 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
             int grade = algebra.getGrade(i);
             int sign = minusOneToThePowerOf(grade);
             SX thisCell = this.sx.at(i, 0);
-            SX cellRes = SxStatic.times(new SX(sign), thisCell);
-            res.at(i, 0).assign(cellRes);
+            SX resCell = SxStatic.times(new SX(sign), thisCell);
+            res.at(i, 0).assign(resCell);
+        }
+        return create(res);
+    }
+
+    @Override
+    public EXPR conjugate() {
+        IAlgebra algebra = this.getIAlgebra();
+        SX res = createSparseSX();
+        for (int i : indices()) {
+            int grade = algebra.getGrade(i);
+            int exp = (grade * (grade + 1)) / 2;
+            int sign = minusOneToThePowerOf(exp);
+            SX thisCell = this.sx.at(i, 0);
+            SX resCell = SxStatic.times(new SX(sign), thisCell);
+            res.at(i, 0).assign(resCell);
         }
         return create(res);
     }
