@@ -7,8 +7,8 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
-import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import java.util.List;
+import de.orat.math.sparsematrix.SparseDoubleMatrix;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
 
@@ -31,6 +31,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return sx.get_row().stream().map(Long::intValue).toList();
     }
 
+    @Override
+    public int getBladesCount() {
+        return getIAlgebra().getBladesCount();
+    }
+    
     @Uncached
     public abstract EXPR create(SX sx);
 
@@ -218,6 +223,14 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     }
 
     @Override
+    public EXPR reverse() {
+        SparseDoubleMatrix revm = GAOperatorMatrixUtils.createReversionOperatorMatrix(getIAlgebra());
+        SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
+        return create(result);
+    }
+    
+    
+    @Override
     public EXPR scalarAtan2(EXPR y) {
         if (!isScalar()) {
             throw new IllegalArgumentException("The argument x of atan2(y,x) is no scalar!");
@@ -281,11 +294,6 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     @Override
     public int[] grades() {
         return this.getIAlgebra().getGrades(indices()).stream().mapToInt(Integer::intValue).toArray();
-    }
-
-    @Override
-    public int getBladesCount() {
-        return this.getIAlgebra().getBladesCount();
     }
 
     @Override

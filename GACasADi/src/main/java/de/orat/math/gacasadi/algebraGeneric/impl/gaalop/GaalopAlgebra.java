@@ -181,4 +181,9 @@ public class GaalopAlgebra implements IAlgebra {
             .sorted()
             .toList();
     }
+
+    @Override
+    public int getGrade(int index){
+        return algebra.getGrade(index);
+    }
 }

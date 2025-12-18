@@ -15,6 +15,7 @@ import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
+import de.orat.math.gacasadi.specific.cga.CgaCasADiUtil;
 import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -112,19 +113,25 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         return new PgaMvValue(sym, combinedInputs);
     }
 
+    
+    private MultivectorValue.Callback callback;
+
     @Override
     public void init(MultivectorValue.Callback callback) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        this.callback = callback;
     }
 
     @Override
     public SparseDoubleMatrix elements() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+         return CasADiUtil.elements(this.getDM());
     }
 
+    // can be expensive
     @Override
     public PgaMvExpr toExpr() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        var dm = this.getDM();
+        var mv = PgaMvExpr.create(dm);
+        return mv;
     }
 
     public static PgaMvValue compose(GeometricObject obj) {
