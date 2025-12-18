@@ -230,21 +230,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return lc(CONSTANTS.getInversePseudoscalar());
     }
 
-    // jede algebra
-    // generisch konzeptionell
-    // generisch implementation
-    /**
-     * Generic GA reverse function implementation based on matrix calculations.
-     *
-     * @return reverse of a multivector
-     */
-    @Override
-    public CgaMvExpr reverse() {
-        SparseDoubleMatrix revm = cgaOperatorMatrixUtils.getReversionOperatorMatrix();
-        SX result = SxStatic.mtimes(CgaCasADiUtil.toSX(revm), sx);
-        return create(result);
-    }
-
     // jede algebra nein
     // spezifisch konzeptionell
     // spezifisch implementation

@@ -8,7 +8,6 @@ import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import java.util.List;
-import de.orat.math.sparsematrix.SparseDoubleMatrix;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
 
@@ -224,11 +223,18 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     @Override
     public EXPR reverse() {
-        SparseDoubleMatrix revm = GAOperatorMatrixUtils.createReversionOperatorMatrix(getIAlgebra());
-        SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
-        return create(result);
+        IAlgebra algebra = this.getIAlgebra();
+        SX res = createSparseSX();
+        for (int i : indices()) {
+            int grade = algebra.getGrade(i);
+            int exp = (grade * (grade - 1)) / 2;
+            int sign = minusOneToThePowerOf(exp);
+            SX thisCell = this.sx.at(i, 0);
+            SX resCell = SxStatic.times(new SX(sign), thisCell);
+            res.at(i, 0).assign(resCell);
+        }
+        return create(res);
     }
-    
     
     @Override
     public EXPR scalarAtan2(EXPR y) {
