@@ -363,24 +363,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
             return new Multivector(entries);
         }
     }
-     */
-    // jede algebra
-    // generisch konzeptionell
-    // generisch implementation
-    /**
-     * Involute.
-     *
-     * Main involution - grade inversion<p>
-     *
-     * swapping the parity of each grade<p>
-     *
-     * @return involution/grade inversion
-     */
-    @Override
-    public CgaMvExpr gradeInversion() {
-        SparseDoubleMatrix m = CGAOperatorMatrixUtils.createInvolutionOperatorMatrix(baseCayleyTable);
-        return create(SxStatic.mtimes(CgaCasADiUtil.toSX(m), sx));
-    }
+
 
     /**
      * Dual.
