@@ -76,10 +76,13 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return map;
     }
 
-    public final Map<String, CgaMvExpr> constants = createConstants();
+    public Map<String, CgaMvExpr> constants = null;
 
     @Override
     public Map<String, CgaMvExpr> getConstants() {
+        if (constants == null) {
+            constants = createConstants();
+        }
         return constants;
     }
 
