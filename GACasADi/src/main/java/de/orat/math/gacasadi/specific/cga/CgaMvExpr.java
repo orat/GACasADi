@@ -404,7 +404,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         IAlgebra algebra = this.getIAlgebra();
         SX res = createSparseSX();
         SX minusOne = new SX(-1);
-        for (int i : indices()) {
+        for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
             SX resCell = this.sx.at(i, 0);
             if (grade == 1 || grade == 4) {

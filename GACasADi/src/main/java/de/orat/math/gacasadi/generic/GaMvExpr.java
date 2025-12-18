@@ -26,7 +26,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     public abstract IAlgebra getIAlgebra();
 
-    public List<Integer> indices() {
+    public List<Integer> nzIndices() {
         return sx.get_row().stream().map(Long::intValue).toList();
     }
 
@@ -225,7 +225,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR reverse() {
         IAlgebra algebra = this.getIAlgebra();
         SX res = createSparseSX();
-        for (int i : indices()) {
+        for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
             int exp = (grade * (grade - 1)) / 2;
             int sign = minusOneToThePowerOf(exp);
@@ -290,7 +290,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     @Override
     public int grade() {
-        List<Integer> grades = this.getIAlgebra().getGrades(indices());
+        List<Integer> grades = this.getIAlgebra().getGrades(nzIndices());
         if (grades.size() != 1) {
             throw new IllegalArgumentException(String.format("grades count not equal to 1: %s", grades.toString()));
         }
@@ -299,7 +299,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     @Override
     public int[] grades() {
-        return this.getIAlgebra().getGrades(indices()).stream().mapToInt(Integer::intValue).toArray();
+        return this.getIAlgebra().getGrades(nzIndices()).stream().mapToInt(Integer::intValue).toArray();
     }
 
     @Override
@@ -326,7 +326,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR gpWithScalar(double s) {
         SX res = createSparseSX();
         SX scalar = new SX(s);
-        for (int i : indices()) {
+        for (int i : nzIndices()) {
             SX thisCell = this.sx.at(i, 0);
             SX resCell = SxStatic.times(thisCell, scalar);
             res.at(i, 0).assign(resCell);
@@ -348,7 +348,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR gradeInversion() {
         IAlgebra algebra = this.getIAlgebra();
         SX res = createSparseSX();
-        for (int i : indices()) {
+        for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
             int sign = minusOneToThePowerOf(grade);
             SX thisCell = this.sx.at(i, 0);
@@ -362,7 +362,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR conjugate() {
         IAlgebra algebra = this.getIAlgebra();
         SX res = createSparseSX();
-        for (int i : indices()) {
+        for (int i : nzIndices()) {
             int grade = algebra.getGrade(i);
             int exp = (grade * (grade + 1)) / 2;
             int sign = minusOneToThePowerOf(exp);
