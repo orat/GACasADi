@@ -22,7 +22,7 @@ public class Algebra {
     // An dem Index 0 ist ein BasisBlade mit einer leeren Liste. Dieses enspricht dem Skalar.
     // Eigentlich wäre es auch schön, eine List<Grades> zu haben.
     final List<BasisBlade> basisBlades = allCombinationsReuse(baseVectorMetric.size()).stream().map(BasisBlade::new).toList();
-    // ToDo: Check, dass hächster Index in int passt.
+    // ToDo: Check, dass höchster Index in int passt.
     // 2^n ausrechnen mit long.
     // Oder mit Double und schauen, ob es einen Overflow gab.
     final Map<BasisBlade, Integer> basisBladesToIndices = calculateBasisBladesToIndices(basisBlades);

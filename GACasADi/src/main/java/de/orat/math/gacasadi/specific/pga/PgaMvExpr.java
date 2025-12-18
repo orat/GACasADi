@@ -4,6 +4,7 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.api.SXColVec;
 import de.dhbw.rahmlab.casadi.api.SXScalar;
 import static de.dhbw.rahmlab.casadi.api.SXScalar.ZERO_SXScalar;
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
@@ -323,6 +324,12 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     }
 
     protected static PgaMvExpr createFromSX(SX sx) {
+        return new CachedPgaMvExpr(sx);
+    }
+    
+    public static PgaMvExpr create(DM dm) {
+        //var sx = CgaCasADiUtil.toSX(dm);
+        var sx = CasADiUtil.toSX(dm);
         return new CachedPgaMvExpr(sx);
     }
     

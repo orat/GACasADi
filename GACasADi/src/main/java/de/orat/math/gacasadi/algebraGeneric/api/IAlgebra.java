@@ -40,5 +40,4 @@ public interface IAlgebra {
 
     public int[] getEvenIndizes();
     
-    //TODO erweitern und dann auch die impl in GaalopAlgebra in impl.gaalop
 }
