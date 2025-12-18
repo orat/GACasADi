@@ -406,38 +406,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return dual().gpWithScalar(-1d);
     }
 
-    /*@Override
-    public SparseCGASymbolicMultivector op(SparseCGASymbolicMultivector b){
-        //TODO mit transponieren und vertauschen von a und b wirds völlig falsch
-        // so wie es jetzt ist stimmen nur die ersten 5 Elemente
-        System.out.println("---op---");
-        SX gpm = CasADiUtil.toSXProductMatrix( this, CGACayleyTableOuterProduct.instance());
-        System.out.println("--- end of op matrix creation ---");
-        SX result = SxStatic.mtimes(gpm, ( b).getSX());
-        return create(result);
-    }*/
-    
-    // jede algebra
-    // generisch konzeptionell
-    // generisch implementation
-    /**
-     * Scalar product.
-     *
-     * TODO alternativ via gradeSelection() implementieren?
-     *
-     * @param rhs
-     * @return scalar product of this with a 'rhs'
-     */
-    @Override
-    public CgaMvExpr scp(CgaMvExpr rhs) {
-        // eventuell sollte ich ip() explizit implementieren und hier verwenden,
-        // damit scp() unabhängig von der Reihenfolge der Argumente wird
-        // return ip(x, LEFT_CONTRACTION).scalarPart();
-        SX sxres = (lc(rhs)).getSX().at(0);
-
-        return createFromScalar(sxres);
-    }
-
     // cga algebra
     // spezifisch konzeptionell
     // spezifisch implementation

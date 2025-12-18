@@ -366,4 +366,8 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         }
         return create(res);
     }
+
+    public EXPR scp(EXPR rhs) {
+        return this.lc(rhs).gradeSelection(0);
+    }
 }
