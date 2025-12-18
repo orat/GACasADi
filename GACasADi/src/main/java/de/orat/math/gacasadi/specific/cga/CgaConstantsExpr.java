@@ -1,11 +1,10 @@
 package de.orat.math.gacasadi.specific.cga;
 
-import de.orat.math.gacalc.spi.IConstantsExpression;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class CgaConstantsExpr implements IConstantsExpression<CgaMvExpr> {
+public class CgaConstantsExpr extends CgaConstants<CgaMvExpr> {
 
     public static final CgaConstantsExpr instance = new CgaConstantsExpr();
 
@@ -14,20 +13,9 @@ public class CgaConstantsExpr implements IConstantsExpression<CgaMvExpr> {
     }
 
     @Override
-    public CgaFactory fac() {
-        return CgaFactory.instance;
-    }
-
-    @Override
     public CgaMvExpr getSparseEmptyInstance() {
         final String name = "SparseEmptyInstance";
         return cached2(name, () -> CgaMvVariable.createSparse(name));
-    }
-
-    @Override
-    public CgaMvExpr getDenseEmptyInstance() {
-        final String name = "DenseEmptyInstance";
-        return cached2(name, () -> CgaMvVariable.createDense(name));
     }
 
     // ConcurrentHashMap to avoid ConcurrentModificationException while testing.

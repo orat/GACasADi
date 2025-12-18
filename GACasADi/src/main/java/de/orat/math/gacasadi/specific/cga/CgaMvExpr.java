@@ -14,7 +14,6 @@ import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
-import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
@@ -50,7 +49,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     private final static CgaFactory fac = CgaFactory.instance;
 
     protected static CgaFactory getFactory() {
-        return fac;
+        return CgaFactory.instance;
     }
 
     // a multivector is represented by a sparse column vector
@@ -229,18 +228,12 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return (grade() == 2);
     }
 
-    private static final CgaConstantsExpr CONSTANTS = CgaConstantsExpr.instance;
-
-    @Override
-    public CgaConstantsExpr constants() {
-        return CONSTANTS;
-    }
-
-    public GaFactory fac() {
+    public CgaFactory fac() {
         return fac;
     }
 
-    
+    protected static final CgaConstantsExpr CONSTANTS = CgaConstantsExpr.instance;
+
     //======================================================
     // Operators
     //======================================================

@@ -5,7 +5,6 @@ import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.api.MultivectorValue;
-import de.orat.math.gacalc.spi.IConstants;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
@@ -14,9 +13,6 @@ import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
-import de.orat.math.gacasadi.specific.cga.CgaMvValue;
-import static de.orat.math.gacasadi.specific.cga.CgaMvValue.constants2;
 import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -57,9 +53,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         return pureSym;
     }
 
-
-    @Override
-    public IConstants<PgaMvValue> constants() {
+    public PgaConstantsValue constants() {
         return PgaFactory.instance.constantsValue();
     }
 
@@ -400,15 +394,4 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         var dm = SxStatic.evalf(sym.getSX());
         return create(dm);
     }
-    
-    @Override
-    public double get(int index) {
-        return IGaMvValue.super.get(index); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
-    @Override
-    public List<Double> get(List<Integer> indices) {
-        return IGaMvValue.super.get(indices); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
 }

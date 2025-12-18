@@ -3,8 +3,6 @@ package de.orat.math.gacasadi.specific.pga;
 import com.google.auto.service.AutoService;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.orat.math.gacalc.spi.IConstantsExpression;
-import de.orat.math.gacalc.spi.IConstantsValue;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacalc.spi.ILoopService;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
@@ -12,9 +10,6 @@ import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
-import de.orat.math.gacasadi.specific.cga.CgaConstantsExpr;
-import de.orat.math.gacasadi.specific.cga.CgaConstantsValue;
-import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
@@ -98,13 +93,11 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
         return this.loopService;
     }
 
-    @Override
-    public IConstantsExpression<PgaMvExpr> constantsExpr() {
+    public PgaConstantsExpr constantsExpr() {
        return PgaConstantsExpr.instance;
     }
 
-    @Override
-    public IConstantsValue<PgaMvValue, PgaMvExpr> constantsValue() {
+    public PgaConstantsValue constantsValue() {
          return PgaConstantsValue.instance;
     }
 
@@ -158,7 +151,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
     public SparseDoubleMatrix createE(double x, double y, double z) {
         int index1 = alDef.indexOfBlade("e1");
         int index2 = alDef.indexOfBlade("e2");
@@ -168,7 +160,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
         return new SparseDoubleMatrix(sparsity, new double[]{x, y, z});
     }
 
-    @Override
     public SparseDoubleMatrix createBaseVectorOrigin(double scalar) {
         //PGAMultivectorSparsity sparsity = new PGAMultivectorSparsity(rows);
         int index = alDef.indexOfBlade("e0");
@@ -176,62 +167,36 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
         return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
-    @Override
-    public SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
     public SparseDoubleMatrix createScalar(double scalar) {
         // the index of the scalar is 0 for all algebras
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{0});
         return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
-    @Override
     public SparseDoubleMatrix createBaseVectorX(double scalar) {
         int index = alDef.indexOfBlade("e1");
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
         return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
-    @Override
     public SparseDoubleMatrix createBaseVectorY(double scalar) {
         int index = alDef.indexOfBlade("e2");
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
         return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
-    @Override
     public SparseDoubleMatrix createBaseVectorZ(double scalar) {
         int index = alDef.indexOfBlade("e3");
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
         return new SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
-    @Override
-    public SparseDoubleMatrix createEpsilonPlus() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
-    public SparseDoubleMatrix createEpsilonMinus() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
-    public SparseDoubleMatrix createMinkovskiBiVector() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
     public SparseDoubleMatrix createEuclideanPseudoscalar() {
         int index = alDef.indexOfBlade("e1","e2","e3");
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
-    @Override
     public SparseDoubleMatrix createPseudoscalar() {
         int index = alDef.indexOfBlade("e0","e1","e2","e3");
         ColumnVectorSparsity sparsity = new ColumnVectorSparsity(alDef.getBladesCount(), new int[]{index});
@@ -239,52 +204,28 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
     }
 
     @Override
-    public SparseDoubleMatrix createInversePseudoscalar() {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
-
-    @Override
-    public SparseDoubleMatrix createBaseVectorInfinityDorst() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
-    public SparseDoubleMatrix createBaseVectorOriginDorst() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
-    public SparseDoubleMatrix createBaseVectorInfinityDoran() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
-    public SparseDoubleMatrix createBaseVectorOriginDoran() {
-        throw new UnsupportedOperationException("Not supported!"); 
-    }
-
-    @Override
     public IAlgebra getIAlgebra() {
         return this.alDef;
     }
     
-    public static final Map<String, PgaMvExpr> constants = createConstants();
+    public final Map<String, PgaMvExpr> constants = createConstants();
 
     @Override
     public Map<String, PgaMvExpr> getConstants() {
         return constants;
     }
     
-    private static Map<String, PgaMvExpr> createConstants() {
+    private Map<String, PgaMvExpr> createConstants() {
         Map<String, PgaMvExpr> map = new HashMap<>();
-        map.put("ε₀", PgaConstantsExpr.instance.getBaseVectorOrigin());
-        map.put("ε₁", PgaConstantsExpr.instance.getBaseVectorX());
-        map.put("ε₂", PgaConstantsExpr.instance.getBaseVectorY());
-        map.put("ε₃", PgaConstantsExpr.instance.getBaseVectorZ());
-        map.put("π", PgaConstantsExpr.instance.getPi());
-        //map.put("o", PgaConstantsExpr.instance.getBaseVectorOriginDorst());
-        map.put("E₃", PgaConstantsExpr.instance.getEuclideanPseudoscalar());
-        map.put("E", PgaConstantsExpr.instance.getPseudoscalar());
+
+        map.put("ε₀", createValue(createBaseVectorOrigin(1d)).toExpr());
+        map.put("ε₁", createValue(createBaseVectorX(1d)).toExpr());
+        map.put("ε₂", createValue(createBaseVectorY(1d)).toExpr());
+        map.put("ε₃", createValue(createBaseVectorZ(1d)).toExpr());
+        map.put("π", createValue(createScalar(Math.PI)).toExpr());
+        map.put("E₃", createValue(createEuclideanPseudoscalar()).toExpr());
+        map.put("E", createValue(createPseudoscalar()).toExpr());
+
         return map;
     }
 }
