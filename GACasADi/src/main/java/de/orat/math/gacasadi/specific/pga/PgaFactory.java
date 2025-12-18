@@ -178,7 +178,7 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
@@ -211,17 +211,17 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public SparseDoubleMatrix createEpsilonPlus() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
     public SparseDoubleMatrix createEpsilonMinus() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
     public SparseDoubleMatrix createMinkovskiBiVector() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
@@ -240,27 +240,27 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public SparseDoubleMatrix createInversePseudoscalar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinityDorst() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorOriginDorst() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorInfinityDoran() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
     public SparseDoubleMatrix createBaseVectorOriginDoran() {
-        throw new UnsupportedOperationException("Not supported!"); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported!"); 
     }
 
     @Override
@@ -277,7 +277,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
     
     private static Map<String, PgaMvExpr> createConstants() {
         Map<String, PgaMvExpr> map = new HashMap<>();
-
         map.put("ε₀", PgaConstantsExpr.instance.getBaseVectorOrigin());
         map.put("ε₁", PgaConstantsExpr.instance.getBaseVectorX());
         map.put("ε₂", PgaConstantsExpr.instance.getBaseVectorY());
@@ -286,7 +285,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
         //map.put("o", PgaConstantsExpr.instance.getBaseVectorOriginDorst());
         map.put("E₃", PgaConstantsExpr.instance.getEuclideanPseudoscalar());
         map.put("E", PgaConstantsExpr.instance.getPseudoscalar());
-
         return map;
     }
 }
