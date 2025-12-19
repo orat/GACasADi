@@ -53,7 +53,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     @Uncached
     @Override
     public PgaMvExpr create(SX sx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+         return new CachedPgaMvExpr(sx);
     }
 
     public static PgaMvVariable create(String name, int[] grades) {
@@ -275,21 +275,23 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }*/
 
+    private MultivectorExpression.Callback callback;
+
     @Override
     public void init(MultivectorExpression.Callback callback) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+         this.callback = callback;
     }
 
     @Override
     public MatrixSparsity getSparsity() {
-        // return CgaCasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return CasADiUtil.toColumnVectorSparsity(sx.sparsity());
     }
 
     @Override
     public PgaMvExpr undual() {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        return dual();
         //TODO see Gunns publications, copy auch in die dsl-helper-functions
+        //muss ich da das Vorzeichen noch ändern?
     }
 
     protected static PgaMvExpr createFromSX(SX sx) {

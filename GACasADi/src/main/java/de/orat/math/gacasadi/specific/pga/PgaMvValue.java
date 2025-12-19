@@ -409,4 +409,13 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         var dm = SxStatic.evalf(sym.getSX());
         return create(dm);
     }
+    
+    
+    /**
+     * Can be expensive.
+     */
+    @Override
+    public String toString() {
+        return this.getDM().toString();
+    }
 }

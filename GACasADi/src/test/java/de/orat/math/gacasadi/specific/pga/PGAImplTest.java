@@ -40,9 +40,8 @@ public class PGAImplTest {
         sb.append("]");
         return sb.toString();
     }
-    //@Test
+    @Test
     public void testAdd() {
-        
         IAlgebra algebra = PgaFactory.instance.getIAlgebra();
         int bladesCount = algebra.getBladesCount();
         GAFactory exprGraphFactory = TestExprGraphFactory.instance();
@@ -92,6 +91,242 @@ public class PGAImplTest {
         } catch (Exception e) {}
     }
     
+    @Test
+    public void testSub() {
+        IAlgebra algebra = PgaFactory.instance.getIAlgebra();
+        int bladesCount = algebra.getBladesCount();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        ColumnVectorSparsity sparsity_a = new ColumnVectorSparsity(bladesCount, new int[]{1, 2, 3});
+        MultivectorVariable mvsa = exprGraphFactory.createVariable("a", sparsity_a);
+        ColumnVectorSparsity sparsity_b = new ColumnVectorSparsity(bladesCount, new int[]{1, 3, 4});
+        MultivectorVariable mvsb = exprGraphFactory.createVariable("b", sparsity_b);
+
+        MultivectorExpression mvsc = mvsa.subtraction(mvsb);
+
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mvsa);
+        parameters.add(mvsb);
+        List<MultivectorExpression> returns = new ArrayList<>();
+        returns.add(mvsc);
+
+        GAFunction f = exprGraphFactory.createFunction("c", parameters, returns);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+
+        double[] values_A = new double[bladesCount];
+        values_A[1] = 1;
+        values_A[2] = 2;
+        values_A[3] = 3;
+        MultivectorValue arg_a = createValue(exprGraphFactory, values_A);
+        System.out.println("a=" + arg_a.toString());
+        arguments.add(arg_a);
+
+        double[] values_B = new double[bladesCount];
+        values_B[1] = 1;
+        values_B[3] = 1;
+        values_B[4] = 1;
+        MultivectorValue arg_b = createValue(exprGraphFactory, values_B);
+        System.out.println("b=" + arg_b.toString());
+        arguments.add(arg_b);
+
+        double[] test = sub(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+
+        try {
+            List<MultivectorValue> mv = f.callValue(arguments);
+            System.out.println("c=a-b=" + mv.iterator().next().toString());
+            System.out.println("test=" + testMatrix.toString());
+            assertTrue(equals((new SparseDoubleColumnVector(mv.iterator().next().elements())).toArray(), test));
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testOP() {
+        IAlgebra algebra = PgaFactory.instance.getIAlgebra();
+        int bladesCount = algebra.getBladesCount();
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        ColumnVectorSparsity sparsity_a = new ColumnVectorSparsity(bladesCount, new int[]{1, 2, 3});
+        MultivectorVariable mvsa = exprGraphFactory.createVariable("a", sparsity_a);
+        ColumnVectorSparsity sparsity_b = new ColumnVectorSparsity(bladesCount, new int[]{1, 3, 4});
+        MultivectorVariable mvsb = exprGraphFactory.createVariable("b", sparsity_b);
+
+        MultivectorExpression mvsc = mvsa.outerProduct(mvsb);
+
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mvsa);
+        parameters.add(mvsb);
+        List<MultivectorExpression> returns = new ArrayList<>();
+        returns.add(mvsc);
+
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, returns);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+
+        double[] values_A = new double[bladesCount];
+        values_A[1] = 1;
+        values_A[2] = 2;
+        values_A[3] = 3;
+        //values_A = exprGraphFactory.createRandomCGAKVector(1);
+
+        MultivectorValue arg_a = createValue(exprGraphFactory, values_A);
+        System.out.println("a=" + arg_a.toString());
+        arguments.add(arg_a);
+
+        double[] values_B = new double[bladesCount];
+        values_B[1] = 1;
+        values_B[3] = 1;
+        values_B[4] = 1;
+        //values_B = exprGraphFactory.createRandomCGAKVector(1);
+
+        MultivectorValue arg_b = createValue(exprGraphFactory, values_B);
+        System.out.println("b=" + arg_b.toString());
+        arguments.add(arg_b);
+
+        double[] test = op(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+
+        try {
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
+            System.out.println("a^b=" + mv.toString());
+            System.out.println("test==" + testMatrix.toString());
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testGPRandom() {
+
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a"/*, 1*/);
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b"/*, 1*/);
+
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb);
+
+        MultivectorExpression res = mva.geometricProduct(mvb);
+        System.out.println("gprandom: " + res.toString());
+
+        List<MultivectorExpression> result = new ArrayList<>();
+        result.add(res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+
+        double[] values_A = createValueRandom();
+        MultivectorValue arg_a = createValue(exprGraphFactory, values_A);
+        arguments.add(arg_a);
+
+        double[] values_B = createValueRandom();
+        MultivectorValue arg_b = createValue(exprGraphFactory, values_B);
+        arguments.add(arg_b);
+
+        double[] test = gp(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            System.out.println("a=" + arg_a.toString());
+            System.out.println("b=" + arg_b.toString());
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
+            System.out.println("random (gp): a b=" + mv.toString());
+            System.out.println("test=" + testMatrix.toString());
+
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testDotRandom() {
+
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mva = exprGraphFactory.createVariableDense("a");
+        MultivectorVariable mvb = exprGraphFactory.createVariableDense("b");
+
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mva);
+        parameters.add(mvb);
+
+        MultivectorExpression res = mva.dotProduct(mvb);
+        System.out.println("dotRandom: " + res.toString());
+
+        List<MultivectorExpression> result = new ArrayList<>();
+        result.add(res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+
+        double[] values_A = createValueRandom();
+        MultivectorValue arg_a = createValue(exprGraphFactory, values_A);
+        arguments.add(arg_a);
+
+        double[] values_B = createValueRandom();
+        MultivectorValue arg_b = createValue(exprGraphFactory, values_B);
+        arguments.add(arg_b);
+
+        double[] test = ip/*dot*/(values_A, values_B);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+
+        try {
+            System.out.println("a=" + arg_a.toString());
+            System.out.println("b=" + arg_b.toString());
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
+            System.out.println("random (dot): " + mv.toString());
+            System.out.println("test=" + testMatrix.toString());
+
+            // nur der scalar stimmt alle anderen Werte sind falsch
+            //TODO
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }
+    
+    /*@Test
+    public void testGradeSelectionRandom() {
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        ColumnVectorSparsity sparsity_a = ColumVectorSparsity.dense();
+        MultivectorVariable mva = exprGraphFactory.createVariable("a", sparsity_a);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+
+        double[] values_A = createValueRandom();
+        MultivectorValue arg_a = createValue(exprGraphFactory, values_A);
+        arguments.add(arg_a);
+
+        //TODO
+        // random auswählen
+        int grade = 5;
+        MultivectorExpression res = mva.gradeExtraction(grade);
+
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mva);
+
+        List<MultivectorExpression> result = new ArrayList<>();
+        result.add(res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
+
+        double[] test = gradeSelection(values_A, grade);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
+            System.out.println("gradeSelection()=" + mv.toString());
+            System.out.println("test=" + testMatrix.toString());
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test));
+        } catch (Exception e) {
+        }
+    }*/
+
 		// just for debug and print output, the basis names
 		//public static string[] _basis = new[] { "1","e0","e1","e2","e3","e01","e02","e03","e12","e31","e23","e021","e013","e032","e123","e0123" };
 
