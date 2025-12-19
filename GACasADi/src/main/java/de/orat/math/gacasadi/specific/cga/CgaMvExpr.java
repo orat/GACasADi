@@ -12,6 +12,7 @@ import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
@@ -76,7 +77,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     public static CgaMvExpr create(SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
-        SX sx = new SX(CgaCasADiUtil.toCasADiSparsity(vector.getSparsity()),
+        SX sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
         return new CachedCgaMvExpr(sx);
     }
@@ -112,7 +113,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     public static CgaMvExpr create(DM dm) {
-        var sx = CgaCasADiUtil.toSX(dm);
+        var sx = CasADiUtil.toSX(dm);
         return new CachedCgaMvExpr(sx);
     }
 

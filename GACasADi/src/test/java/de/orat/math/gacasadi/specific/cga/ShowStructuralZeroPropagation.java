@@ -3,6 +3,7 @@ package de.orat.math.gacasadi.specific.cga;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 
 public class ShowStructuralZeroPropagation {
 
@@ -23,7 +24,7 @@ public class ShowStructuralZeroPropagation {
         // -----------------
         var c = SxStatic.sym("c", 2, 2);
         System.out.println(c);
-        System.out.println(CgaCasADiUtil.toMatrixSparsity(c.sparsity()));
+        System.out.println(CasADiUtil.toMatrixSparsity(c.sparsity()));
         System.out.println("// -----------------");
         // -----------------
         c.at(0, 0).assign(structuralZeroSum);
@@ -32,7 +33,7 @@ public class ShowStructuralZeroPropagation {
         System.out.println("// -----------------");
         // -----------------
         System.out.println("Assigned structural zero changes sparsity:");
-        System.out.println(CgaCasADiUtil.toMatrixSparsity(c.sparsity()));
+        System.out.println(CasADiUtil.toMatrixSparsity(c.sparsity()));
         System.out.println("// -----------------");
         // -----------------
     }
