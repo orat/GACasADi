@@ -4,19 +4,17 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import static de.orat.math.gacasadi.generic.CasADiUtil.nonzeros;
 import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
+import de.orat.math.gacasadi.generic.IGaMvExpr;
 import de.orat.math.sparsematrix.DenseStringMatrix;
 import de.orat.math.sparsematrix.MatrixSparsity;
-import de.orat.math.sparsematrix.SparseStringMatrix;
 import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
-import de.orat.math.gacasadi.generic.IGaMvExpr;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -147,14 +145,4 @@ public class CgaCasADiUtil extends CasADiUtil {
         return new DenseCGAColumnVector(nonzeros, sparsity.getrow());
     }
 
-    public static SparseStringMatrix toStringMatrix(SX m) {
-        String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
-        for (int i = 0; i < m.rows(); i++) {
-            for (int j = 0; j < m.columns(); j++) {
-                SxSubMatrix cell = m.at(i, j);
-                stringArr[i][j] = cell.toString();
-            }
-        }
-        return new SparseStringMatrix(toCGAMultivectorSparsity(m.sparsity()), stringArr);
-    }
 }

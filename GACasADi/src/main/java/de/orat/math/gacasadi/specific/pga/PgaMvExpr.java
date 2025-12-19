@@ -12,7 +12,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
-import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;

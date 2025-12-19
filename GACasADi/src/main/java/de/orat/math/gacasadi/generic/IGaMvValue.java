@@ -2,6 +2,7 @@ package de.orat.math.gacasadi.generic;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.orat.math.gacalc.spi.IMultivectorValue;
+import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,5 +25,10 @@ public interface IGaMvValue<VAL extends IGaMvValue<VAL, EXPR>, EXPR extends IGaM
             values.add(value);
         }
         return values;
+    }
+
+    @Override
+    default SparseDoubleMatrix elements() {
+        return CasADiUtil.elements(this.getDM());
     }
 }

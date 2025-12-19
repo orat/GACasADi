@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.List;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
@@ -412,5 +413,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
             }
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(sx);
+        return stringMatrix.toString(true);
     }
 }

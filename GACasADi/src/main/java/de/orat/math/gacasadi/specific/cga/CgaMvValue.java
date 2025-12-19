@@ -34,6 +34,14 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
         this.callback = callback;
     }
 
+    /**
+     * Can be expensive.
+     */
+    @Override
+    public String toString() {
+        return this.getDM().toString();
+    }
+
     private final ComposableImmutableBinaryTree<CgaMvValue> inputs;
 
     /**
@@ -139,25 +147,6 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
             this.lazyDM = evalMV.lazyDM;
         }
         return lazyDM;
-    }
-
-    /**
-     * Can be expensive.
-     */
-    @Override
-    public String toString() {
-        return this.getDM().toString();
-    }
-
-    /**
-     * Get a complete multivector as double[], inclusive structural 0 values. Can be expensive.
-     *
-     * @return double[32] elements corresponding to the underlaying implementation specific coordindate
-     * system.
-     */
-    @Override
-    public SparseDoubleMatrix elements() {
-        return CgaCasADiUtil.elements(this.getDM());
     }
 
     /**

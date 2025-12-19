@@ -10,7 +10,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
-import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
@@ -20,7 +19,6 @@ import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
-import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.Arrays;
 import java.util.Objects;
 import util.cga.CGACayleyTable;
@@ -150,12 +148,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     @Override
     public IAlgebra getIAlgebra() {
         return CgaFactory.instance.alDef;
-    }
-
-    @Override
-    public String toString() {
-        SparseStringMatrix stringMatrix = CgaCasADiUtil.toStringMatrix(sx);
-        return stringMatrix.toString(true);
     }
 
     /**
