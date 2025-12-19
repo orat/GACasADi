@@ -171,65 +171,64 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return val;
     }
 
-    
     // create constants
     // based on e4e5
-    public static SparseDoubleMatrix createBaseVectorOrigin(double scalar) {
+    protected static SparseDoubleMatrix createBaseVectorOrigin(double scalar) {
         double[] nonzeros = new double[]{-0.5d * scalar, 0.5d * scalar};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
+    protected static SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
         double[] nonzeros = new double[]{scalar, scalar};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorX(double scalar) {
+    protected static SparseDoubleMatrix createBaseVectorX(double scalar) {
         double[] nonzeros = new double[]{scalar};
         int[] rows = new int[]{1};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorY(double scalar) {
+    protected static SparseDoubleMatrix createBaseVectorY(double scalar) {
         double[] nonzeros = new double[]{scalar};
         int[] rows = new int[]{2};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorZ(double scalar) {
+    protected static SparseDoubleMatrix createBaseVectorZ(double scalar) {
         double[] nonzeros = new double[]{scalar};
         int[] rows = new int[]{3};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createScalar(double scalar) {
+    protected static SparseDoubleMatrix createScalar(double scalar) {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
         return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{scalar});
     }
 
-    public static SparseDoubleMatrix createEpsilonPlus() {
+    protected static SparseDoubleMatrix createEpsilonPlus() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{4, 5});
         return new SparseDoubleMatrix(sparsity, new double[]{1d, 0d});
     }
 
-    public static SparseDoubleMatrix createEpsilonMinus() {
+    protected static SparseDoubleMatrix createEpsilonMinus() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{4, 5});
         return new SparseDoubleMatrix(sparsity, new double[]{0d, 1d});
     }
 
-    public static SparseDoubleMatrix createEuclideanPseudoscalar() {
+    protected static SparseDoubleMatrix createEuclideanPseudoscalar() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{16});
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
-    public SparseDoubleMatrix createPseudoscalar() {
+    protected SparseDoubleMatrix createPseudoscalar() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{this.alDef.getBladesCount() - 1});
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
@@ -238,11 +237,11 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
     // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
     // geht nur für CGA?
-    public SparseDoubleMatrix createInversePseudoscalar() {
+    protected SparseDoubleMatrix createInversePseudoscalar() {
         return CgaFactory.instance.createValue(createPseudoscalar()).reverse().elements();
     }
 
-    private static int getMikovskiBivectorIndex() {
+    protected static int getMikovskiBivectorIndex() {
         return 15;
     }
 
@@ -253,12 +252,12 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
      *
      * @return
      */
-    public static SparseDoubleMatrix createMinkovskiBiVector() {
+    protected static SparseDoubleMatrix createMinkovskiBiVector() {
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{getMikovskiBivectorIndex()});
         return new SparseDoubleMatrix(sparsity, new double[]{2d});
     }
 
-    public static SparseDoubleMatrix createE(double x, double y, double z) {
+    protected static SparseDoubleMatrix createE(double x, double y, double z) {
         double[] nonzeros = new double[]{x, y, z};
         int[] rows = new int[]{1, 2, 3};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
@@ -266,28 +265,28 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     }
 
     // die folgenden Defs sind noch nicht überprüft
-    public static SparseDoubleMatrix createBaseVectorInfinityDorst() {
+    protected static SparseDoubleMatrix createBaseVectorInfinityDorst() {
         double[] nonzeros = new double[]{-1d, 1d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorOriginDorst() {
+    protected static SparseDoubleMatrix createBaseVectorOriginDorst() {
         double[] nonzeros = new double[]{0.5d, 0.5d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorInfinityDoran() {
+    protected static SparseDoubleMatrix createBaseVectorInfinityDoran() {
         double[] nonzeros = new double[]{1d, 1d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
         return new SparseDoubleMatrix(sparsity, nonzeros);
     }
 
-    public static SparseDoubleMatrix createBaseVectorOriginDoran() {
+    protected static SparseDoubleMatrix createBaseVectorOriginDoran() {
         double[] nonzeros = new double[]{1d, -1d};
         int[] rows = new int[]{4, 5};
         CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(rows);
