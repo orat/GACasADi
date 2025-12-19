@@ -293,6 +293,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     }
 
     @Override
+    public int pseudoscalarGrade() {
+        return this.getIAlgebra().getGradesCount() - 1;
+    }
+
+    @Override
     public EXPR gradeSelection(int grade) {
         int[] indicesOfGrade = this.getIAlgebra().getIndizes(grade);
         SX res = createSparseSX();

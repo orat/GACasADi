@@ -153,7 +153,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .map(SX::scalar)
             .toArray(SXElem[]::new);
 
-        SX result = new SXColVec(this.getCayleyTable().getBladesCount(),
+        SX result = new SXColVec(this.getIAlgebra().getBladesCount(),
             generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
 
         return create(result);
@@ -203,7 +203,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .toArray(SXElem[]::new);
 
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(this.getCayleyTable().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
+        return create(new SXColVec(this.getIAlgebra().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
     }
 
     @Override
@@ -245,7 +245,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .map(SX::scalar)
             .toArray(SXElem[]::new);
 
-        return create(new SXColVec(this.getCayleyTable().getBladesCount(),
+        return create(new SXColVec(this.getIAlgebra().getBladesCount(),
             valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
     }
 
@@ -283,13 +283,6 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     @Override
     public MatrixSparsity getSparsity() {
         // return CgaCasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    // kann weg, wird nur noch zur Bestimmung des pseudoscalar-dim verwendet
-    //TODO
-    @Override
-    public CayleyTable getCayleyTable() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

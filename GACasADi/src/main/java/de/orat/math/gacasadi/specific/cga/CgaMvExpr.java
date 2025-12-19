@@ -153,11 +153,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     @Override
-    public CayleyTable getCayleyTable() {
-        return baseCayleyTable;
-    }
-
-    @Override
     public String toString() {
         SparseStringMatrix stringMatrix = CgaCasADiUtil.toStringMatrix(sx);
         return stringMatrix.toString(true);
@@ -544,7 +539,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         // alle in der exp()-Impl verwendeten casdi-Funktionen überprüfen, ob diese auch wirklich
         // die richtige sparsity zurückliefern. Hier könnte die Ursache des Problems liegen, z.B. 
         // insbesondere die trigometrischen Funktionen
-        SX result = new SXColVec(getCayleyTable().getBladesCount(), 
+        SX result = new SXColVec(getIAlgebra().getBladesCount(),
             generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
         
         //WORKAROUND
@@ -680,7 +675,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
             .toArray(SXElem[]::new);
         
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(getCayleyTable().getBladesCount(), valuesSXElem, evenIndizes).sx);
+        return create(new SXColVec(getIAlgebra().getBladesCount(), valuesSXElem, evenIndizes).sx);
     }
 
     // jede algebra
@@ -815,7 +810,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
          
         //return bivector
         SXElem[] values = conv(B);
-        return create(new SXColVec(getCayleyTable().getBladesCount(), 
+        return create(new SXColVec(getIAlgebra().getBladesCount(),
             values, CGACayleyTable.getBivectorIndizes()).sx);
     }
     private SXElem[] conv(SXScalar[] values){
