@@ -21,7 +21,6 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
 import java.util.Objects;
-import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperations;
 
 /**
