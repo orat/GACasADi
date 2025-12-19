@@ -1,18 +1,11 @@
 package de.orat.math.gacasadi.specific.cga;
 
-import de.dhbw.rahmlab.casadi.SxStatic;
 import static de.dhbw.rahmlab.casadi.api.Util.toIntArr;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
-import de.orat.math.gacalc.util.CayleyTable;
-import de.orat.math.gacalc.util.CayleyTable.Cell;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import static de.orat.math.gacasadi.generic.CasADiUtil.nonzeros;
 import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
-import de.orat.math.gacasadi.generic.IGaMvExpr;
-import de.orat.math.sparsematrix.DenseStringMatrix;
-import de.orat.math.sparsematrix.MatrixSparsity;
-import util.cga.CGACayleyTable;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.DenseCGAColumnVector;
 
@@ -38,6 +31,7 @@ public class CgaCasADiUtil extends CasADiUtil {
      * @param cgaCayleyTable Cayley-table representing the specific product
      *
      */
+    /*
     public static SX toSXProductMatrix(CgaMvExpr mv, CGACayleyTable cgaCayleyTable) {
 
         String[][] log = new String[cgaCayleyTable.getRows()][cgaCayleyTable.getCols()];
@@ -114,6 +108,7 @@ public class CgaCasADiUtil extends CasADiUtil {
 
         return result;
     }
+     */
 
     /**
      * Create a sparsity object for the given cayleyTable based on the sparsity of the given sparse
@@ -123,6 +118,7 @@ public class CgaCasADiUtil extends CasADiUtil {
      * @param mv sparse multivector
      * @return sparsity of the matrix representation of the given multivector for the given cayley table
      */
+    /*
     private static MatrixSparsity createSparsity(CayleyTable cayleyTable, IGaMvExpr mv) {
         double[][] values = new double[mv.getBladesCount()][mv.getBladesCount()];
         MatrixSparsity sparsity = mv.getSparsity();
@@ -139,6 +135,7 @@ public class CgaCasADiUtil extends CasADiUtil {
         }
         return new MatrixSparsity(values, true);
     }
+     */
 
     public static DenseCGAColumnVector toDenseDoubleMatrix(DM dm, CGAMultivectorSparsity sparsity) {
         double[] nonzeros = nonzeros(dm);

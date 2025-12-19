@@ -4,13 +4,13 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -19,8 +19,6 @@ import org.apache.commons.math3.util.Precision;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
-import de.orat.math.gacasadi.generic.IGaMvValue;
-import util.cga.CGACayleyTable;
 
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
@@ -995,9 +993,13 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
         CgaMvValue result = m.gradeSelection(2).rc(o).negate();
         return extractE3(result);
     }
-    
+
+    public static int[] getEuclidIndizes() {
+        return new int[]{1, 2, 3};
+    }
+
     private static Tuple extractE3(CgaMvValue m) {
-        int[] ind = CGACayleyTable.getEuclidIndizes();
+        int[] ind = getEuclidIndizes();
         StdVectorDouble elements = m.getDM().get_elements();
         return new Tuple(new double[]{elements.get(ind[0]), 
                            elements.get(ind[1]),

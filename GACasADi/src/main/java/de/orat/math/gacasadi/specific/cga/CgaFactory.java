@@ -242,6 +242,10 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return CgaFactory.instance.createValue(createPseudoscalar()).reverse().elements();
     }
 
+    private static int getMikovskiBivectorIndex() {
+        return 15;
+    }
+
     /**
      * Minkovski Bivector.
      *
@@ -250,7 +254,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
      * @return
      */
     public static SparseDoubleMatrix createMinkovskiBiVector() {
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getMikovskiBivectorIndex()});
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{getMikovskiBivectorIndex()});
         return new SparseDoubleMatrix(sparsity, new double[]{2d});
     }
 
