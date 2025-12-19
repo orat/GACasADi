@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import util.cga.CGACayleyTableGeometricProduct;
 
 @AutoService(IGAFactory.class)
 public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVariable, CgaMvValue> {
@@ -35,8 +34,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     // cga_2 hat den Basiswechsel nicht und hat dadurch das gleiche gp wie vorherige Implementierung.
     protected final IAlgebra alDef = new GaalopAlgebra("cga_2");
     protected final Optional<Path> alLibFile = ((GaalopAlgebra) alDef).algebraLibFile;
-
-    private static final CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
     public static final CgaFactory instance = new CgaFactory();
 
@@ -161,7 +158,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     @Override
     public CgaMvValue createValueRandom(int[] grades) {
         Random random = new Random();
-        int[] indizes = CGACayleyTableGeometricProduct.getIndizes(grades);
+        int[] indizes = this.getIAlgebra().getIndizes(grades);
         double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
         var sparsity = createSparsity(indizes);
         var sdm = new SparseDoubleColumnVector(sparsity, values);

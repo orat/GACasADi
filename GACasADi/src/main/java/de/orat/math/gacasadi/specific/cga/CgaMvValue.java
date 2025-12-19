@@ -17,13 +17,10 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
-import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.SparseCGAColumnVector;
 
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
-
-    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
     /**
      * Can be expensive.
@@ -102,14 +99,14 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     public static CgaMvValue create(SparseDoubleMatrix vec) {
         double[] nonzeros = vec.nonzeros();
         int[] rows = vec.getSparsity().getrow();
-        if (baseCayleyTable.getBladesCount() < nonzeros.length) {
+        if (CgaFactory.instance.getIAlgebra().getBladesCount() < nonzeros.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(nonzeros.length));
         }
         if (nonzeros.length != rows.length) {
             throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
         }
-        var dm = CasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
+        var dm = CasADiUtil.toDM(CgaFactory.instance.getIAlgebra().getBladesCount(), nonzeros, rows);
         return create(dm);
     }
 
