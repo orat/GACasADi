@@ -193,20 +193,11 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return null;
     }
 
-    @Override
+    /*
     public boolean isGeneralEven() {
         return getSparsity().isGeneralEven();
     }
-
-    @Override
-    public boolean isEven(){
-        return getSparsity().isEven();
-    }
-
-    @Override
-    public boolean isBivector(){
-        return (grade() == 2);
-    }
+     */
 
     public CgaFactory fac() {
         return fac;

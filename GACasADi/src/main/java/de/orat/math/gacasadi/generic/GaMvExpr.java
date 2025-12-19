@@ -392,4 +392,25 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public EXPR scp(EXPR rhs) {
         return this.lc(rhs).gradeSelection(0);
     }
+
+    @Override
+    public boolean isBivector() {
+        int[] grades = this.grades();
+        if (grades.length != 1) {
+            return false;
+        }
+        return grades[0] == 2;
+    }
+
+    @Override
+    public boolean isEven() {
+        // Could be implemented with getEvenIndices and check, if there is one of nzIndices which is not in getEvenIndices.
+        List<Integer> grades = getIAlgebra().getGrades(nzIndices());
+        for (int grade : grades) {
+            if (grade % 2 != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

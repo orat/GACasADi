@@ -35,7 +35,6 @@ public class GaalopAlgebra implements IAlgebra {
     private final List<Integer> gradeToGradeInversionSign;
     private final List<Integer> gradeToReverseSign;
 
-
     public GaalopAlgebra(String algebraName) {
         this.algebraPath = getAlgebraPath(algebraName);
         this.algebraDefinitionFile = getADF(this.algebraPath);
@@ -152,14 +151,17 @@ public class GaalopAlgebra implements IAlgebra {
         }
         return index;
     }
-    
-    public int[] getIndizes(int grade){
+
+    @Override
+    public int[] getIndizes(int grade) {
         return algebra.getIndizes(grade);
     }
+
+    @Override
     // ungetested
-    public int[] getIndizes(int[] grades){
+    public int[] getIndizes(int[] grades) {
         List<Integer> indizes = new ArrayList<>();
-        for (int i=0;i<grades.length;i++){
+        for (int i = 0; i < grades.length; i++) {
             int[] ints = getIndizes(grades[i]);
             indizes.addAll(Arrays.stream(ints).boxed().toList());
         }
@@ -168,14 +170,13 @@ public class GaalopAlgebra implements IAlgebra {
         // toArray() is used to return an array
         return indizes.stream().mapToInt(Integer::intValue).toArray();
     }
-    
-    // ungetested bisher: even indizes for PGA = [1, 6, 7, 8, 9, 10, 11, 16]
-    //FIXME 1 ist falsch, da sollte 0 stehen und dann sollten es mit 5 statt mit 6 beginnen und 15 statt 16
-    // also alle indizes sind um 1 zu groß
-    public int[] getEvenIndizes(){
-        // 0, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 26, 27, 28, 29, 30 für cga
-        List<Integer> grades = new ArrayList<>();
-        for (int i=0;i<=getBaseSize();i = i+2){
+
+    // Always same for same Algebra. Could be cached.
+    @Override
+    public int[] getEvenIndizes() {
+        final int gradesCount = this.getGradesCount();
+        List<Integer> grades = new ArrayList<>(gradesCount);
+        for (int i = 0; i <= gradesCount; i += 2) {
             grades.add(i);
         }
         return getIndizes(grades.stream().mapToInt(Integer::intValue).toArray());
@@ -191,7 +192,7 @@ public class GaalopAlgebra implements IAlgebra {
     }
 
     @Override
-    public int getGrade(int index){
+    public int getGrade(int index) {
         return algebra.getGrade(index);
     }
 
