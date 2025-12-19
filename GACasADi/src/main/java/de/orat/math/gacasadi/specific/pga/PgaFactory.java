@@ -11,7 +11,6 @@ import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
-import static de.orat.math.gacasadi.specific.pga.PgaMvExpr.create;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;

@@ -229,8 +229,8 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
-    public static SparseDoubleMatrix createPseudoscalar() {
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getPseudoScalarIndex()/*31*/});
+    public SparseDoubleMatrix createPseudoscalar() {
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{this.alDef.getBladesCount() - 1});
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
@@ -238,7 +238,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
     // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
     // geht nur für CGA?
-    public static SparseDoubleMatrix createInversePseudoscalar() {
+    public SparseDoubleMatrix createInversePseudoscalar() {
         return CgaFactory.instance.createValue(createPseudoscalar()).reverse().elements();
     }
 

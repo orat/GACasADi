@@ -132,10 +132,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     // Other methods
     //======================================================
     @Override
-    public void init(MultivectorExpression.Callback callback) {
-    }
-
-    @Override
     public IAlgebra getIAlgebra() {
         return CgaFactory.instance.alDef;
     }

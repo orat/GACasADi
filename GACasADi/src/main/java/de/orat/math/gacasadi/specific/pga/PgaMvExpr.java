@@ -25,7 +25,6 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
-import util.cga.CGACayleyTable;
 
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
 public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpression<PgaMvExpr>, IGetSX, IGetSparsityCasadi {
@@ -121,7 +120,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
 
         // 5,6,7,8,9,10 --> 0,1,2,3,4,5
         // coefficient 9(4) hat anderes Vorzeichen
-        SXColVec B = new SXColVec(this.getSX(), CGACayleyTable.getBivectorIndizes());
+        SXColVec B = new SXColVec(this.getSX(), this.getIAlgebra().getIndizes(2));
 
         // java if-else is possible because only test for structural zeros
         if (B.get(3).isZero() && B.get(4).isZero() && B.get(5).isZero()) {
@@ -153,7 +152,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
             .toArray(SXElem[]::new);
 
         SX result = new SXColVec(this.getIAlgebra().getBladesCount(),
-            generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
+            generalRotorValuesSXElem, this.getIAlgebra().getEvenIndizes()).sx;
 
         return create(result);
     }
@@ -202,7 +201,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
             .toArray(SXElem[]::new);
 
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(this.getIAlgebra().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
+        return create(new SXColVec(this.getIAlgebra().getBladesCount(), valuesSXElem, this.getIAlgebra().getEvenIndizes()).sx);
     }
 
     @Override
@@ -245,7 +244,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
             .toArray(SXElem[]::new);
 
         return create(new SXColVec(this.getIAlgebra().getBladesCount(),
-            valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
+            valuesSXElem, this.getIAlgebra().getIndizes(2)).sx);
     }
 
     private static SXScalar[] logTemp(SXColVec R) {
@@ -273,14 +272,6 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
     public int getBladesCount() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }*/
-
-    private MultivectorExpression.Callback callback;
-
-    @Override
-    public void init(MultivectorExpression.Callback callback) {
-         this.callback = callback;
-    }
-
     @Override
     public MatrixSparsity getSparsity() {
         return CasADiUtil.toColumnVectorSparsity(sx.sparsity());

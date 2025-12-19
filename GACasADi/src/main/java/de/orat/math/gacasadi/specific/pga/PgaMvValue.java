@@ -118,14 +118,6 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         return new PgaMvValue(sym, combinedInputs);
     }
 
-    
-    private MultivectorValue.Callback callback;
-
-    @Override
-    public void init(MultivectorValue.Callback callback) {
-        this.callback = callback;
-    }
-
     // can be expensive
     @Override
     public PgaMvExpr toExpr() {

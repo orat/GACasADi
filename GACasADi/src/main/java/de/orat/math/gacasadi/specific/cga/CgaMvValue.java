@@ -16,23 +16,16 @@ import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
-import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
 import de.orat.math.gacasadi.generic.IGaMvValue;
+import util.cga.CGACayleyTable;
 
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
-
-    private MultivectorValue.Callback callback;
-
-    @Override
-    public void init(MultivectorValue.Callback callback) {
-        this.callback = callback;
-    }
 
     /**
      * Can be expensive.
