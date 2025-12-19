@@ -21,7 +21,6 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
 import java.util.Objects;
-import util.cga.CGAOperations;
 
 /**
  * <pre>
@@ -869,7 +868,15 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      */
     @Override
     public CgaMvExpr generalInverse() {
-        return CGAOperations.generalInverse(this);
+        var conjugate = this.conjugate();
+        var gradeInversion = this.gradeInversion();
+        var reversion = this.reverse();
+        var part1 = conjugate.gp(gradeInversion).gp(reversion);
+        var part2 = this.gp(part1);
+        var part3 = part2.negate14();
+        var scalar = part2.gp(part3).gradeSelection(0);
+        var generalInverse = part1.gp(part3).gp(scalar.scalarInverse());
+        return generalInverse;
     }
 
     //======================================================
