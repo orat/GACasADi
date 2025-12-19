@@ -57,10 +57,11 @@ public interface IAlgebra {
     /**
      * <pre>
      * (-1)^exponent
-     * Precondition: exponent >= 0
+     * Works for all integers.
      * </pre>
      */
     public static int minusOneToThePowerOf(int exponent) {
+        // n & 0x1 == abs(n) mod 2
         return -1 + 2 * ((exponent + 1) & 0x1);
     }
 
