@@ -293,7 +293,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     public PgaMvExpr undual() {
         return dual();
         //TODO see Gunns publications, copy auch in die dsl-helper-functions
-        //muss ich da das Vorzeichen noch ändern?
+        //muss ich da das Vorzeichen noch ändern? oder ist das nur bei CGA nötig?
     }
 
     protected static PgaMvExpr createFromSX(SX sx) {

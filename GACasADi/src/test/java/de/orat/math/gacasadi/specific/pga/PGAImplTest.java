@@ -364,6 +364,49 @@ public class PGAImplTest {
     }
 
 
+    @Test
+    //@Disabled
+    /*public void testExpOfBivectorRandom() {
+
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        // input is bivector is grade 2
+        MultivectorVariable mva = exprGraphFactory.createVariable("a",2);
+        
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mva);
+        
+        MultivectorExpression res = mva.exp();
+        System.out.println("expOfBivectorRandom: " + res.toString());
+
+        List<MultivectorExpression> result = new ArrayList<>();
+        result.add(res);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, result);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+
+        // input is bivector
+        double[] bivector = createValueRandom(2);
+        MultivectorValue arg_a = createValue(exprGraphFactory, bivector);
+        arguments.add(arg_a);
+
+        double[] test = exp(bivector);
+        DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+        //System.out.println(testMatrix.toString());
+
+        try {
+            System.out.println("random a (bivector)=" + arg_a.toString());
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue mv = result2.iterator().next();
+            System.out.println("exp(a)=" + mv.toString());
+            System.out.println("test exp(a)=" + testMatrix.toString());
+
+            double eps = 0.00001;
+            assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
+        } catch (Exception e) {
+        }
+    }*/
+    
+    
 		// just for debug and print output, the basis names
 		//public static string[] _basis = new[] { "1","e0","e1","e2","e3","e01","e02","e03","e12","e31","e23","e021","e013","e032","e123","e0123" };
 
