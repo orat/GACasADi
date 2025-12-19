@@ -1,11 +1,8 @@
 package de.orat.math.gacasadi.generic;
 
-import de.orat.math.gacalc.util.CayleyTable;
-import de.orat.math.gacalc.util.LinearOperators;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
-import de.orat.math.sparsematrix.iDoubleMatrix;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +11,8 @@ import java.util.List;
  */
 public class GAOperatorMatrixUtils {
 
-    private final CayleyTable cayleyTable;
+    private final IAlgebra algebra;
+
     private static SparseDoubleMatrix reversionOperatorMatrix;
     private static SparseDoubleMatrix involutionOperatorMatrix;
     private static SparseDoubleMatrix conjugationOperatorMatrix;
@@ -23,13 +21,13 @@ public class GAOperatorMatrixUtils {
     //----
     
     // negate14
-    public static SparseDoubleMatrix createNegate14MultiplicationMatrix(CayleyTable cayleyTable) {
-        int size = cayleyTable.getBladesCount();
+    public static SparseDoubleMatrix createNegate14MultiplicationMatrix(IAlgebra algebra) {
+        int size = algebra.getBladesCount();
         MatrixSparsity sparsity = MatrixSparsity.diagonal(size);
         double[] nonzeros = new double[size];
         for (int i = 0; i < size; i++) {
             nonzeros[i] = 1d;
-            int grade = cayleyTable.getGrade(i);
+            int grade = algebra.getGrade(i);
             if (grade == 1 || grade == 4) {
                 nonzeros[i] *= -1;
             }
@@ -38,8 +36,8 @@ public class GAOperatorMatrixUtils {
     }
 
     // scalar multiplication
-    public static SparseDoubleMatrix createScalarMultiplicationMatrix(CayleyTable cayleyTable, double s) {
-        int size = cayleyTable.getBladesCount();
+    public static SparseDoubleMatrix createScalarMultiplicationMatrix(IAlgebra algebra, double s) {
+        int size = algebra.getBladesCount();
         MatrixSparsity sparsity = MatrixSparsity.diagonal(size);
         double[] nonzeros = new double[size];
         for (int i = 0; i < size; i++) {
@@ -63,12 +61,12 @@ public class GAOperatorMatrixUtils {
     }
 
     // clifford conjugation
-    public static SparseDoubleMatrix createConjugationOperatorMatrix(CayleyTable cayleyTable) {
-        int size = cayleyTable.getBladesCount();
+    public static SparseDoubleMatrix createConjugationOperatorMatrix(IAlgebra algebra) {
+        int size = algebra.getBladesCount();
         MatrixSparsity sparsity = MatrixSparsity.diagonal(size);
         double[] nonzeros = new double[size];
         for (int i = 0; i < size; i++) {
-            int gradei = cayleyTable.getGrade(i);
+            int gradei = algebra.getGrade(i);
             double exp = gradei * (gradei + 1) * 0.5;
             nonzeros[i] = Math.pow(-1d, exp);
         }
@@ -76,12 +74,12 @@ public class GAOperatorMatrixUtils {
     }
 
     // grade involution
-    public static SparseDoubleMatrix createInvolutionOperatorMatrix(CayleyTable cayleyTable) {
-        int size = cayleyTable.getBladesCount();
+    public static SparseDoubleMatrix createInvolutionOperatorMatrix(IAlgebra algebra) {
+        int size = algebra.getBladesCount();
         MatrixSparsity sparsity = MatrixSparsity.diagonal(size);
         double[] nonzeros = new double[size];
         for (int i = 0; i < size; i++) {
-            int gradei = cayleyTable.getGrade(i);
+            int gradei = algebra.getGrade(i);
             nonzeros[i] = Math.pow(-1d, gradei);
         }
         return new SparseDoubleMatrix(sparsity, nonzeros);
@@ -147,15 +145,15 @@ public class GAOperatorMatrixUtils {
     
     //----
     
-    public GAOperatorMatrixUtils(CayleyTable cayleyTable) {
-        this.cayleyTable = cayleyTable;
+    public GAOperatorMatrixUtils(IAlgebra algebra) {
+        this.algebra = algebra;
     }
 
     public SparseDoubleMatrix getScalarMultiplicationOperatorMatrix(double s) {
         // Caching is wrong here!
         // The value "s" is written directly into the matrix by the create method.
         // And thus the returned matrix depends on the actual value of "s".
-        return createScalarMultiplicationMatrix(cayleyTable, s);
+        return createScalarMultiplicationMatrix(this.algebra, s);
     }
 
     /*public SparseDoubleMatrix getReversionOperatorMatrix() {
