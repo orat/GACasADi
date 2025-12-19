@@ -47,10 +47,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return alLibFile;
     }
 
-    public int getBasisBladesCount() {
-        return baseCayleyTable.getBladesCount();
-    }
-
     /**
      * TODO: With the current implementation, they might depend on the specific definition of cga used.
      */
@@ -157,7 +153,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     // random multivectors
     @Override
     public CgaMvValue createValueRandom() {
-        final int basisBladesCount = getBasisBladesCount();
+        final int basisBladesCount = this.alDef.getBladesCount();
         double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
         var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
         var val = createValue(sdm);

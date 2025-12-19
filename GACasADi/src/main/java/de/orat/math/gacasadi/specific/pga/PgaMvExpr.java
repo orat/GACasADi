@@ -29,7 +29,7 @@ import java.util.Arrays;
 import util.cga.CGACayleyTable;
 
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
-public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpression<PgaMvExpr>, IGetSX, IGetSparsityCasadi {
+public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpression<PgaMvExpr>, IGetSX, IGetSparsityCasadi {
 
     private final static PgaFactory fac = PgaFactory.instance;
 

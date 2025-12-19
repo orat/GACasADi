@@ -85,11 +85,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
        return "pgacasadisx";
     }
 
-    @Override
-    public int getBasisBladesCount() {
-        return alDef.getBaseSize();
-    }
-
     private final GaLoopService<PgaMvExpr, PgaMvVariable> loopService = new GaLoopService<>(this);
 
     @Override
@@ -147,7 +142,7 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public PgaMvValue createValueRandom() {
-        final int basisBladesCount = getBasisBladesCount();
+        final int basisBladesCount = this.alDef.getBladesCount();
         double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
         var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
         var val = createValue(sdm);
