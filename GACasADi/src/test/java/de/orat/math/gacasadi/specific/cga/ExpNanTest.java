@@ -8,8 +8,9 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDM;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.IGetSX;
+import static de.orat.math.gacasadi.specific.cga.CgaMvValue.getEuclidIndizes;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.List;
-import util.cga.SparseCGAColumnVector;
 
 public class ExpNanTest {
 
@@ -58,7 +59,11 @@ public class ExpNanTest {
         System.out.println(exp3);
          */
         //  Noch näher an der DSL.
-        CgaMvValue ae = fac.createValue(SparseCGAColumnVector.createEuclid(new double[]{0d, 1d, 0d}));
+        int[] euclidIndices = getEuclidIndizes();
+        var sparsity = CgaFactory.createSparsity(euclidIndices);
+        double[] nonzeros = new double[]{0d, 1d, 0d};
+        var sdm = new SparseDoubleColumnVector(sparsity, nonzeros);
+        CgaMvValue ae = fac.createValue(sdm);
         CgaMvExpr d6 = fac.createExpr(0.0996);
         CgaMvExpr vec = d6.gp(ae.getDelegate());
         CgaMvExpr expInput = fac.createExpr(-0.5).gp(vec).gp(CgaConstantsExpr.instance.getBaseVectorInfinity());
