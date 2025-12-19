@@ -23,25 +23,22 @@ public class Algebra {
     // grade, indizes
     private Map<Integer, List<Integer>> grades = new HashMap<>();
     
-    private boolean dirty;
+    private boolean dirty = true;
     
 
     public Algebra() {
-        dirty = true;
     }
 
     public Algebra(String[] base, TCBlade[] blades) {
         this.base = base;
         for (TCBlade b: blades)
             this.blades.add(new Blade(b));
-        dirty = true;
     }
 
     public Algebra(AlgebraDefinitionFile alFile) {
         this.base = alFile.base;
         for (Expression e: alFile.blades) 
             blades.add(Blade.createBladeFromExpression(e));
-        dirty = true;
     }
     
     public int getBladeCount() {
@@ -82,6 +79,7 @@ public class Algebra {
 
     public void setBase(String[] base) {
         this.base = base;
+        dirty = true;
     }
 
     /**

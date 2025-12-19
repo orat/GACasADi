@@ -2,30 +2,25 @@ package de.orat.math.gacasadi.specific.cga;
 
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
-import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import static de.orat.math.gacalc.util.GeometricObject.Type.REAL;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
-import util.cga.CGACayleyTableGeometricProduct;
-import util.cga.CGAMultivectorSparsity;
-import util.cga.SparseCGAColumnVector;
-import de.orat.math.gacasadi.generic.IGaMvValue;
-import util.cga.CGACayleyTable;
 
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
-
-    private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
     /**
      * Can be expensive.
@@ -104,19 +99,19 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     public static CgaMvValue create(SparseDoubleMatrix vec) {
         double[] nonzeros = vec.nonzeros();
         int[] rows = vec.getSparsity().getrow();
-        if (baseCayleyTable.getBladesCount() < nonzeros.length) {
+        if (CgaFactory.instance.getIAlgebra().getBladesCount() < nonzeros.length) {
             throw new IllegalArgumentException("Construction of CGA multivevector failed because given array has wrong length "
                 + String.valueOf(nonzeros.length));
         }
         if (nonzeros.length != rows.length) {
             throw new IllegalArgumentException("Construction of CGA multivector failed because nonzeros.length != rows.length!");
         }
-        var dm = CgaCasADiUtil.toDM(baseCayleyTable.getBladesCount(), nonzeros, rows);
+        var dm = CasADiUtil.toDM(CgaFactory.instance.getIAlgebra().getBladesCount(), nonzeros, rows);
         return create(dm);
     }
 
     public static CgaMvValue create(double scalar) {
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
+        ColumnVectorSparsity sparsity = CasADiUtil.determineSparsity(0, CgaFactory.instance.getIAlgebra());
         SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
         return create(sdm);
     }
@@ -150,11 +145,6 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
         var dm = this.getDM();
         var mv = CgaMvExpr.create(dm);
         return mv;
-    }
-
-    @Override
-    public Sparsity getSparsityCasadi() {
-        return super.delegate.getSparsityCasadi();
     }
 
     public CgaMvExpr getDelegate() {
@@ -385,7 +375,12 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     // helper methods to implement composition methods
     
     private static CgaMvValue createE3(Tuple c) {
-        return create(SparseCGAColumnVector.createEuclid(new double[]{c.values[0], c.values[1], c.values[2]}));
+        int[] euclidIndices = getEuclidIndizes();
+        var sparsity = CgaFactory.createSparsity(euclidIndices);
+        double[] nonzeros = new double[]{c.values[0], c.values[1], c.values[2]};
+        var vec = new SparseDoubleColumnVector(sparsity, nonzeros);
+        return create(vec);
+
         /* warum funktioniert das nicht
         return constants2().getBaseVectorX().gpWithScalar(c.values[0]).
             add(constants2().getBaseVectorY().gpWithScalar(c.values[1])).
@@ -995,9 +990,13 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
         CgaMvValue result = m.gradeSelection(2).rc(o).negate();
         return extractE3(result);
     }
-    
+
+    public static int[] getEuclidIndizes() {
+        return new int[]{1, 2, 3};
+    }
+
     private static Tuple extractE3(CgaMvValue m) {
-        int[] ind = CGACayleyTable.getEuclidIndizes();
+        int[] ind = getEuclidIndizes();
         StdVectorDouble elements = m.getDM().get_elements();
         return new Tuple(new double[]{elements.get(ind[0]), 
                            elements.get(ind[1]),

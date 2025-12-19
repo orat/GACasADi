@@ -133,7 +133,7 @@ public class CasADiUtil {
         int bladesCount = algebra.getBladesCount();
         return new ColumnVectorSparsity(bladesCount, indizes);
     }
-    
+
     public static SparseStringMatrix toStringMatrix(SX m) {
         String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
         for (int i = 0; i < m.rows(); i++) {

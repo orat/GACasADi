@@ -174,12 +174,18 @@ public class GaalopAlgebra implements IAlgebra {
     // Always same for same Algebra. Could be cached.
     @Override
     public int[] getEvenIndizes() {
+        return getIndizes(getEvenGrades());
+    }
+
+    // Always same for same Algebra. Could be cached.
+    @Override
+    public int[] getEvenGrades() {
         final int gradesCount = this.getGradesCount();
-        List<Integer> grades = new ArrayList<>(gradesCount);
-        for (int i = 0; i <= gradesCount; i += 2) {
-            grades.add(i);
+        List<Integer> evenGrades = new ArrayList<>(gradesCount);
+        for (int i = 0; i < gradesCount; i += 2) {
+            evenGrades.add(i);
         }
-        return getIndizes(grades.stream().mapToInt(Integer::intValue).toArray());
+        return evenGrades.stream().mapToInt(Integer::intValue).toArray();
     }
 
     @Override

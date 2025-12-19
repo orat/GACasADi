@@ -8,11 +8,11 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
@@ -21,9 +21,6 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
 import java.util.Objects;
-import util.cga.CGACayleyTable;
-import util.cga.CGAMultivectorSparsity;
-import util.cga.CGAOperations;
 
 /**
  * <pre>
@@ -78,7 +75,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
 
     public static CgaMvExpr create(SparseDoubleMatrix vector) {
         StdVectorDouble vecDouble = new StdVectorDouble(vector.nonzeros());
-        SX sx = new SX(CgaCasADiUtil.toCasADiSparsity(vector.getSparsity()),
+        SX sx = new SX(CasADiUtil.toCasADiSparsity(vector.getSparsity()),
             new SX(new StdVectorVectorDouble(new StdVectorDouble[]{vecDouble})));
         return new CachedCgaMvExpr(sx);
     }
@@ -114,7 +111,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     }
 
     public static CgaMvExpr create(DM dm) {
-        var sx = CgaCasADiUtil.toSX(dm);
+        var sx = CasADiUtil.toSX(dm);
         return new CachedCgaMvExpr(sx);
     }
 
@@ -143,11 +140,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     public String getName() {
         // Value will be different if this instanceof CgaMvVariable.
         return "(CgaMvExpr)";
-    }
-
-    @Override
-    public CGAMultivectorSparsity getSparsity() {
-        return CgaCasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
     }
 
     /**
@@ -396,7 +388,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
             throw new IllegalArgumentException("exp() defined for bivectors and scalars only ("+this.toString()+")!");
         }
         
-        SXColVec B = new SXColVec(sx, CGACayleyTable.getBivectorIndizes());
+        SXColVec B = new SXColVec(sx, this.getIAlgebra().getIndizes(2));
 
         // var S = -B[0]*B[0]-B[1]*B[1]-B[2]*B[2]+B[3]*B[3]-B[4]*B[4]-B[5]*B[5]+B[6]*B[6]-B[7]*B[7]+B[8]*B[8]+B[9]*B[9];
         SXScalar S = SXScalar.sumSq(B, new int[]{3,6,8,9}).sub(SXScalar.sumSq(B, new int[]{0,1,2,4,5,7}));
@@ -509,7 +501,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         // die richtige sparsity zurückliefern. Hier könnte die Ursache des Problems liegen, z.B. 
         // insbesondere die trigometrischen Funktionen
         SX result = new SXColVec(getIAlgebra().getBladesCount(),
-            generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
+            generalRotorValuesSXElem, this.getIAlgebra().getEvenIndizes()).sx;
         
         //WORKAROUND
         // bei euclidian only input arguements I got 0-vales in grade-4 elements instead of 
@@ -538,7 +530,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
         
-        int[] evenIndizes = CGACayleyTable.getEvenIndizes();
+        int[] evenIndizes = this.getIAlgebra().getEvenIndizes();
         SXColVec R = new SXColVec(sx, evenIndizes);
 
         // var S = R[0]*R[0]-R[10]*R[10]+R[11]*R[11]-R[12]*R[12]-R[13]*R[13]-R[14]*R[14]-R[15]*R[15]+R[1]*R[1]
@@ -675,7 +667,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
             throw new IllegalArgumentException("Multivector must be an even element/general rotor!");
         }
         
-        SXColVec R = new SXColVec(sx, CGACayleyTable.getEvenIndizes());
+        SXColVec R = new SXColVec(sx, this.getIAlgebra().getEvenIndizes());
         
         SXScalar S = R.get(0).sq().add(R.get(11).sq()).sub(R.get(12).sq()). 
                      sub(R.get(13).sq()).sub(R.get(14).sq()).sub(R.get(15).sq()).sub(new SXScalar(1d));
@@ -780,7 +772,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         //return bivector
         SXElem[] values = conv(B);
         return create(new SXColVec(getIAlgebra().getBladesCount(),
-            values, CGACayleyTable.getBivectorIndizes()).sx);
+            values, this.getIAlgebra().getIndizes(2)).sx);
     }
     private SXElem[] conv(SXScalar[] values){
         SXElem[] result = new SXElem[values.length];
@@ -876,7 +868,15 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      */
     @Override
     public CgaMvExpr generalInverse() {
-        return CGAOperations.generalInverse(this);
+        var conjugate = this.conjugate();
+        var gradeInversion = this.gradeInversion();
+        var reversion = this.reverse();
+        var part1 = conjugate.gp(gradeInversion).gp(reversion);
+        var part2 = this.gp(part1);
+        var part3 = part2.negate14();
+        var scalar = part2.gp(part3).gradeSelection(0);
+        var generalInverse = part1.gp(part3).gp(scalar.scalarInverse());
+        return generalInverse;
     }
 
     //======================================================
