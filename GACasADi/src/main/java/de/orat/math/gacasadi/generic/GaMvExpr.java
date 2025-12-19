@@ -34,7 +34,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     public int getBladesCount() {
         return getIAlgebra().getBladesCount();
     }
-    
+
     @Uncached
     public abstract EXPR create(SX sx);
 
@@ -222,22 +222,6 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     }
 
     @Override
-    public EXPR reverse() {
-        IAlgebra algebra = this.getIAlgebra();
-        SX res = createSparseSX();
-        for (int i : nzIndices()) {
-            int grade = algebra.getGrade(i);
-            int sign = algebra.gradeToReverseSign(grade);
-            SX resCell = this.sx.at(i, 0);
-            if (sign != 1) {
-                resCell = SxStatic.times(new SX(sign), resCell);
-            }
-            res.at(i, 0).assign(resCell);
-        }
-        return create(res);
-    }
-    
-    @Override
     public EXPR scalarAtan2(EXPR y) {
         if (!isScalar()) {
             throw new IllegalArgumentException("The argument x of atan2(y,x) is no scalar!");
@@ -290,6 +274,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     }
 
     @Override
+    public EXPR scalarInverse() {
+        return computeScalar(SxStatic::inv);
+    }
+
+    @Override
     public int grade() {
         List<Integer> grades = this.getIAlgebra().getGrades(nzIndices());
         if (grades.size() != 1) {
@@ -335,6 +324,32 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(res);
     }
 
+    /*
+    @Override
+    public EXPR reverse() {
+        var revm = GAOperatorMatrixUtils.createReversionOperatorMatrix(getIAlgebra());
+        SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
+        return create(result);
+    }
+     */
+    // Could be implemented with Hadamard Product.
+    @Override
+    public EXPR reverse() {
+        IAlgebra algebra = this.getIAlgebra();
+        SX res = createSparseSX();
+        for (int i : nzIndices()) {
+            int grade = algebra.getGrade(i);
+            int sign = algebra.gradeToReverseSign(grade);
+            SX resCell = this.sx.at(i, 0);
+            if (sign != 1) {
+                resCell = SxStatic.times(new SX(sign), resCell);
+            }
+            res.at(i, 0).assign(resCell);
+        }
+        return create(res);
+    }
+
+    // Could be implemented with Hadamard Product.
     @Override
     public EXPR gradeInversion() {
         IAlgebra algebra = this.getIAlgebra();
@@ -351,6 +366,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(res);
     }
 
+    // Could be implemented with Hadamard Product.
     @Override
     public EXPR conjugate() {
         IAlgebra algebra = this.getIAlgebra();
@@ -370,10 +386,5 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     @Override
     public EXPR scp(EXPR rhs) {
         return this.lc(rhs).gradeSelection(0);
-    }
-
-    @Override
-    public EXPR scalarInverse() {
-        return computeScalar(SxStatic::inv);
     }
 }
