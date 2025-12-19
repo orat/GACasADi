@@ -14,10 +14,10 @@ import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
-import util.cga.SparseCGAColumnVector;
 
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
@@ -375,7 +375,12 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     // helper methods to implement composition methods
     
     private static CgaMvValue createE3(Tuple c) {
-        return create(SparseCGAColumnVector.createEuclid(new double[]{c.values[0], c.values[1], c.values[2]}));
+        int[] euclidIndices = getEuclidIndizes();
+        var sparsity = CgaFactory.createSparsity(euclidIndices);
+        double[] nonzeros = new double[]{c.values[0], c.values[1], c.values[2]};
+        var vec = new SparseDoubleColumnVector(sparsity, nonzeros);
+        return create(vec);
+
         /* warum funktioniert das nicht
         return constants2().getBaseVectorX().gpWithScalar(c.values[0]).
             add(constants2().getBaseVectorY().gpWithScalar(c.values[1])).
