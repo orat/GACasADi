@@ -40,7 +40,7 @@ public class PGAImplTest {
         sb.append("]");
         return sb.toString();
     }
-    //@Test
+    @Test
     public void testAdd() {
         
         IAlgebra algebra = PgaFactory.instance.getIAlgebra();
