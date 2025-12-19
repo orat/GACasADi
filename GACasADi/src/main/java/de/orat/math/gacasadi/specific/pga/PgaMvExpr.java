@@ -13,6 +13,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.gacasadi.generic.GaFactory;
@@ -235,7 +236,8 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
         SXColVec R = getRotor(this);
 
         // numerical test against 1, because we have no structural fix numbers (e.g. 1)
-        SXScalar[] bivectorValues = R.get(0).eq(1d, new SXScalar[]{R.get(1), R.get(2), R.get(3),
+        SXScalar[] bivectorValues = R.get(0).eq(1d, new SXScalar[]{
+            R.get(1), R.get(2), R.get(3),
             ZERO_SXScalar, ZERO_SXScalar, ZERO_SXScalar}, logTemp(R));
 
         SXElem[] valuesSXElem = Arrays.stream(bivectorValues)
@@ -281,7 +283,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
     public PgaMvExpr undual() {
         return dual();
         //TODO see Gunns publications, copy auch in die dsl-helper-functions
-        //muss ich da das Vorzeichen noch ändern?
+        //muss ich da das Vorzeichen noch ändern? oder ist das nur bei CGA nötig?
     }
 
     protected static PgaMvExpr createFromSX(SX sx) {
@@ -336,6 +338,36 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
 
     @Override
     public PgaMvExpr dual() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        //return lc(CONSTANTS.getInversePseudoscalar());
+        
+        /**
+         * Dual = {
+            coefficient(_P(1),1)*(e0^e1^e2^e3)
+            + coefficient(_P(1),e0)*(e1^e2^e3)
+            + coefficient(_P(1),e1)*(e0^e3^e2)
+            + coefficient(_P(1),e2)*(e0^e1^e3)
+            + coefficient(_P(1),e3)*(e0^e2^e1)
+            + coefficient(_P(1),e0^e1)*(e2^e3)
+            + coefficient(_P(1),e0^e2)*(e3^e1)
+            + coefficient(_P(1),e0^e3)*(e1^e2)
+            + coefficient(_P(1),e1^e2)*(e0^e3)
+            + coefficient(_P(1),e3^e1)*(e0^e2) -
+            + coefficient(_P(1),e2^e3)*(e0^e1)
+            + coefficient(_P(1),e0^e2^e1)*(e3) -
+            + coefficient(_P(1),e0^e1^e3)*(e2)
+            + coefficient(_P(1),e0^e3^e2)*(e1) -
+            + coefficient(_P(1),e1^e2^e3)*(e0)
+            + coefficient(_P(1),e0^e1^e2^e3)*(1)
+         */
+        int[] map = new int[]{15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0};
+        SX result = super.createSparseSX();
+        for (int i : this.nzIndices()) {
+            SX resCell = sx.at(i, 0);
+            if (i == 9 || i == 11 || i == 13){
+                resCell = SxStatic.mtimes(new SX(-1), resCell);
+            }
+            result.at(map[i], 0).assign(resCell);
+        }
+        return create(result);
     }
 }
