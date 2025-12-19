@@ -364,9 +364,8 @@ public class PGAImplTest {
     }
 
 
-    //@Test
-    //@Disabled
-    /*public void testExpOfBivectorRandom() {
+    @Test
+    public void testExpOfBivectorRandom() {
 
         GAFactory exprGraphFactory = TestExprGraphFactory.instance();
         // input is bivector is grade 2
@@ -404,7 +403,7 @@ public class PGAImplTest {
             assertTrue(equals((new SparseDoubleColumnVector(mv.elements())).toArray(), test, eps));
         } catch (Exception e) {
         }
-    }*/
+    }
     
     
 		// just for debug and print output, the basis names
@@ -1021,8 +1020,31 @@ public class PGAImplTest {
         SparseDoubleColumnVector sdm = SparseDoubleColumnVector.fromValues(values);
         return exprGraphFactory.createValue(sdm);
     }
-
-}
+    
+    private static double[] rotor(double[] mv){
+        // 0,5,6,7,8,9,10,15 --> 0,1,2,3,4,5,6,7
+        int[] evenIndizes = PgaFactory.instance.getIAlgebra().getEvenIndizes();
+        double[] result = new double[evenIndizes.length];
+        //return new SXColVec(expr.getSX(), evenIndizes);
+        for (int i=0;i<evenIndizes.length;i++){
+            result[i] = mv[evenIndizes[i]];
+        }
+        return result;
+    }  
+    
+    // [8] M Roelfs and S De Keninck. 2021.
+    // Graded Symmetry Groups: Plane and Simple. arXiv:2107.03771 [math-ph]
+    // https://arxiv.org/pdf/2107.03771
+    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
+    private double[] exp(double[] B) {
+        double l = B[3]*B[3] + B[4]*B[4] + B[5]*B[5];
+        if (l==0) {
+            return new double[]{1d, B[0], B[1], B[2], 0d, 0d, 0d, 0d};
+        }
+        double m = (B[0]*B[5] + B[1]*B[4] + B[2]*B[3]), a = Math.sqrt(l), 
+                   c = Math.cos(a), s = Math.sin(a)/a, t = m/l*(c-s);
+        return new double[]{c, s*B[0] + t*B[5], s*B[1] + t*B[4], s*B[2] + t*B[3], s*B[3], s*B[4], s*B[5], m*s};
+    }
 
 	/*class Program
 	{
@@ -1070,14 +1092,6 @@ public class PGAImplTest {
 	}
 }*/
 
- // [8] M Roelfs and S De Keninck. 2021.
-    // Graded Symmetry Groups: Plane and Simple. arXiv:2107.03771 [math-ph]
-    // https://arxiv.org/pdf/2107.03771
-    // https://enki.ws/ganja.js/examples/coffeeshop.html#NSELGA
-/*private exp(B) {
-  var l = (B[3]*B[3] + B[4]*B[4] + B[5]*B[5]);
-  if (l==0) return rotor(1, B[0], B[1], B[2], 0, 0, 0, 0);
-  var m = (B[0]*B[5] + B[1]*B[4] + B[2]*B[3]), a = sqrt(l), c = cos(a), s = sin(a)/a, t = m/l*(c-s);
-  return rotor(c, s*B[0] + t*B[5], s*B[1] + t*B[4], s*B[2] + t*B[3], s*B[3], s*B[4], s*B[5], m*s);
-}*/
 
+    
+}

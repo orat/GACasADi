@@ -159,9 +159,6 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
     }
 
     /**
-     * CGA R4,1. e1*e1 = e2*e2 = e3*e3 = e4*4 = 1, e5*e5 = -1
-     * <p>
-     *
      * Normalize an even element (a general rotor R with 16 coefficients) X =
      * [1,e12,e13,e14,e15,e23,e24,e25,e34,e35,e45,e1234,e1235,e1245,e1345,e2345]
      * <p>
