@@ -176,7 +176,7 @@ public class GaalopAlgebra implements IAlgebra {
     public int[] getEvenIndizes() {
         final int gradesCount = this.getGradesCount();
         List<Integer> grades = new ArrayList<>(gradesCount);
-        for (int i = 0; i <= gradesCount; i += 2) {
+        for (int i = 0; i < gradesCount; i += 2) {
             grades.add(i);
         }
         return getIndizes(grades.stream().mapToInt(Integer::intValue).toArray());
