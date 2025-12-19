@@ -17,7 +17,6 @@ import java.util.PrimitiveIterator.OfDouble;
 import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
-import util.cga.SparseCGAColumnVector;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -2473,7 +2472,27 @@ public class CGAImplTest {
     }
 
     public static MultivectorValue createValue(GAFactory fac, double[] values) {
-        SparseCGAColumnVector sdm = SparseCGAColumnVector.fromValues(values);
+        SparseDoubleColumnVector sdm = fromValues(values);
         return fac.createValue(sdm);
+    }
+
+    public static SparseDoubleColumnVector fromValues(double[] values) {
+        List<Integer> nonzeroPositions = new ArrayList<>(values.length);
+        List<Double> nonzeroValues = new ArrayList<>(values.length);
+
+        for (int i = 0; i < values.length; i++) {
+            double value = values[i];
+            if (value == 0d) {
+                continue;
+            }
+            nonzeroPositions.add(i);
+            nonzeroValues.add(value);
+        }
+
+        int[] nonzerosPositionsArray = nonzeroPositions.stream().mapToInt(Integer::intValue).toArray();
+        double[] nonzeroValuesArray = nonzeroValues.stream().mapToDouble(Double::doubleValue).toArray();
+
+        var sparsity = new ColumnVectorSparsity(nonzerosPositionsArray.length, nonzerosPositionsArray);
+        return new SparseDoubleColumnVector(sparsity, nonzeroValuesArray);
     }
 }
