@@ -10,20 +10,17 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SXElem;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
-import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
-import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
-import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.CasADiUtil;
+import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
 
@@ -268,15 +265,6 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
     @Override
     public PgaMvExpr createSparse() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    /*@Override
-    public int getBladesCount() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }*/
-    @Override
-    public MatrixSparsity getSparsity() {
-        return CasADiUtil.toColumnVectorSparsity(sx.sparsity());
     }
 
     @Override

@@ -143,11 +143,6 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return "(CgaMvExpr)";
     }
 
-    @Override
-    public CGAMultivectorSparsity getSparsity() {
-        return CgaCasADiUtil.toCGAMultivectorSparsity(sx.sparsity());
-    }
-
     /**
      * Get SX representation of a blade.
      *
