@@ -55,6 +55,8 @@ public interface IAlgebra {
 
     public int[] getEvenIndizes();
 
+    public int[] getEvenGrades();
+
     public int getGrade(int index);
 
     /**

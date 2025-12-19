@@ -2,16 +2,21 @@ package de.orat.math.gacasadi.specific.cga;
 
 import de.orat.math.gacalc.api.GAFactory;
 import de.orat.math.gacalc.spi.IGAFactory;
+import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
 public class TestExprGraphFactory extends GAFactory {
 
-    public static CgaFactory impl_ = CgaFactory.instance;
+    public static final CgaFactory impl_ = CgaFactory.instance;
 
-    public static GAFactory instance() {
-        return get(impl_);
+    public static final IAlgebra al = impl_.getIAlgebra();
+
+    public static final TestExprGraphFactory instance = new TestExprGraphFactory(impl_);
+
+    public static TestExprGraphFactory instance() {
+        return instance;
     }
 
     protected TestExprGraphFactory(IGAFactory impl) {
