@@ -8,16 +8,15 @@ import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
-import de.orat.math.gacasadi.specific.pga.PgaFactory;
-import de.orat.math.gacasadi.specific.pga.PgaMvValue;
-import static de.orat.math.gacasadi.specific.pga.PgaMvValue.create;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
+import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.List;
 
 public class CasADiUtil {
@@ -135,5 +134,14 @@ public class CasADiUtil {
         return new ColumnVectorSparsity(bladesCount, indizes);
     }
     
-
+    public static SparseStringMatrix toStringMatrix(SX m) {
+        String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
+        for (int i = 0; i < m.rows(); i++) {
+            for (int j = 0; j < m.columns(); j++) {
+                SxSubMatrix cell = m.at(i, j);
+                stringArr[i][j] = cell.toString();
+            }
+        }
+        return new SparseStringMatrix(toColumnVectorSparsity(m.sparsity()), stringArr);
+    }
 }

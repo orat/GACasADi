@@ -47,10 +47,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return alLibFile;
     }
 
-    public int getBasisBladesCount() {
-        return baseCayleyTable.getBladesCount();
-    }
-
     /**
      * TODO: With the current implementation, they might depend on the specific definition of cga used.
      */
@@ -157,7 +153,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     // random multivectors
     @Override
     public CgaMvValue createValueRandom() {
-        final int basisBladesCount = getBasisBladesCount();
+        final int basisBladesCount = this.alDef.getBladesCount();
         double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
         var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
         var val = createValue(sdm);
@@ -233,8 +229,8 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
-    public static SparseDoubleMatrix createPseudoscalar() {
-        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{CGACayleyTable.getPseudoScalarIndex()/*31*/});
+    public SparseDoubleMatrix createPseudoscalar() {
+        CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{this.alDef.getBladesCount() - 1});
         return new SparseDoubleMatrix(sparsity, new double[]{1d});
     }
 
@@ -242,7 +238,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
     // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
     // geht nur für CGA?
-    public static SparseDoubleMatrix createInversePseudoscalar() {
+    public SparseDoubleMatrix createInversePseudoscalar() {
         return CgaFactory.instance.createValue(createPseudoscalar()).reverse().elements();
     }
 

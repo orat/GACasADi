@@ -3,19 +3,16 @@ package de.orat.math.gacasadi.specific.pga;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
-import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.specific.cga.CgaCasADiUtil;
 import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -24,6 +21,14 @@ import java.util.List;
 
 @GenerateDelegate(to = PgaMvExpr.class)
 public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMvValue, PgaMvExpr>, IMultivectorValue<PgaMvValue, PgaMvExpr>, IGetSparsityCasadi {
+
+    /**
+     * Can be expensive.
+     */
+    @Override
+    public String toString() {
+        return this.getDM().toString();
+    }
 
     private final ComposableImmutableBinaryTree<PgaMvValue> inputs;
 
@@ -111,19 +116,6 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         var combinedInputs = this.inputs.append(other.inputs);
         // Call permitted here.
         return new PgaMvValue(sym, combinedInputs);
-    }
-
-    
-    private MultivectorValue.Callback callback;
-
-    @Override
-    public void init(MultivectorValue.Callback callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public SparseDoubleMatrix elements() {
-         return CasADiUtil.elements(this.getDM());
     }
 
     // can be expensive
@@ -408,14 +400,5 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
          */
         var dm = SxStatic.evalf(sym.getSX());
         return create(dm);
-    }
-    
-    
-    /**
-     * Can be expensive.
-     */
-    @Override
-    public String toString() {
-        return this.getDM().toString();
     }
 }

@@ -18,7 +18,9 @@ public interface IAlgebra {
 
     IProduct outer();
 
-    //n
+    /**
+     * Count of grade 1 Multivectors.
+     */
     int getBaseSize();
 
     /**
@@ -29,10 +31,11 @@ public interface IAlgebra {
     }
 
     int[] getIndizes(int grade);
+
     int[] getIndizes(int[] grades);
 
     List<Integer> getGrades(List<Integer> indices);
-    
+
     // 2^n
     // n can be at most 31.
     default int getBladesCount() {
@@ -51,7 +54,7 @@ public interface IAlgebra {
     int indexOfBlade(String... bladeOfBasevectors);
 
     public int[] getEvenIndizes();
-    
+
     public int getGrade(int index);
 
     /**

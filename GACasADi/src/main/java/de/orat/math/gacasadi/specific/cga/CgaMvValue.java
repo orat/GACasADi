@@ -16,22 +16,23 @@ import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
-import util.cga.CGACayleyTable;
 import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.SparseCGAColumnVector;
 import de.orat.math.gacasadi.generic.IGaMvValue;
+import util.cga.CGACayleyTable;
 
 @GenerateDelegate(to = CgaMvExpr.class)
 public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
 
     private final static CGACayleyTableGeometricProduct baseCayleyTable = CGACayleyTableGeometricProduct.instance();
 
-    private MultivectorValue.Callback callback;
-
+    /**
+     * Can be expensive.
+     */
     @Override
-    public void init(MultivectorValue.Callback callback) {
-        this.callback = callback;
+    public String toString() {
+        return this.getDM().toString();
     }
 
     private final ComposableImmutableBinaryTree<CgaMvValue> inputs;
@@ -139,25 +140,6 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
             this.lazyDM = evalMV.lazyDM;
         }
         return lazyDM;
-    }
-
-    /**
-     * Can be expensive.
-     */
-    @Override
-    public String toString() {
-        return this.getDM().toString();
-    }
-
-    /**
-     * Get a complete multivector as double[], inclusive structural 0 values. Can be expensive.
-     *
-     * @return double[32] elements corresponding to the underlaying implementation specific coordindate
-     * system.
-     */
-    @Override
-    public SparseDoubleMatrix elements() {
-        return CgaCasADiUtil.elements(this.getDM());
     }
 
     /**

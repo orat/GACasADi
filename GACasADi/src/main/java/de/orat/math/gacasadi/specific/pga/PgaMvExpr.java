@@ -12,7 +12,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
-import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
@@ -27,10 +26,9 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
-import util.cga.CGACayleyTable;
 
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
-public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpression<PgaMvExpr>, IGetSX, IGetSparsityCasadi {
+public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpression<PgaMvExpr>, IGetSX, IGetSparsityCasadi {
 
     private final static PgaFactory fac = PgaFactory.instance;
 
@@ -123,7 +121,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
 
         // 5,6,7,8,9,10 --> 0,1,2,3,4,5
         // coefficient 9(4) hat anderes Vorzeichen
-        SXColVec B = new SXColVec(this.getSX(), CGACayleyTable.getBivectorIndizes());
+        SXColVec B = new SXColVec(this.getSX(), this.getIAlgebra().getIndizes(2));
 
         // java if-else is possible because only test for structural zeros
         if (B.get(3).isZero() && B.get(4).isZero() && B.get(5).isZero()) {
@@ -155,7 +153,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .toArray(SXElem[]::new);
 
         SX result = new SXColVec(this.getIAlgebra().getBladesCount(),
-            generalRotorValuesSXElem, CGACayleyTable.getEvenIndizes()).sx;
+            generalRotorValuesSXElem, this.getIAlgebra().getEvenIndizes()).sx;
 
         return create(result);
     }
@@ -204,7 +202,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .toArray(SXElem[]::new);
 
         // create SX with sparsity corresponding to a rotor (even element)
-        return create(new SXColVec(this.getIAlgebra().getBladesCount(), valuesSXElem, CGACayleyTable.getEvenIndizes()).sx);
+        return create(new SXColVec(this.getIAlgebra().getBladesCount(), valuesSXElem, this.getIAlgebra().getEvenIndizes()).sx);
     }
 
     @Override
@@ -248,7 +246,7 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
             .toArray(SXElem[]::new);
 
         return create(new SXColVec(this.getIAlgebra().getBladesCount(),
-            valuesSXElem, CGACayleyTable.getBivectorIndizes()).sx);
+            valuesSXElem, this.getIAlgebra().getIndizes(2)).sx);
     }
 
     private static SXScalar[] logTemp(SXColVec R) {
@@ -276,14 +274,6 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
     public int getBladesCount() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }*/
-
-    private MultivectorExpression.Callback callback;
-
-    @Override
-    public void init(MultivectorExpression.Callback callback) {
-         this.callback = callback;
-    }
-
     @Override
     public MatrixSparsity getSparsity() {
         return CasADiUtil.toColumnVectorSparsity(sx.sparsity());
@@ -346,25 +336,6 @@ public class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpres
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public boolean isGeneralEven() {
-        //return getSparsity().isGeneralEven();
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public boolean isEven() {
-         //return getSparsity().isEven();
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public boolean isBivector() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    protected final IAlgebra alDef = new GaalopAlgebra("3dpga");
-    
     @Override
     public PgaMvExpr dual() {
         //return lc(CONSTANTS.getInversePseudoscalar());

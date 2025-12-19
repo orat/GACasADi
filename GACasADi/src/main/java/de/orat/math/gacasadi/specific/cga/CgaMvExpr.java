@@ -10,7 +10,6 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorVectorDouble;
 import de.orat.math.gacalc.api.MultivectorExpression;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
-import de.orat.math.gacalc.util.CayleyTable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.caching.annotation.api.GenerateCached;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
@@ -20,14 +19,11 @@ import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
-import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.Arrays;
 import java.util.Objects;
 import util.cga.CGACayleyTable;
-import util.cga.CGACayleyTableGeometricProduct;
 import util.cga.CGAMultivectorSparsity;
 import util.cga.CGAOperations;
-import util.cga.CGAOperatorMatrixUtils;
 
 /**
  * <pre>
@@ -38,13 +34,6 @@ import util.cga.CGAOperatorMatrixUtils;
  */
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
 public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivectorExpression<CgaMvExpr>, IGetSX, IGetSparsityCasadi {
-
-    private MultivectorExpression.Callback callback;
-
-    private final static CGACayleyTableGeometricProduct baseCayleyTable
-        = CGACayleyTableGeometricProduct.instance();
-    private final static CGAOperatorMatrixUtils cgaOperatorMatrixUtils
-        = new CGAOperatorMatrixUtils(baseCayleyTable);
 
     private final static CgaFactory fac = CgaFactory.instance;
 
@@ -75,7 +64,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     protected CgaMvExpr(SX sx) {
         super(sx);
         Objects.requireNonNull(sx);
-        if (sx.rows() != baseCayleyTable.getBladesCount()) {
+        if (sx.rows() != this.getIAlgebra().getBladesCount()) {
             throw new IllegalArgumentException(String.format("Invalid row count: %s", sx.rows()));
         }
         if (sx.columns() != 1l) {
@@ -143,19 +132,8 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
     // Other methods
     //======================================================
     @Override
-    public void init(MultivectorExpression.Callback callback) {
-        this.callback = callback;
-    }
-
-    @Override
     public IAlgebra getIAlgebra() {
         return CgaFactory.instance.alDef;
-    }
-
-    @Override
-    public String toString() {
-        SparseStringMatrix stringMatrix = CgaCasADiUtil.toStringMatrix(sx);
-        return stringMatrix.toString(true);
     }
 
     /**
@@ -181,7 +159,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
      * cayley-table
      */
     SX getSX(String bladeName) {
-        int row = baseCayleyTable.getBasisBladeIndex(bladeName);
+        int row = this.getIAlgebra().indexOfBlade(bladeName);
         if (row == -1) {
             throw new IllegalArgumentException("The given bladeName ="
                 + bladeName + " does not exist in the cayley table!");
@@ -193,20 +171,11 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivec
         return null;
     }
 
-    @Override
+    /*
     public boolean isGeneralEven() {
         return getSparsity().isGeneralEven();
     }
-
-    @Override
-    public boolean isEven(){
-        return getSparsity().isEven();
-    }
-
-    @Override
-    public boolean isBivector(){
-        return (grade() == 2);
-    }
+     */
 
     public CgaFactory fac() {
         return fac;

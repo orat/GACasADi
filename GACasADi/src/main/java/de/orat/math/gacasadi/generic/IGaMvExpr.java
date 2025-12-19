@@ -18,8 +18,6 @@ public interface IGaMvExpr<EXPR extends IGaMvExpr<EXPR>>
 
     EXPR simplifySparsify();
 
-    boolean isGeneralEven();
-
     boolean isEven();
 
     boolean isBivector();

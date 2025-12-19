@@ -23,9 +23,6 @@ public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL
     private final List<Sparsity> paramsSparsities;
     private final GaFactory<EXPR, ?, ?, VAL> fac;
 
-    // available after plugging the impl into the api object
-    private GAFunction.Callback callback;
-
     private final Function f_sym_casadi;
 
     protected Function getCasADiFunction() {
@@ -103,11 +100,6 @@ public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL
     @Override
     public String toString() {
         return f_sym_casadi.toString();
-    }
-
-    @Override
-    public void init(GAFunction.Callback callback) {
-        this.callback = callback;
     }
 
     @Override

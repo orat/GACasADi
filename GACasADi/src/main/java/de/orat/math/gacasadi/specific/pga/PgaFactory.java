@@ -11,7 +11,6 @@ import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
-import static de.orat.math.gacasadi.specific.pga.PgaMvExpr.create;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
@@ -85,11 +84,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
        return "pgacasadisx";
     }
 
-    @Override
-    public int getBasisBladesCount() {
-        return alDef.getBaseSize();
-    }
-
     private final GaLoopService<PgaMvExpr, PgaMvVariable> loopService = new GaLoopService<>(this);
 
     @Override
@@ -147,7 +141,7 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
 
     @Override
     public PgaMvValue createValueRandom() {
-        final int basisBladesCount = getBasisBladesCount();
+        final int basisBladesCount = this.alDef.getBladesCount();
         double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
         var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
         var val = createValue(sdm);

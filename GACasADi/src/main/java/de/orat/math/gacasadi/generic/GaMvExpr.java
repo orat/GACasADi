@@ -7,6 +7,7 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
+import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.List;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
@@ -391,5 +392,32 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
     @Override
     public EXPR scp(EXPR rhs) {
         return this.lc(rhs).gradeSelection(0);
+    }
+
+    @Override
+    public boolean isBivector() {
+        int[] grades = this.grades();
+        if (grades.length != 1) {
+            return false;
+        }
+        return grades[0] == 2;
+    }
+
+    @Override
+    public boolean isEven() {
+        // Could be implemented with getEvenIndices and check, if there is one of nzIndices which is not in getEvenIndices.
+        List<Integer> grades = getIAlgebra().getGrades(nzIndices());
+        for (int grade : grades) {
+            if (grade % 2 != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(sx);
+        return stringMatrix.toString(true);
     }
 }
