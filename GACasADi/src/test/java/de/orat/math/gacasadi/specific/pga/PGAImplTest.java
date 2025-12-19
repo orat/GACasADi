@@ -326,6 +326,43 @@ public class PGAImplTest {
         } catch (Exception e) {
         }
     }*/
+    
+    @Test
+    public void testDualRandom() {
+        GAFactory exprGraphFactory = TestExprGraphFactory.instance();
+        MultivectorVariable mv = exprGraphFactory.createVariableDense("mv");
+        System.out.println("mv (sparsity für dual): " + mv.getSparsity().toString());
+        System.out.println("mv: (dual) " + mv.toString());
+        // dual() basiert derzeit auf dot
+        MultivectorExpression result = mv.dual();
+        System.out.println("result (dual) (sym): " + result.toString());
+
+        List<MultivectorVariable> parameters = new ArrayList<>();
+        parameters.add(mv);
+
+        List<MultivectorExpression> res = new ArrayList<>();
+        res.add(result);
+        GAFunction f = exprGraphFactory.createFunction("f", parameters, res);
+
+        List<MultivectorValue> arguments = new ArrayList<>();
+        double[] randomValues = createValueRandom();
+        MultivectorValue arg = createValue(exprGraphFactory, randomValues);
+        arguments.add(arg);
+
+        try {
+            List<MultivectorValue> result2 = f.callValue(arguments);
+            MultivectorValue out = result2.iterator().next();
+            System.out.println("dual(a)=" + out.toString());
+            double[] values = (new SparseDoubleColumnVector(out.elements())).toArray();
+
+            double[] test = dual(randomValues);
+            DenseDoubleColumnVector testMatrix = new DenseDoubleColumnVector(test);
+            System.out.println(testMatrix.toString());
+            assertTrue(equals(values, test, ColumnVectorSparsity.instance(mv.getSparsity())));
+        } catch (Exception e) {
+        }
+    }
+
 
 		// just for debug and print output, the basis names
 		//public static string[] _basis = new[] { "1","e0","e1","e2","e3","e01","e02","e03","e12","e31","e23","e021","e013","e032","e123","e0123" };
