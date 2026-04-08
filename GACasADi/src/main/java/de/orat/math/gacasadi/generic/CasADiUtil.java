@@ -134,12 +134,24 @@ public class CasADiUtil {
         return new ColumnVectorSparsity(bladesCount, indizes);
     }
 
+    /**
+     * If m is a column vector with symbolic expressions inside and contains "@1="-Variables, the print will
+     * be wrong. Das passiert, weil in GACasADi::CasADiUtil::toStringMatrix Kommas sind in dem geprinteten
+     * Ausdruck in einer Cell. Das passiert immer in jeder Zeile der ersten Spalte. Auch dupliziert. Man
+     * könnte das umgehen, wenn man vor dem Printen den Spaltenvektor in einen Zeilenvektor transponiert. Und
+     * dann ein Trennzeichen nimmt, anstatt des letzen Kommas.
+     */
+    @Deprecated
     public static SparseStringMatrix toStringMatrix(SX m) {
         String[][] stringArr = new String[(int) m.rows()][(int) m.columns()];
         for (int i = 0; i < m.rows(); i++) {
             for (int j = 0; j < m.columns(); j++) {
                 SxSubMatrix cell = m.at(i, j);
                 stringArr[i][j] = cell.toString();
+                if (stringArr[i][j].contains(",")) {
+                    System.out.print(String.format("Comma in Cell %s:%s: ", i, j));
+                    System.out.println(stringArr[i][j]);
+                }
             }
         }
         return new SparseStringMatrix(toColumnVectorSparsity(m.sparsity()), stringArr);
