@@ -72,7 +72,7 @@ public class GaFunctionCache<CACHED extends ICached<CACHED, EXPR, VAR, VAL>, EXP
         for (int i = 0; i < size; ++i) {
             EXPR arg = args.get(i);
             // sparsity
-            var param = fac.EXPRtoVAR(getParamName(i), arg.toEXPR());
+            var param = fac.EXPRtoVAR(getParamName(i), arg);
             casadiFuncParams.add(param);
 
             // Preserve identity for symbolicMultivectorParams.
