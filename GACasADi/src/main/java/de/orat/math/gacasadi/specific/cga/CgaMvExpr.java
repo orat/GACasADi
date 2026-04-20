@@ -30,7 +30,7 @@ import java.util.Objects;
  * </pre>
  */
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
-public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr> implements IMultivectorExpression<CgaMvExpr>, IGetSX, IGetSparsityCasadi {
+public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr, CgaMvVariable, CgaMvValue> implements IMultivectorExpression<CgaMvExpr, CgaMvVariable, CgaMvValue>, IGetSX, IGetSparsityCasadi {
 
     private final static CgaFactory fac = CgaFactory.instance;
 

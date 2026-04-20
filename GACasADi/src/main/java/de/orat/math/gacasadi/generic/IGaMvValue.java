@@ -6,8 +6,8 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface IGaMvValue<VAL extends IGaMvValue<VAL, EXPR>, EXPR extends IGaMvExpr<EXPR>>
-    extends IMultivectorValue<VAL, EXPR>, IGetSparsityCasadi {
+public interface IGaMvValue<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    extends IMultivectorValue<EXPR, VAR, VAL>, IGetSparsityCasadi {
 
     DM getDM();
 

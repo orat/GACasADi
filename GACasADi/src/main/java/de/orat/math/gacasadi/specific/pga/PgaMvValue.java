@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @GenerateDelegate(to = PgaMvExpr.class)
-public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMvValue, PgaMvExpr>, IMultivectorValue<PgaMvValue, PgaMvExpr>, IGetSparsityCasadi {
+public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMvExpr, PgaMvVariable, PgaMvValue>, IMultivectorValue<PgaMvExpr, PgaMvVariable, PgaMvValue>, IGetSparsityCasadi {
 
     /**
      * Can be expensive.

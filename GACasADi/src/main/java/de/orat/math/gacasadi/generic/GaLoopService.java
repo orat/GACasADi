@@ -6,7 +6,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorCasadiInt;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacalc.spi.ILoopService;
-import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
 import static de.orat.math.gacasadi.generic.CasADiUtil.areMVSparsitiesSupersetsOfSubsets;
 import static de.orat.math.gacasadi.generic.GaFunction.transformImpl;
@@ -20,33 +19,33 @@ import java.util.stream.Stream;
  * https://web.casadi.org/api/html/da/da4/classcasadi_1_1Function.html
  * </pre>
  */
-public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariable<VAR, ?, EXPR>>
-    implements ILoopService<EXPR, VAR, GaExprArray<EXPR>> {
+public class GaLoopService<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    implements ILoopService<EXPR, VAR, VAL, GaExprArray<EXPR, VAR, VAL>> {
 
-    private final GaFactory<EXPR, ?, VAR, ?> fac;
+    private final GaFactory<EXPR, VAR, VAL> fac;
 
-    public GaLoopService(GaFactory<EXPR, ?, VAR, ?> fac) {
+    public GaLoopService(GaFactory<EXPR, VAR, VAL> fac) {
         this.fac = fac;
     }
 
     @Override
-    public IMultivectorExpressionArray<EXPR> toExprArray(List<EXPR> from) {
+    public GaExprArray<EXPR, VAR, VAL> toExprArray(List<EXPR> from) {
         return new GaExprArray(from);
     }
 
     @Override
-    public List<GaExprArray<EXPR>> map(
+    public List<GaExprArray<EXPR, VAR, VAL>> map(
         List<VAR> paramsSimple,
         List<VAR> paramsArray,
         List<EXPR> returnsArray,
         List<EXPR> argsSimple,
-        List<GaExprArray<EXPR>> argsArray,
+        List<GaExprArray<EXPR, VAR, VAL>> argsArray,
         int iterations) {
         return mapImpl(paramsSimple, paramsArray, returnsArray, argsSimple, argsArray, iterations);
     }
 
     @Override
-    public AccumArrayListReturn<EXPR, GaExprArray<EXPR>> fold(
+    public AccumArrayListReturn<EXPR, GaExprArray<EXPR, VAR, VAL>> fold(
         List<VAR> paramsAccum,
         List<VAR> paramsSimple,
         List<VAR> paramsArray,
@@ -54,13 +53,13 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
         List<EXPR> returnsArray,
         List<EXPR> argsAccumInitial,
         List<EXPR> argsSimple,
-        List<GaExprArray<EXPR>> argsArray,
+        List<GaExprArray<EXPR, VAR, VAL>> argsArray,
         int iterations) {
         return foldImpl(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iterations);
     }
 
     @Override
-    public AccumArrayListReturn<GaExprArray<EXPR>, GaExprArray<EXPR>> mapaccum(
+    public AccumArrayListReturn<GaExprArray<EXPR, VAR, VAL>, GaExprArray<EXPR, VAR, VAL>> mapaccum(
         List<VAR> paramsAccum,
         List<VAR> paramsSimple,
         List<VAR> paramsArray,
@@ -68,7 +67,7 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
         List<EXPR> returnsArray,
         List<EXPR> argsAccumInitial,
         List<EXPR> argsSimple,
-        List<GaExprArray<EXPR>> argsArray,
+        List<GaExprArray<EXPR, VAR, VAL>> argsArray,
         int iterations) {
         return mapaccumImpl(paramsAccum, paramsSimple, paramsArray, returnsAccum, returnsArray, argsAccumInitial, argsSimple, argsArray, iterations);
     }
@@ -85,12 +84,12 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
      * @param argsArray Hint: Index of element used in the computation is equal to the current iteration.
      * @return One array element for each iteration for the variables of the returnsArray parameter.
      */
-    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> List<GaExprArray<EXPR>> mapImpl(
+    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> List<GaExprArray<EXPR, VAR, VAL>> mapImpl(
         List<MV> paramsSimple,
         List<MV> paramsArray,
         List<? extends EXPR> returnsArray,
         List<? extends EXPR> argsSimple,
-        List<GaExprArray<EXPR>> argsArray,
+        List<GaExprArray<EXPR, VAR, VAL>> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsSimple.size() == argsSimple.size();
@@ -147,7 +146,7 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
      * @return Only end results of accum Variables. One array element for each iteration for the variables of
      * the returnsArray parameter.
      */
-    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<EXPR, GaExprArray<EXPR>> foldImpl(
+    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<EXPR, GaExprArray<EXPR, VAR, VAL>> foldImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
@@ -155,7 +154,7 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
         List<? extends EXPR> returnsArray,
         List<? extends EXPR> argsAccumInitial,
         List<? extends EXPR> argsSimple,
-        List<GaExprArray<EXPR>> argsArray,
+        List<GaExprArray<EXPR, VAR, VAL>> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsAccum.size() >= 1;
@@ -222,7 +221,7 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
      * @return Results of all iterations of accum Variables. One array element for each iteration for the
      * variables of the returnsArray parameter.
      */
-    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<GaExprArray<EXPR>, GaExprArray<EXPR>> mapaccumImpl(
+    public <MV extends IGetSX & IGetSparsityCasadi & IMultivectorVariable> AccumArrayListReturn<GaExprArray<EXPR, VAR, VAL>, GaExprArray<EXPR, VAR, VAL>> mapaccumImpl(
         List<MV> paramsAccum,
         List<MV> paramsSimple,
         List<MV> paramsArray,
@@ -230,7 +229,7 @@ public class GaLoopService<EXPR extends IGaMvExpr<EXPR>, VAR extends IGaMvVariab
         List<? extends EXPR> returnsArray,
         List<? extends EXPR> argsAccumInitial,
         List<? extends EXPR> argsSimple,
-        List<GaExprArray<EXPR>> argsArray,
+        List<GaExprArray<EXPR, VAR, VAL>> argsArray,
         int iterations) {
         assert iterations >= 1;
         assert paramsAccum.size() >= 1;

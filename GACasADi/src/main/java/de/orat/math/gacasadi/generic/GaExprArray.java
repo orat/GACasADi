@@ -5,7 +5,8 @@ import de.orat.math.gacalc.spi.IMultivectorExpressionArray;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class GaExprArray<EXPR extends IGaMvExpr<EXPR>> extends ArrayList<EXPR> implements IMultivectorExpressionArray<EXPR> {
+public class GaExprArray<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    extends ArrayList<EXPR> implements IMultivectorExpressionArray<EXPR, VAR, VAL> {
 
     public GaExprArray() {
         super();

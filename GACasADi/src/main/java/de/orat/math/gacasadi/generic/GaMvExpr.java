@@ -5,14 +5,14 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadimaxima.api.MaximaSimplifier;
-import de.orat.math.gacalc.spi.IMultivectorVariable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import java.util.List;
 
-public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
+public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    implements IGaMvExpr<EXPR, VAR, VAL> {
 
     /**
      * Sparse column vector.
@@ -52,7 +52,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(createSparseSX());
     }
 
-    protected abstract GaFactory<EXPR, ?, ?, ?> fac();
+    protected abstract GaFactory<EXPR, VAR, VAL> fac();
 
     @Uncached
     @Override
@@ -85,8 +85,8 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     @Override
     @Uncached
-    public EXPR simplify(EXPR expr, List<? extends IGaMvVariable<?, ?, EXPR>> variables) {
-
+    public EXPR simplify(List<? extends VAR> variables) {
+        return null;
     }
 
     @Uncached

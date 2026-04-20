@@ -8,7 +8,7 @@ import de.orat.math.gacasadi.generic.IGaMvVariable;
 import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 
-public class CgaMvVariable extends CachedCgaMvExpr implements IGaMvVariable<CgaMvVariable, CachedCgaMvExpr, CgaMvExpr>, IMultivectorVariable<CgaMvExpr> {
+public class CgaMvVariable extends CachedCgaMvExpr implements IGaMvVariable<CgaMvExpr, CgaMvVariable, CgaMvValue>, IMultivectorVariable<CgaMvExpr, CgaMvVariable, CgaMvValue> {
 
     private final String name;
 

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @AutoService(IGAFactory.class)
-public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVariable, PgaMvValue> {
+public class PgaFactory extends GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> {
 
     public final static PgaFactory instance = new PgaFactory();
 
@@ -54,21 +54,13 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
     }
 
     @Override
-    public CachedPgaMvExpr cachedEXPR(PgaMvExpr expr) {
-        if (expr instanceof CachedPgaMvExpr cached) {
-            return cached;
-        }
-        return new CachedPgaMvExpr(expr);
-    }
-
-    @Override
     public PgaMvVariable EXPRtoVAR(String name, PgaMvExpr from) {
        return createVariable(name, from);
     }
 
     // create function
     @Override
-    public GaFunction<PgaMvExpr, PgaMvValue> createFunction(String name,
+    public GaFunction<PgaMvExpr, PgaMvVariable, PgaMvValue> createFunction(String name,
         List<? extends PgaMvVariable> parameters,
         List<? extends PgaMvExpr> returns) {
         return new GaFunction<>(this, name, parameters, returns);
@@ -84,7 +76,7 @@ public class PgaFactory extends GaFactory<PgaMvExpr, CachedPgaMvExpr, PgaMvVaria
        return "pgacasadisx";
     }
 
-    private final GaLoopService<PgaMvExpr, PgaMvVariable> loopService = new GaLoopService<>(this);
+    private final GaLoopService<PgaMvExpr, PgaMvVariable, PgaMvValue> loopService = new GaLoopService<>(this);
 
     @Override
     public ILoopService getLoopService() {
