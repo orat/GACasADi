@@ -4,6 +4,8 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
+import de.dhbw.rahmlab.casadimaxima.api.MaximaSimplifier;
+import de.orat.math.gacalc.spi.IMultivectorVariable;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
@@ -75,9 +77,23 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return sparse;
     }
 
+    @Override
     @Uncached
     public EXPR simplifySparsify() {
         return create(simplifySparsifySX(this.sx));
+    }
+
+    @Override
+    @Uncached
+    public EXPR simplify(EXPR expr, List<? extends IGaMvVariable<?, ?, EXPR>> variables) {
+
+    }
+
+    @Uncached
+    public EXPR simplifySparsifyMaxima(List<? extends IGaMvVariable<?, ?, ?>> variables) {
+        SX simplifiedSX = MaximaSimplifier.simplify(this.sx, variables.stream().map(IGaMvVariable::getSX).toList());
+        EXPR res = create(simplifiedSX);
+        return res;
     }
 
     @Override

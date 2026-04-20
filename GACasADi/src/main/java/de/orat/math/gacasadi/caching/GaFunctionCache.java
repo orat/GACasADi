@@ -3,6 +3,7 @@ package de.orat.math.gacasadi.caching;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
+import de.orat.math.gacasadi.generic.GaMvExpr;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +20,7 @@ import de.orat.math.gacasadi.generic.IGaMvExprCached;
 import de.orat.math.gacasadi.generic.IGaMvVariable;
 import java.util.Objects;
 
-public class GaFunctionCache<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>> implements IFunctionCache {
+public class GaFunctionCache<EXPR extends GaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>> implements IFunctionCache {
 
     private final Map<String, GaFunction<EXPR, ?>> functionCache
         = new HashMap<>(1024, 0.5f);
@@ -54,7 +55,7 @@ public class GaFunctionCache<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvE
             }
 
             // Specific type: CachedGaMvExpr.
-            EXPR retVal = func.callExpr(args).get(0).simplifySparsify();
+            EXPR retVal = func.callExpr(args).get(0).simplifySparsify(); // ToDo: Here with Maxima as well.
             cachedFunctionsUsage.compute(name, (k, v) -> ++v);
             return fac.cachedEXPR(retVal);
         }
@@ -82,7 +83,8 @@ public class GaFunctionCache<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvE
         List<CACHED> paramsEXPR = symbolicMultivectorParams.stream().map(VAR::toCACHED).toList();
 
         // Specific type: CachedGaMvExpr.
-        EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsify();
+        // EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsify();
+        EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsifyMaxima(symbolicMultivectorParams);
         GaFunction<EXPR, ?> func = fac.createFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }
