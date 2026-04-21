@@ -1045,7 +1045,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     }*/
     //----------------------
     @Override
-    public CgaMvExpr toEXPR() {
+    public CgaMvExpr asEXPR() {
         return this;
     }
 }

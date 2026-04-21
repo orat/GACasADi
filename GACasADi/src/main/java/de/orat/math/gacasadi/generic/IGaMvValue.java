@@ -2,12 +2,19 @@ package de.orat.math.gacasadi.generic;
 
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.orat.math.gacalc.spi.IMultivectorValue;
+import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.ArrayList;
 import java.util.List;
 
 public interface IGaMvValue<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
     extends IMultivectorValue<EXPR, VAR, VAL>, IGetSparsityCasadi {
+
+    @Override
+    @Uncached
+    default VAL asVAL() {
+        return (VAL) this;
+    }
 
     DM getDM();
 

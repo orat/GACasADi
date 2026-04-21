@@ -82,7 +82,7 @@ public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR 
             var symbolicMultivectorParam = casadiFuncParams.get(firstOccurrence);
             symbolicMultivectorParams.add(symbolicMultivectorParam);
         }
-        List<CACHED> paramsEXPR = symbolicMultivectorParams.stream().map(VAR::toEXPR).map(cachedFac::cachedEXPR).toList();
+        List<CACHED> paramsEXPR = symbolicMultivectorParams.stream().map(VAR::asEXPR).map(cachedFac::cachedEXPR).toList();
 
         // Specific type: CachedGaMvExpr.
         // EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsify();
