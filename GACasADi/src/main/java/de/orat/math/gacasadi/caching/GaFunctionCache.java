@@ -19,7 +19,7 @@ import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGaMvVariable;
 import java.util.Objects;
 
-public class GaFunctionCache<CACHED extends ICached, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
     implements IFunctionCache {
 
     private final Map<String, GaFunction<EXPR, VAR, VAL>> functionCache
