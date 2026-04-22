@@ -4,12 +4,14 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
-import de.dhbw.rahmlab.casadimaxima.api.MaximaSimplifier;
+import de.dhbw.rahmlab.casadi.spi.ExternalServiceLoader;
+import de.dhbw.rahmlab.casadi.spi.ICasADiExternalProcessor;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
     implements IGaMvExpr<EXPR, VAR, VAL> {
@@ -71,29 +73,30 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return this.sx;
     }
 
-    public static SX simplifySparsifySX(SX input) {
+    private static SX simplifySparsifySX(SX input) {
         SX simple = SxStatic.simplify(input);
         SX sparse = SxStatic.sparsify(simple);
         return sparse;
     }
 
-    @Override
+    @Deprecated
     @Uncached
-    public EXPR simplifySparsify() {
+    public EXPR simplify() {
         return create(simplifySparsifySX(this.sx));
     }
 
     @Override
     @Uncached
     public EXPR simplify(List<? extends VAR> variables) {
-        return null;
-    }
-
-    @Uncached
-    public EXPR simplifySparsifyMaxima(List<? extends IGaMvVariable<?, ?, ?>> variables) {
-        SX simplifiedSX = MaximaSimplifier.simplify(this.sx, variables.stream().map(IGaMvVariable::getSX).toList());
-        EXPR res = create(simplifiedSX);
-        return res;
+        Optional<ICasADiExternalProcessor> processorOpt = ExternalServiceLoader.getProcessor();
+        SX result;
+        if (processorOpt.isPresent()) {
+            List<SX> variablesSX = variables.stream().map(VAR::getSX).toList();
+            result = processorOpt.get().simplifySparsify(this.sx, variablesSX);
+        } else {
+            result = GaMvExpr.simplifySparsifySX(this.sx);
+        }
+        return create(result);
     }
 
     @Override

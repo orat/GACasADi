@@ -57,7 +57,7 @@ public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR 
             }
 
             // Specific type: CachedGaMvExpr.
-            EXPR retVal = func.callExpr(args).get(0).simplifySparsify(); // ToDo: Here with Maxima as well.
+            EXPR retVal = func.callExpr(args).get(0).simplify(); // ToDo: Here with Maxima as well.
             cachedFunctionsUsage.compute(name, (k, v) -> ++v);
             return cachedFac.cachedEXPR(retVal);
         }
@@ -86,7 +86,7 @@ public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR 
 
         // Specific type: CachedGaMvExpr.
         // EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsify();
-        EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsifyMaxima(symbolicMultivectorParams);
+        EXPR symbolicReturn = res.apply(paramsEXPR).simplify(symbolicMultivectorParams);
         GaFunction<EXPR, VAR, VAL> func = fac.createFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }

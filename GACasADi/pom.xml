@@ -44,6 +44,7 @@
 			<groupId>de.dhbw.rahmlab</groupId>
 			<artifactId>JCasADi_Maxima</artifactId>
 			<version>1.0-SNAPSHOT</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.orat.math.sparsematrix</groupId>

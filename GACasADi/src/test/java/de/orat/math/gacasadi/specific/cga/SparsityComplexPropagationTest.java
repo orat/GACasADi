@@ -54,7 +54,7 @@ public class SparsityComplexPropagationTest {
 
         var aa1 = fac.createVariable("a", 0);
         var aa2 = fac.createVariable("a", 0);
-        var bb = aa1.add(aa2).simplifySparsify();
+        var bb = aa1.add(aa2).simplify();
         System.out.println(bb);
         //new CGASymbolicFunction("ffff", List.of(aa1), List.of(bb));
     }
