@@ -443,4 +443,9 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     public String toString() {
         return this.sx.toString();
     }
+
+    @Override
+    public String LaTeXify() {
+        return ExternalServiceLoader.getProcessor().orElseThrow(UnsupportedOperationException::new).LaTeXify(this.sx);
+    }
 }
