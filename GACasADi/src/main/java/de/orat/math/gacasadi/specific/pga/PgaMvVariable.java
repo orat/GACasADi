@@ -10,7 +10,7 @@ import de.orat.math.gacasadi.generic.IGaMvVariable;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 
-public class PgaMvVariable extends CachedPgaMvExpr implements IGaMvVariable<PgaMvVariable, CachedPgaMvExpr, PgaMvExpr>, IMultivectorVariable<PgaMvExpr> {
+public class PgaMvVariable extends CachedPgaMvExpr implements IGaMvVariable<PgaMvExpr, PgaMvVariable, PgaMvValue>, IMultivectorVariable<PgaMvExpr, PgaMvVariable, PgaMvValue> {
 
     private final String name;
 

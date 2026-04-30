@@ -4,14 +4,17 @@ import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
+import de.dhbw.rahmlab.casadi.spi.ExternalServiceLoader;
+import de.dhbw.rahmlab.casadi.spi.ICasADiExternalProcessor;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import de.orat.math.sparsematrix.SparseStringMatrix;
 import java.util.List;
+import java.util.Optional;
 
-public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr<EXPR> {
+public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    implements IGaMvExpr<EXPR, VAR, VAL> {
 
     /**
      * Sparse column vector.
@@ -51,7 +54,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return create(createSparseSX());
     }
 
-    protected abstract GaFactory<EXPR, ?, ?, ?> fac();
+    protected abstract GaFactory<EXPR, VAR, VAL> fac();
 
     @Uncached
     @Override
@@ -70,15 +73,30 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
         return this.sx;
     }
 
-    public static SX simplifySparsifySX(SX input) {
+    private static SX simplifySparsifySX(SX input) {
         SX simple = SxStatic.simplify(input);
         SX sparse = SxStatic.sparsify(simple);
         return sparse;
     }
 
+    @Deprecated
     @Uncached
-    public EXPR simplifySparsify() {
+    public EXPR simplify() {
         return create(simplifySparsifySX(this.sx));
+    }
+
+    @Override
+    @Uncached
+    public EXPR simplify(List<? extends VAR> variables) {
+        Optional<ICasADiExternalProcessor> processorOpt = ExternalServiceLoader.getProcessor();
+        SX result;
+        if (processorOpt.isPresent()) {
+            List<SX> variablesSX = variables.stream().map(VAR::getSX).toList();
+            result = processorOpt.get().simplifySparsify(this.sx, variablesSX);
+        } else {
+            result = GaMvExpr.simplifySparsifySX(this.sx);
+        }
+        return create(result);
     }
 
     @Override
@@ -423,7 +441,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR>> implements IGaMvExpr
 
     @Override
     public String toString() {
-        SparseStringMatrix stringMatrix = CasADiUtil.toStringMatrix(sx);
-        return stringMatrix.toString(true);
+        return this.sx.toString();
+    }
+
+    @Override
+    public String LaTeXify() {
+        return ExternalServiceLoader.getProcessor().orElseThrow(UnsupportedOperationException::new).LaTeXify(this.sx);
     }
 }

@@ -20,7 +20,7 @@ import java.util.List;
 import org.apache.commons.math3.util.Precision;
 
 @GenerateDelegate(to = CgaMvExpr.class)
-public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvValue, CgaMvExpr>, IMultivectorValue<CgaMvValue, CgaMvExpr>, IGetSparsityCasadi {
+public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvExpr, CgaMvVariable, CgaMvValue>, IMultivectorValue<CgaMvExpr, CgaMvVariable, CgaMvValue>, IGetSparsityCasadi {
 
     /**
      * Can be expensive.

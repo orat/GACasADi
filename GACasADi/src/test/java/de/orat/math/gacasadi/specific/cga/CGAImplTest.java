@@ -2492,7 +2492,7 @@ public class CGAImplTest {
         int[] nonzerosPositionsArray = nonzeroPositions.stream().mapToInt(Integer::intValue).toArray();
         double[] nonzeroValuesArray = nonzeroValues.stream().mapToDouble(Double::doubleValue).toArray();
 
-        var sparsity = new ColumnVectorSparsity(nonzerosPositionsArray.length, nonzerosPositionsArray);
+        var sparsity = new ColumnVectorSparsity(CgaFactory.instance.alDef.getBladesCount(), nonzerosPositionsArray);
         return new SparseDoubleColumnVector(sparsity, nonzeroValuesArray);
     }
 }

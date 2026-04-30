@@ -5,7 +5,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
-import de.orat.math.gacalc.api.GAFunction;
 import de.orat.math.gacalc.spi.IGAFunction;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
 import static de.orat.math.gacasadi.generic.CasADiUtil.areSparsitiesSupersetsOfSubsets;
@@ -15,13 +14,14 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL, EXPR>> implements IGAFunction<EXPR, VAL> {
+public class GaFunction<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    implements IGAFunction<EXPR, VAR, VAL> {
 
     private final String name;
     private final int arity;
     private final int resultCount;
     private final List<Sparsity> paramsSparsities;
-    private final GaFactory<EXPR, ?, ?, VAL> fac;
+    private final GaFactory<EXPR, VAR, VAL> fac;
 
     private final Function f_sym_casadi;
 
@@ -33,7 +33,7 @@ public class GaFunction<EXPR extends IGaMvExpr<EXPR>, VAL extends IGaMvValue<VAL
      * @param name A valid CasADi function name starts with a letter followed by letters, numbers or
      * non-consecutive underscores.
      */
-    public <MV extends IGetSX & IMultivectorVariable> GaFunction(GaFactory<EXPR, ?, ?, VAL> fac, String name, List<MV> parameters, List<? extends IGaMvExpr> returns) {
+    public <MV extends IGetSX & IMultivectorVariable> GaFunction(GaFactory<EXPR, VAR, VAL> fac, String name, List<MV> parameters, List<? extends IGaMvExpr> returns) {
         try {
             this.fac = fac;
             this.paramsSparsities = parameters.stream().map(IGetSX::getSX).map(SX::sparsity).toList();

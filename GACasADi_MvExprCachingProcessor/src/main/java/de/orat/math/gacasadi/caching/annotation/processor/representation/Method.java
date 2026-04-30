@@ -70,7 +70,11 @@ public final class Method {
             throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": final method will not be cached.", this.name);
         }
-
+        // default methods are not abstract.
+        if (this.modifiers.contains(Modifier.ABSTRACT)) {
+            throw FailedToCacheException.create(correspondingElement,
+                "\"%s\": abstract method will not be cached.", this.name);
+        }
         if (!this.returnType.equals(enclosingClassQualifiedName)) {
             throw FailedToCacheException.create(correspondingElement,
                 "\"%s\": Return type \"%s\" was not the expected one \"%s\".", this.name, this.returnType, enclosingClassQualifiedName);

@@ -1,6 +1,7 @@
 package de.orat.math.gacasadi.caching.annotation.processor.generation;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -8,11 +9,9 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-import com.squareup.javapoet.WildcardTypeName;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_List;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_Override;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_SX;
-import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_String;
 import de.orat.math.gacasadi.caching.annotation.processor.representation.Clazz;
 import de.orat.math.gacasadi.caching.annotation.processor.representation.Method;
 import de.orat.math.gacasadi.caching.annotation.processor.representation.Parameter;
@@ -26,7 +25,6 @@ import java.util.stream.Stream;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_GaFunctionCache;
-import static de.orat.math.gacasadi.caching.annotation.processor.generation.Classes.T_IGaMvExprCached;
 
 final class ClassGenerator {
 
@@ -40,12 +38,13 @@ final class ClassGenerator {
         ClassName genClass = ClassName.get(packageName, className);
         ClassName T_c = ClassName.get(c.enclosingQualifiedName, c.simpleName);
 
-        ParameterizedTypeName cacheType = ParameterizedTypeName.get(T_GaFunctionCache, T_c, genClass, TypeVariableName.get("?"));
+        ParameterizedTypeName cacheType = ParameterizedTypeName.get(T_GaFunctionCache, genClass, T_c, TypeVariableName.get("?"), TypeVariableName.get("?"));
         FieldSpec CACHE = FieldSpec.builder(cacheType, "CACHE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("new $T<>($T.getFactory())", T_GaFunctionCache, T_c)
+            .initializer("new $T<>($T.getFactory(), $T::cachedEXPR)", T_GaFunctionCache, T_c, genClass)
             .build();
 
         MethodSpec getCache = ClassGenerator.getCache();
+        MethodSpec cachedEXPR = ClassGenerator.cachedEXPR(T_c, genClass);
 
         MethodSpec constructor1 = ClassGenerator.constructor1(T_c);
         MethodSpec constructor2 = ClassGenerator.constructor2();
@@ -58,14 +57,12 @@ final class ClassGenerator {
             methods.add(superMethod);
         }
 
-        ParameterizedTypeName interfaceType = ParameterizedTypeName.get(T_IGaMvExprCached, genClass, T_c);
-
         TypeSpec genClassSpec = TypeSpec.classBuilder(genClass)
             .addModifiers(Modifier.PUBLIC)
             .superclass(T_c)
-            .addSuperinterface(interfaceType)
             .addField(CACHE)
             .addMethod(getCache)
+            .addMethod(cachedEXPR)
             .addMethod(constructor1)
             .addMethod(constructor2)
             .addMethods(methods)
@@ -77,6 +74,27 @@ final class ClassGenerator {
             .build();
 
         javaFile.writeTo(filer);
+    }
+
+    private static MethodSpec cachedEXPR(ClassName T_c, ClassName genClass) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("cachedEXPR");
+
+        // Signature
+        methodBuilder
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(T_c, "mv")
+            .returns(genClass);
+
+        // Body
+        CodeBlock body = CodeBlock.builder()
+            .beginControlFlow("if (mv instanceof $T cached)", genClass)
+            .addStatement("return cached")
+            .endControlFlow()
+            .addStatement("return new $T(mv)", genClass)
+            .build();
+        methodBuilder.addCode(body);
+
+        return methodBuilder.build();
     }
 
     private static MethodSpec getCache() {

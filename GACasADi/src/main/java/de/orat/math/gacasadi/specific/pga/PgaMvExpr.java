@@ -26,7 +26,7 @@ import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.Arrays;
 
 @GenerateCached(warnFailedToCache = false, warnUncached = false)
-public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivectorExpression<PgaMvExpr>, IGetSX, IGetSparsityCasadi {
+public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMvValue> implements IMultivectorExpression<PgaMvExpr, PgaMvVariable, PgaMvValue>, IGetSX, IGetSparsityCasadi {
 
     private final static PgaFactory fac = PgaFactory.instance;
 
@@ -35,7 +35,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
     }
 
     @Override
-    protected GaFactory<PgaMvExpr, ?, ?, ?> fac() {
+    protected GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> fac() {
         return fac;
     }
 

@@ -3,20 +3,16 @@ package de.orat.math.gacasadi.generic;
 import de.orat.math.gacalc.spi.IMultivectorExpression;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 
-public interface IGaMvExpr<EXPR extends IGaMvExpr<EXPR>>
-    extends IMultivectorExpression<EXPR>, IGetSX, IGetSparsityCasadi {
+public interface IGaMvExpr<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
+    extends IMultivectorExpression<EXPR, VAR, VAL>, IGetSX, IGetSparsityCasadi {
 
+    @Override
     @Uncached
-    default EXPR toEXPR() {
-        // Downcast.
-        // Possible, if EXPR currently used subtype of IGaMvExpr.
-        // this without cast is possible in subclass.
+    default EXPR asEXPR() {
         return (EXPR) this;
     }
 
     int getBladesCount();
-
-    EXPR simplifySparsify();
 
     boolean isEven();
 

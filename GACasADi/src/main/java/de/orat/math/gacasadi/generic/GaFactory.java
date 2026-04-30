@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
  */
-public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGaMvExprCached<CACHED, EXPR>, VAR extends IGaMvVariable<VAR, CACHED, EXPR>, VAL extends IGaMvValue<VAL, EXPR>>
+public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaMvVariable<EXPR, VAR, VAL>, VAL extends IGaMvValue<EXPR, VAR, VAL>>
     implements IGAFactory<EXPR, VAR, VAL> {
 
     static {
@@ -23,12 +23,10 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR>, CACHED extends IGa
 
     protected abstract VAL DMtoVAL(DM dm);
 
-    public abstract CACHED cachedEXPR(EXPR expr);
-
     public abstract VAR EXPRtoVAR(String name, EXPR from);
 
     @Override
-    public abstract GaFunction<EXPR, VAL> createFunction(String name, List<? extends VAR> parameters, List<? extends EXPR> returns);
+    public abstract GaFunction<EXPR, VAR, VAL> createFunction(String name, List<? extends VAR> parameters, List<? extends EXPR> returns);
 
     public abstract IAlgebra getIAlgebra();
 

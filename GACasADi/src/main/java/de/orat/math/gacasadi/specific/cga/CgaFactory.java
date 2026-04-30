@@ -9,7 +9,6 @@ import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
-import de.orat.math.gacasadi.specific.cga.gen.CachedCgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @AutoService(IGAFactory.class)
-public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVariable, CgaMvValue> {
+public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
 
     /**
      * Needs to be public in order to make ServiceLoader work.
@@ -121,7 +120,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
 
     // create function
     @Override
-    public GaFunction<CgaMvExpr, CgaMvValue> createFunction(String name,
+    public GaFunction<CgaMvExpr, CgaMvVariable, CgaMvValue> createFunction(String name,
         List<? extends CgaMvVariable> parameters,
         List<? extends CgaMvExpr> returns) {
         return new GaFunction<>(this, name, parameters, returns);
@@ -138,10 +137,10 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
         return "cgacasadisx";
     }
 
-    private final GaLoopService<CgaMvExpr, CgaMvVariable> loopService = new GaLoopService<>(this);
+    private final GaLoopService<CgaMvExpr, CgaMvVariable, CgaMvValue> loopService = new GaLoopService<>(this);
 
     @Override
-    public GaLoopService<CgaMvExpr, CgaMvVariable> getLoopService() {
+    public GaLoopService<CgaMvExpr, CgaMvVariable, CgaMvValue> getLoopService() {
         return this.loopService;
     }
 
@@ -301,14 +300,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CachedCgaMvExpr, CgaMvVaria
     @Override
     protected CgaMvValue DMtoVAL(DM dm) {
         return CgaMvValue.create(dm);
-    }
-
-    @Override
-    public CachedCgaMvExpr cachedEXPR(CgaMvExpr expr) {
-        if (expr instanceof CachedCgaMvExpr cached) {
-            return cached;
-        }
-        return new CachedCgaMvExpr(expr);
     }
 
     @Override
