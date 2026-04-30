@@ -19,6 +19,7 @@ import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
+import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -259,9 +260,10 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
         return PgaFactory.instance.alDef;
     }
 
+    @Uncached
     @Override
     public PgaMvExpr createSparse() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return PgaMvVariable.createSparse("");
     }
 
     @Override
@@ -281,11 +283,21 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
         return new CachedPgaMvExpr(sx);
     }
 
+    /**
+     * euclidean point --> projected point
+     * 
+     * @return 
+     */
     @Override
     public PgaMvExpr up() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    /**
+     * projected point --> euclidean point
+     * 
+     * @return 
+     */
     @Override
     public PgaMvExpr down() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -296,11 +308,11 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
         throw new UnsupportedOperationException("Not available (cga only)."); 
     }
 
+    // non linear function, iplementation via matrix calculations of casadi
     @Override
     public PgaMvExpr meet(PgaMvExpr b) {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
-
     @Override
     public PgaMvExpr join(PgaMvExpr b) {
         throw new UnsupportedOperationException("Not supported yet."); 
@@ -311,11 +323,39 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr> implements IMultivec
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
+    /*@Override
     public PgaMvExpr normalizeBySquaredNorm() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    }*/
 
+    /**
+     * TODO
+     * das ist eine copy aus CgaMvExpr
+     * könnte das also nicht in einer für alle gemeinsame impl class ...
+     * 
+     * Elementwise division with a scalar.
+     *
+     * @param s scalar
+     * @throws IllegalArgumentException if the argument is no structural scalar
+     * @return a multivector for which each component of the given multivector is divided by the given scalar
+     */
+    public PgaMvExpr divs(PgaMvExpr s) {
+        // test allowed because it is a test against structural beeing a scalar
+        // test against structural 0 not useful
+        // runtime can fail if scalar == 0
+        if (!s.isScalar()) {
+            throw new IllegalArgumentException("The argument of divs() must be a scalar!");
+        }
+        SX svec = SxStatic.repmat(s.asScalar(), sx.sparsity().rows(), 1);
+        return create(SxStatic.rdivide(sx, svec));
+    }
+    
+    /**
+     * PGA specific implementation should be possible based on 
+     * https://arxiv.org/pdf/2005.04015
+     * 
+     * @return 
+     */
     @Override
     public PgaMvExpr generalInverse() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

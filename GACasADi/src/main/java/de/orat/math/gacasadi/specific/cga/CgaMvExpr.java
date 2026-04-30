@@ -840,11 +840,11 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @throws IllegalArgumentException if the arguments norm is no structural scalar
      * @return a normalized (Euclidean) element.
      */
-    @Override
+    /*@Override
     public CgaMvExpr normalizeBySquaredNorm() {
         //return binop_muls(this, 1d / norm());
         return divs(norm());
-    }
+    }*/
 
    
     // jede algebra
@@ -853,14 +853,15 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     /**
      * General inverse implemented in an efficient cga specific way.
      *
-     * Typically a versor inverse can be implemented more efficient than a general inverse operation.<p>
+     * Typically a versor inverse can be implemented more efficient than the general inverse operation
+     * implementation.<p>
      *
      * TODO Kann die derzeitige cga spezifische Implementierung auch versors gut invertieren? Wenn ja, dann
      * sollte ich hier die Methode versorInverse() so implementieren, dass die gleiche generalInverse()
-     * Methode aufgerufen wird.
+     * Methode aufgerufen wird.<p>
      *
      * TODO Eine Implementierung basierend auf der Invertierung der Cayley-Table des geometrischen Produkts
-     * ist auch möglich. Das solle ich auch ausprobieren.
+     * ist auch möglich. Das solle ich auch ausprobieren.<p>
      *
      * https://pure.uva.nl/ws/files/4375498/52687_fontijne.pdf
      *
@@ -929,7 +930,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
      * @throws IllegalArgumentException if the argument is no structural scalar
      * @return a multivector for which each component of the given multivector is divided by the given scalar
      */
-    private CgaMvExpr divs(CgaMvExpr s) {
+    public CgaMvExpr divs(CgaMvExpr s) {
         // test allowed because it is a test against structural beeing a scalar
         // test against structural 0 not useful
         // runtime can fail if scalar == 0

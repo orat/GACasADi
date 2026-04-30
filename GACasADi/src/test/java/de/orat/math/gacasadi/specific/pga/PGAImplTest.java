@@ -10,6 +10,7 @@ import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.DenseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1046,6 +1047,33 @@ public class PGAImplTest {
         return new double[]{c, s*B[0] + t*B[5], s*B[1] + t*B[4], s*B[2] + t*B[3], s*B[3], s*B[4], s*B[5], m*s};
     }
 
+    // return bivector
+    private static double[] logRotor(double[] R) {
+        if (R[0]==1) return new double[]{R[1],R[2],R[3],0d,0d,0d};
+        double a = 1d/(1d - R[0]*R[0]),                 // inv squared length. 
+            b = Math.acos(R[0])*Math.sqrt(a),                // rotation scale
+            c = a*R[7]*(1 - R[0]*b);               // translation scale
+        // B=B0​e01​+B1​e02​+B2​e03​+B3​e12​+B4​e31​+B5​e23
+        return new double[]{c*R[6] + b*R[1], c*R[5] + b*R[2], c*R[4] + b*R[3], b*R[4], b*R[5], b*R[6]};    
+    }
+    
+    private static double[] normalizeRotor(double[] R) {
+        double s = 1d/Math.sqrt((R[0]*R[0] + R[4]*R[4] + R[5]*R[5] + R[6]*R[6]));
+        double d = (R[7]*R[0] - (R[1]*R[6] + R[2]*R[5] + R[3]*R[4]))*s*s;
+        //R = R*s; R[1] += R[6]*d; R[2] += R[5]*d; R[3] += R[4]*d; R[7] -= R[0]*d;
+        double[] result = Arrays.copyOf(R, R.length);
+        for (int i=0;i<result.length;i++){
+            result[i] *=s;
+        }
+        result[1] += result[6]*d; result[2] += result[5]*d; result[3] += result[4]*d; result[7] -= result[0]*d;
+        return result;
+    }
+    private static double[] sqrtRotor(double[] R) {
+        double[] R_ = Arrays.copyOf(R, R.length);
+        R_[0] = R_[0] + 1d;
+        return normalizeRotor(R);
+    }
+    
 	/*class Program
 	{
 	        
