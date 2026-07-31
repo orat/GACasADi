@@ -12,7 +12,7 @@ The readme for the annotation which generates a cached version of [`iMultivector
 ## Project status
 At the moment only the algebras CGA and PGA are supported. For futher ones code has to be written, e.g. for specific support of 3d-Visualisation and implementation of some features, which are dependend to the algebra specifities. In the future instead of writing Java-code, all speficic functionality should be configurable in specific ascii files.
 
-## Implementation of Projectie Geometric Algebra (PGA)
+## Implementation of Projective Geometric Algebra (PGA)
 
 ### Symbols
 | symbol           | latex        | Unicode      | description |
