@@ -45,7 +45,9 @@ The following functions are not yet supported:
 
 | symbol      | description |
 | :---------- | ------------ |
-| up()        | up-projection of a euclidean vector into the conformal space |
+| up()        | up-projection of a euclidean vector into the projected space |
 | down()      | down-projection of a multivector into the euclidean space by normalization and rejection from the minkowski plane E0 |
+| euclid()    | euclidean part of the multivector |
+| idle()      | idle part of the multivector |
 
 ### Builtin opererators
