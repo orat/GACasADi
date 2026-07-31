@@ -9,3 +9,5 @@ This project depends on [JCasADi](https://github.com/MobMonRob/JCasADi), a java 
 
 The readme for the annotation which generates a cached version of [`iMultivectorSymbolic`](https://github.com/orat/GACalcAPI/blob/master/src/main/java/de/orat/math/gacalc/spi/iMultivectorSymbolic.java) can be found in [GACasADi_SymbolicMultivectorCachingProcessor](GACasADi_SymbolicMultivectorCachingProcessor/README.md).
 
+## Project status
+The algebras CGA and PGA are supported. For futher ones at the moment code has to be written, e.g. for specific support of 3d-Visualisation and implementations of some features which are dependend to the algebra. In the future instead of writing Java-code all should be configurable in specific ascii files.
