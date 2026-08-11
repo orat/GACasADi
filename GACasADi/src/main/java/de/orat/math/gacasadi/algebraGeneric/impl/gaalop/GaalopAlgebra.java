@@ -19,6 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +41,16 @@ public class GaalopAlgebra implements IAlgebra {
     private final List<Integer> gradeToConjugateSign;
     private final List<Integer> gradeToGradeInversionSign;
     private final List<Integer> gradeToReverseSign;
+    /**
+     * euclidBladeIndices and idleBladeIndices are disjoint and sum of number of elements are
+     * getBladesCount()-1 (without 0-grade scalar).
+     */
+    private final List<Integer> euclidBladeIndices;
+    /**
+     * euclidBladeIndices and idleBladeIndices are disjoint and sum of number of elements are
+     * getBladesCount()-1 (without 0-grade scalar).
+     */
+    private final List<Integer> idleBladeIndices;
 
     public GaalopAlgebra(String algebraName) {
         this.algebraPath = getAlgebraPath(algebraName);
@@ -49,9 +61,13 @@ public class GaalopAlgebra implements IAlgebra {
         this.inner = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new InnerProductCalculator()));
         this.outer = new Product(new MultTableAbsDirectComputer(this.algebraDefinitionFile, new OuterProductCalculator()));
         final int gradesCount = 1 + this.algebra.getBaseCount();
-        gradeToConjugateSign = IAlgebra.computeGradeToConjugateSign(gradesCount);
-        gradeToGradeInversionSign = IAlgebra.computeGradeToGradeInversionSign(gradesCount);
-        gradeToReverseSign = IAlgebra.computeGradeToReverseSign(gradesCount);
+        gradeToConjugateSign = Collections.unmodifiableList(IAlgebra.computeGradeToConjugateSign(gradesCount));
+        gradeToGradeInversionSign = Collections.unmodifiableList(IAlgebra.computeGradeToGradeInversionSign(gradesCount));
+        gradeToReverseSign = Collections.unmodifiableList(IAlgebra.computeGradeToReverseSign(gradesCount));
+        var bladeIndexToBladeBaseIndices = GaalopAlgebra.getBladeIndexToBladeBaseIndices(this.algebra);
+        var baseIndicesEudlicIdle = GaalopAlgebra.getBaseIndicesEuclidIdle(this.algebra, this.gp);
+        this.euclidBladeIndices = Collections.unmodifiableList(GaalopAlgebra.getEuclidOrIdleBladeIndices(EuclidIdle.EUCLID, baseIndicesEudlicIdle, bladeIndexToBladeBaseIndices));
+        this.idleBladeIndices = Collections.unmodifiableList(GaalopAlgebra.getEuclidOrIdleBladeIndices(EuclidIdle.IDLE, baseIndicesEudlicIdle, bladeIndexToBladeBaseIndices));
     }
 
     @Override
@@ -222,6 +238,16 @@ public class GaalopAlgebra implements IAlgebra {
         return gradeToReverseSign.get(grade);
     }
 
+    @Override
+    public List<Integer> getEuclidBladeIndices() {
+        return this.euclidBladeIndices;
+    }
+
+    @Override
+    public List<Integer> getIdleBladeIndices() {
+        return this.idleBladeIndices;
+    }
+
     private static List<Set<Integer>> getBladeIndexToBladeBaseIndices(de.gaalop.tba.Algebra algebra) {
         // base of length n
         String[] base = algebra.getBase();
@@ -234,11 +260,11 @@ public class GaalopAlgebra implements IAlgebra {
 
         final int bladesCount = algebra.getBladeCount();
         List<Set<Integer>> bladeIndexToBladeBaseIndices = new ArrayList<>(bladesCount);
-        for (int bladeIndex = 0; bladeIndex < bladesCount; bladeIndex++) {
+        for (int bladeIndex = 0; bladeIndex < bladesCount; ++bladeIndex) {
             Blade blade = algebra.getBlade(bladeIndex);
             Set<Integer> bladeBaseIndices = blade.getBases().stream()
                 .map(baseValueToIndex::get)
-                .collect(Collectors.toUnmodifiableSet());
+                .collect(Collectors.toCollection(HashSet::new));
             bladeIndexToBladeBaseIndices.add(bladeBaseIndices);
         }
 
@@ -271,13 +297,11 @@ public class GaalopAlgebra implements IAlgebra {
             final float coefficient = entry.coefficient();
             final float epsilon = 1e-3f;
             // euclid
-            if (Math.abs(coefficient - (+1)) <= epsilon) {
+            if (checkEpsilon(coefficient, +1f, epsilon)) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.EUCLID);
-            }
-            else if (Math.abs(coefficient - (0)) <= epsilon) {
+            } else if (checkEpsilon(coefficient, 0f, epsilon)) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
-            }
-            else if (Math.abs(coefficient - (-1)) <= epsilon) {
+            } else if (checkEpsilon(coefficient, -1f, epsilon)) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
             } else {
                 throw new RuntimeException();
@@ -286,8 +310,23 @@ public class GaalopAlgebra implements IAlgebra {
         return euclidVsIdleBaseBladeIndices;
     }
 
-    // Liste von indizes, sodass ich nachher danach filtern kann.
-    private static List<Integer> EuclidIdleBladeIndices(EuclidIdle euclidIdle, List<EuclidIdle> baseIndices) {
-        return null;
+    private static boolean checkEpsilon(float actualValue, float target, float epsilon) {
+        return Math.abs(actualValue - target) <= epsilon;
+    }
+
+    private static List<Integer> getEuclidOrIdleBladeIndices(EuclidIdle euclidIdle, List<EuclidIdle> baseIndicesEuclidIdle, List<Set<Integer>> bladeIndexToBladeBaseIndices) {
+        // Assumption / Precondition: grade-1 blades indices are equal to base indices.
+
+        Set<Integer> baseIndicesEuclidIdleFiltered = IntStream.range(0, baseIndicesEuclidIdle.size())
+            .boxed()
+            .filter(baseIndex -> baseIndicesEuclidIdle.get(baseIndex).equals(euclidIdle))
+            .collect(Collectors.toCollection(HashSet::new));
+
+        List<Integer> euclidOrIdleBladeIndices = IntStream.range(0, bladeIndexToBladeBaseIndices.size())
+            .boxed()
+            .filter(bladeIndex -> !Collections.disjoint(bladeIndexToBladeBaseIndices.get(bladeIndex), baseIndicesEuclidIdleFiltered))
+            .toList();
+
+        return euclidOrIdleBladeIndices;
     }
 }

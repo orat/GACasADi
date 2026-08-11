@@ -104,4 +104,17 @@ public interface IAlgebra {
     int gradeToConjugateSign(int grade);
 
     int gradeToGradeInversionSign(int grade);
+
+    /**
+     * euclidBladeIndices and idleBladeIndices are disjoint and sum of number of elements are
+     * getBladesCount()-1 (without 0-grade scalar).
+     */
+    List<Integer> getEuclidBladeIndices();
+
+    /**
+     * euclidBladeIndices and idleBladeIndices are disjoint and sum of number of elements are
+     * getBladesCount()-1 (without 0-grade scalar).
+     */
+    List<Integer> getIdleBladeIndices();
+
 }
