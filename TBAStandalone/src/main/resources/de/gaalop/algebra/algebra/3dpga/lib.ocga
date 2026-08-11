@@ -1,0 +1,19 @@
+#algebra pga
+
+//fn dual(a){
+//    a⌋(E˜)
+//}
+
+// create point from an euclidean vector
+//fn createPoint(vec) {
+//	(vec + ε₀)*
+//}
+
+// create line from two homogeneous points
+//fn createLine(p1, p2){
+//	p1∨p2
+//}
+
+//fn createPlane(a, b, c, d){
+//	aε₁ + bε₂ + cε₃ + dε₀
+//}
