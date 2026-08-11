@@ -20,10 +20,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GaalopAlgebra implements IAlgebra {
 
+    // Some of those could be computed lazy only when used the first time.
     private final Algebra algebra;
     private final AlgebraDefinitionFile algebraDefinitionFile;
     public final Optional<Path> algebraLibFile;
@@ -215,5 +220,74 @@ public class GaalopAlgebra implements IAlgebra {
     @Override
     public int gradeToReverseSign(int grade) {
         return gradeToReverseSign.get(grade);
+    }
+
+    private static List<Set<Integer>> getBladeIndexToBladeBaseIndices(de.gaalop.tba.Algebra algebra) {
+        // base of length n
+        String[] base = algebra.getBase();
+        Map<String, Integer> baseValueToIndex = IntStream.range(0, base.length)
+            .boxed()
+            .collect(Collectors.toUnmodifiableMap(
+                i -> base[i], // Key: String
+                i -> i // Value: Index
+            ));
+
+        final int bladesCount = algebra.getBladeCount();
+        List<Set<Integer>> bladeIndexToBladeBaseIndices = new ArrayList<>(bladesCount);
+        for (int bladeIndex = 0; bladeIndex < bladesCount; bladeIndex++) {
+            Blade blade = algebra.getBlade(bladeIndex);
+            Set<Integer> bladeBaseIndices = blade.getBases().stream()
+                .map(baseValueToIndex::get)
+                .collect(Collectors.toUnmodifiableSet());
+            bladeIndexToBladeBaseIndices.add(bladeBaseIndices);
+        }
+
+        return bladeIndexToBladeBaseIndices;
+    }
+
+    private static enum EuclidIdle {
+        EUCLID,
+        IDLE
+    }
+
+    private static List<EuclidIdle> getBaseIndicesEuclidIdle(de.gaalop.tba.Algebra algebra, Product gp) {
+        // Blade indices of grade 1 are the indices of the base.
+        int[] oneBladeIndices = algebra.getIndizes(1);
+        List<EuclidIdle> euclidVsIdleBaseBladeIndices = new ArrayList<>(oneBladeIndices.length);
+
+        // At the end: Either all oneBladeIndices are in euclidVsIdleBaseBladeIndices or RuntimException is thrown.
+        for (int oneBladeIndex : oneBladeIndices) {
+            var gpMvEntries = gp.product(oneBladeIndex, oneBladeIndex).entries();
+            final int entriesSize = gpMvEntries.size();
+            // Squares to 0.
+            if (entriesSize == 0) {
+                euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+            }
+            if (entriesSize != 1) {
+                throw new RuntimeException();
+            }
+            // Squares to 1 / -1 / 0
+            var entry = gpMvEntries.get(0);
+            final float coefficient = entry.coefficient();
+            final float epsilon = 1e-3f;
+            // euclid
+            if (Math.abs(coefficient - (+1)) <= epsilon) {
+                euclidVsIdleBaseBladeIndices.add(EuclidIdle.EUCLID);
+            }
+            else if (Math.abs(coefficient - (0)) <= epsilon) {
+                euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+            }
+            else if (Math.abs(coefficient - (-1)) <= epsilon) {
+                euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+            } else {
+                throw new RuntimeException();
+            }
+        }
+        return euclidVsIdleBaseBladeIndices;
+    }
+
+    // Liste von indizes, sodass ich nachher danach filtern kann.
+    private static List<Integer> EuclidIdleBladeIndices(EuclidIdle euclidIdle, List<EuclidIdle> baseIndices) {
+        return null;
     }
 }
