@@ -47,7 +47,7 @@ The following functions are not yet supported:
 | :---------- | ------------ |
 | up()        | up-projection of a euclidean vector into the projected space |
 | down()      | down-projection of a multivector into the euclidean space by normalization and rejection from the minkowski plane E0 |
-| euclid()    | euclidean part of the multivector |
-| idle()      | idle part of the multivector |
+| euclid()    | euclidean part of the multivector, only blades not formed basis vectors squaring to 0 or -1 |
+| idle()      | idle part of the multivector, only blades formaed by basis vectors which includes at minimum one which squares to 0 or -1 |
 
 ### Builtin opererators
