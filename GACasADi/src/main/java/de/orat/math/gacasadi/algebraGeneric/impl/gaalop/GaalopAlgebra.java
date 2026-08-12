@@ -321,10 +321,10 @@ public class GaalopAlgebra implements IAlgebra {
             if (checkEpsilon(metricValue, +1f, epsilon)) {
                 // euclid()
                 continue;
-            } else if (!checkEpsilon(metricValue, -1f, epsilon)) {
+            } else if (checkEpsilon(metricValue, -1f, epsilon)) {
                 idleIndices.add(metricIndex);
                 continue;
-            } else if (!checkEpsilon(metricValue, 0f, epsilon)) {
+            } else if (checkEpsilon(metricValue, 0f, epsilon)) {
                 idleIndices.add(metricIndex);
                 continue;
             } else {
