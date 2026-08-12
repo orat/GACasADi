@@ -106,14 +106,12 @@ public interface IAlgebra {
     int gradeToGradeInversionSign(int grade);
 
     /**
-     * euclidBladeIndices and idleBladeIndices are disjoint and sum of number of elements are
-     * getBladesCount()-1 (without 0-grade scalar).
+     * Blades containing no idle base elements. (without 0-grade scalar)
      */
     List<Integer> getEuclidBladeIndices();
 
     /**
-     * euclidBladeIndices and idleBladeIndices are disjoint and sum of number of elements are
-     * getBladesCount()-1 (without 0-grade scalar).
+     * Blades containing base elements with metric 0 or -1. (without 0-grade scalar)
      */
     List<Integer> getIdleBladeIndices();
 

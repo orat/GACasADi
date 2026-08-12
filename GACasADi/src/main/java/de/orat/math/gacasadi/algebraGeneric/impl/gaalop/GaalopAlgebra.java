@@ -318,10 +318,17 @@ public class GaalopAlgebra implements IAlgebra {
         List<Integer> idleIndices = new ArrayList<>(metric.size()); // Maximum
         for (Integer metricIndex : metricIndices) {
             final float metricValue = metric.get(metricIndex - 1);
-            // Not euclid. That is idle: 0f or -1f.
-            if (!checkEpsilon(metricValue, +1f, epsilon)) {
+            if (checkEpsilon(metricValue, +1f, epsilon)) {
+                // euclid()
+                continue;
+            } else if (!checkEpsilon(metricValue, -1f, epsilon)) {
                 idleIndices.add(metricIndex);
                 continue;
+            } else if (!checkEpsilon(metricValue, 0f, epsilon)) {
+                idleIndices.add(metricIndex);
+                continue;
+            } else {
+                throw new RuntimeException();
             }
         }
         return idleIndices;
