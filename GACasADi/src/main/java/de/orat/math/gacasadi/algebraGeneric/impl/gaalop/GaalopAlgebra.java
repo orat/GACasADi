@@ -288,6 +288,7 @@ public class GaalopAlgebra implements IAlgebra {
             // Squares to 0.
             if (entriesSize == 0) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+                continue;
             }
             if (entriesSize != 1) {
                 throw new RuntimeException();
@@ -299,10 +300,13 @@ public class GaalopAlgebra implements IAlgebra {
             // euclid
             if (checkEpsilon(coefficient, +1f, epsilon)) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.EUCLID);
+                continue;
             } else if (checkEpsilon(coefficient, 0f, epsilon)) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+                continue;
             } else if (checkEpsilon(coefficient, -1f, epsilon)) {
                 euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+                continue;
             } else {
                 throw new RuntimeException();
             }

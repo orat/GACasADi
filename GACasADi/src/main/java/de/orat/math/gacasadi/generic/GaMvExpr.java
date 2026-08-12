@@ -10,6 +10,7 @@ import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.api.IProduct;
 import de.orat.math.gacasadi.caching.annotation.api.Uncached;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -447,5 +448,70 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     @Override
     public String LaTeXify() {
         return ExternalServiceLoader.getProcessor().orElseThrow(UnsupportedOperationException::new).LaTeXify(this.sx);
+    }
+
+    // Could be implemented with Hadamard Product.
+    @Override
+    public EXPR euclid() {
+        List<Integer> euclidBladeIndices = this.getIAlgebra().getEuclidBladeIndices();
+        List<Integer> nzIndices = this.nzIndices();
+        List<Integer> indicesIntersection = GaMvExpr.intersection(euclidBladeIndices, nzIndices);
+        return this.filter(indicesIntersection);
+    }
+
+    // Could be implemented with Hadamard Product.
+    @Override
+    public EXPR idle() {
+        List<Integer> idleBladeIndices = this.getIAlgebra().getIdleBladeIndices();
+        List<Integer> nzIndices = this.nzIndices();
+        List<Integer> indicesIntersection = GaMvExpr.intersection(idleBladeIndices, nzIndices);
+        return this.filter(indicesIntersection);
+    }
+
+    /**
+     * <pre>
+     * Precondition:
+     * - the highest index in retainedIndices is less than or equal to the maximum size of the MV in the current algebra.
+     * </pre>
+     */
+    @Uncached
+    public EXPR filter(List<Integer> retainedIndices) {
+        SX res = createSparseSX();
+        for (int index : retainedIndices) {
+            SX resCell = this.sx.at(index, 0);
+            res.at(index, 0).assign(resCell);
+
+        }
+        return create(res);
+    }
+
+    // Would be even easier, if their size would be the same. BitSet for Blade Indices.
+    /**
+     * <pre>
+     * Preconditions:
+     * - Sorted
+     * - No duplicates
+     * </pre>
+     */
+    private static List<Integer> intersection(List<Integer> a, List<Integer> b) {
+        final int m = a.size();
+        final int n = b.size();
+        int i = 0;
+        int k = 0;
+        List<Integer> intersection = new ArrayList<>(Math.min(m, n)); // Upper bound size.
+        while (i < m && k < n) {
+            int a_i = a.get(i);
+            int b_k = b.get(k);
+            if (a_i == b_k) {
+                intersection.add(a_i);
+                ++i;
+                ++k;
+            } else if (a_i < b_k) {
+                ++i;
+            } else { // (a_i > b_k)
+                ++k;
+            }
+        }
+        return intersection;
     }
 }
