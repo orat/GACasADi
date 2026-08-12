@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,10 +65,13 @@ public class GaalopAlgebra implements IAlgebra {
         gradeToConjugateSign = Collections.unmodifiableList(IAlgebra.computeGradeToConjugateSign(gradesCount));
         gradeToGradeInversionSign = Collections.unmodifiableList(IAlgebra.computeGradeToGradeInversionSign(gradesCount));
         gradeToReverseSign = Collections.unmodifiableList(IAlgebra.computeGradeToReverseSign(gradesCount));
-        var bladeIndexToBladeBaseIndices = GaalopAlgebra.getBladeIndexToBladeBaseIndices(this.algebra);
-        var baseIndicesEudlicIdle = GaalopAlgebra.getBaseIndicesEuclidIdle(this.algebra, this.gp);
-        this.euclidBladeIndices = Collections.unmodifiableList(GaalopAlgebra.getEuclidOrIdleBladeIndices(EuclidIdle.EUCLID, baseIndicesEudlicIdle, bladeIndexToBladeBaseIndices));
-        this.idleBladeIndices = Collections.unmodifiableList(GaalopAlgebra.getEuclidOrIdleBladeIndices(EuclidIdle.IDLE, baseIndicesEudlicIdle, bladeIndexToBladeBaseIndices));
+
+        var metric = GaalopAlgebra.getMetric(this.algebra, this.gp);
+        var idleBaseIndices = GaalopAlgebra.getIdleBaseIndices(metric);
+        var baseToIndex = GaalopAlgebra.getBaseToIndex(this.algebra);
+        var bladeIndexToBaseIndices = GaalopAlgebra.getBladeIndexToBaseIndices(this.algebra, baseToIndex);
+        this.euclidBladeIndices = Collections.unmodifiableList(GaalopAlgebra.getEuclidBladeIndices(idleBaseIndices, bladeIndexToBaseIndices));
+        this.idleBladeIndices = Collections.unmodifiableList(GaalopAlgebra.getIdleBladeIndices(idleBaseIndices, bladeIndexToBaseIndices));
     }
 
     @Override
@@ -248,22 +252,32 @@ public class GaalopAlgebra implements IAlgebra {
         return this.idleBladeIndices;
     }
 
-    private static List<Set<Integer>> getBladeIndexToBladeBaseIndices(de.gaalop.tba.Algebra algebra) {
-        // base of length n
-        String[] base = algebra.getBase();
-        Map<String, Integer> baseValueToIndex = IntStream.range(0, base.length)
-            .boxed()
-            .collect(Collectors.toUnmodifiableMap(
-                i -> base[i], // Key: String
-                i -> i // Value: Index
-            ));
+    /**
+     * Base without scalar. Indices start with 1.
+     */
+    private static Map<String, Integer> getBaseToIndex(de.gaalop.tba.Algebra algebra) {
+        int[] oneBladeIndices = algebra.getIndizes(1);
+        Map<String, Integer> baseToIndex = LinkedHashMap.newLinkedHashMap(oneBladeIndices.length);
+        for (int index : oneBladeIndices) {
+            String bladeBase = algebra.getBlade(index).getBases().get(0); // 1-grade: Exactly 1 base.
+            baseToIndex.put(bladeBase, index);
+        }
+        return baseToIndex;
+    }
 
+    /**
+     * Base without scalar. At blade index 0 is the empty set.
+     */
+    private static List<Set<Integer>> getBladeIndexToBaseIndices(de.gaalop.tba.Algebra algebra, Map<String, Integer> baseToIndex) {
         final int bladesCount = algebra.getBladeCount();
         List<Set<Integer>> bladeIndexToBladeBaseIndices = new ArrayList<>(bladesCount);
-        for (int bladeIndex = 0; bladeIndex < bladesCount; ++bladeIndex) {
+        // Ignore blade 0. 0-grade is nor euclid nor idle.
+        bladeIndexToBladeBaseIndices.add(Collections.emptySet());
+        // Ignore blade 0. 0-grade is nor euclid nor idle.
+        for (int bladeIndex = 1; bladeIndex < bladesCount; ++bladeIndex) {
             Blade blade = algebra.getBlade(bladeIndex);
             Set<Integer> bladeBaseIndices = blade.getBases().stream()
-                .map(baseValueToIndex::get)
+                .map(baseToIndex::get)
                 .collect(Collectors.toCollection(HashSet::new));
             bladeIndexToBladeBaseIndices.add(bladeBaseIndices);
         }
@@ -271,66 +285,71 @@ public class GaalopAlgebra implements IAlgebra {
         return bladeIndexToBladeBaseIndices;
     }
 
-    private static enum EuclidIdle {
-        EUCLID,
-        IDLE
-    }
-
-    private static List<EuclidIdle> getBaseIndicesEuclidIdle(de.gaalop.tba.Algebra algebra, Product gp) {
+    /**
+     * Base without scalar.
+     */
+    private static List<Float> getMetric(de.gaalop.tba.Algebra algebra, Product gp) {
         // Blade indices of grade 1 are the indices of the base.
         int[] oneBladeIndices = algebra.getIndizes(1);
-        List<EuclidIdle> euclidVsIdleBaseBladeIndices = new ArrayList<>(oneBladeIndices.length);
-
-        // At the end: Either all oneBladeIndices are in euclidVsIdleBaseBladeIndices or RuntimException is thrown.
+        List<Float> metric = new ArrayList<>(oneBladeIndices.length);
         for (int oneBladeIndex : oneBladeIndices) {
             var gpMvEntries = gp.product(oneBladeIndex, oneBladeIndex).entries();
             final int entriesSize = gpMvEntries.size();
             // Squares to 0.
             if (entriesSize == 0) {
-                euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
+                metric.add(0f);
                 continue;
             }
             if (entriesSize != 1) {
                 throw new RuntimeException();
             }
-            // Squares to 1 / -1 / 0
-            var entry = gpMvEntries.get(0);
-            final float coefficient = entry.coefficient();
-            final float epsilon = 1e-3f;
-            // euclid
-            if (checkEpsilon(coefficient, +1f, epsilon)) {
-                euclidVsIdleBaseBladeIndices.add(EuclidIdle.EUCLID);
+            float coefficient = gpMvEntries.get(0).coefficient();
+            metric.add(coefficient);
+        }
+        return metric;
+    }
+
+    /**
+     * Base without scalar. Starts with 1.
+     */
+    private static List<Integer> getIdleBaseIndices(List<Float> metric) {
+        final float epsilon = 1e-3f; // Will probably optimized by the JIT.
+        List<Integer> metricIndices = IntStream.range(1, metric.size()).boxed().toList();
+        List<Integer> idleIndices = new ArrayList<>(metric.size()); // Maximum
+        for (Integer metricIndex : metricIndices) {
+            final float metricValue = metric.get(metricIndex - 1);
+            // Not euclid. That is idle: 0f or -1f.
+            if (!checkEpsilon(metricValue, +1f, epsilon)) {
+                idleIndices.add(metricIndex);
                 continue;
-            } else if (checkEpsilon(coefficient, 0f, epsilon)) {
-                euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
-                continue;
-            } else if (checkEpsilon(coefficient, -1f, epsilon)) {
-                euclidVsIdleBaseBladeIndices.add(EuclidIdle.IDLE);
-                continue;
-            } else {
-                throw new RuntimeException();
             }
         }
-        return euclidVsIdleBaseBladeIndices;
+        return idleIndices;
     }
 
     private static boolean checkEpsilon(float actualValue, float target, float epsilon) {
         return Math.abs(actualValue - target) <= epsilon;
     }
 
-    private static List<Integer> getEuclidOrIdleBladeIndices(EuclidIdle euclidIdle, List<EuclidIdle> baseIndicesEuclidIdle, List<Set<Integer>> bladeIndexToBladeBaseIndices) {
-        // Assumption / Precondition: grade-1 blades indices are equal to base indices.
-
-        Set<Integer> baseIndicesEuclidIdleFiltered = IntStream.range(0, baseIndicesEuclidIdle.size())
+    private static List<Integer> getEuclidBladeIndices(List<Integer> idleBaseIndices, List<Set<Integer>> bladeIndexToBaseIndices) {
+        // Euclid: Does not contain idleBaseIndices nor 0-grade.
+        // 0-grade scalar has index 0, thus start with 1.
+        List<Integer> euclidBladeIndices = IntStream.range(1, bladeIndexToBaseIndices.size())
             .boxed()
-            .filter(baseIndex -> baseIndicesEuclidIdle.get(baseIndex).equals(euclidIdle))
-            .collect(Collectors.toCollection(HashSet::new));
-
-        List<Integer> euclidOrIdleBladeIndices = IntStream.range(0, bladeIndexToBladeBaseIndices.size())
-            .boxed()
-            .filter(bladeIndex -> !Collections.disjoint(bladeIndexToBladeBaseIndices.get(bladeIndex), baseIndicesEuclidIdleFiltered))
+            .filter(bladeIndex -> Collections.disjoint(bladeIndexToBaseIndices.get(bladeIndex), idleBaseIndices)) // Contains no idle.
             .toList();
 
-        return euclidOrIdleBladeIndices;
+        return euclidBladeIndices;
+    }
+
+    private static List<Integer> getIdleBladeIndices(List<Integer> idleBaseIndices, List<Set<Integer>> bladeIndexToBaseIndices) {
+        // Idle: Does  contain idleBaseIndices, but not 0-grade.
+        // 0-grade scalar has index 0, thus start with 1.
+        List<Integer> idleBladeIndices = IntStream.range(1, bladeIndexToBaseIndices.size())
+            .boxed()
+            .filter(bladeIndex -> !Collections.disjoint(bladeIndexToBaseIndices.get(bladeIndex), idleBaseIndices)) // Contains at least one idle.
+            .toList();
+
+        return idleBladeIndices;
     }
 }
