@@ -191,7 +191,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr, CgaMvVariable, CgaMv
     // spezifisch implementation
     @Override
     public CgaMvExpr up() {
-        if (!isEuclidian()){
+        if (!isOnlyEuclidBasevector()){
             throw new IllegalArgumentException("Up projection with an argument which is no euclidian vector is not allowed: "+toString());
         }
         // vec + 0.5 vec² εᵢ + ε₀

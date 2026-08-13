@@ -57,7 +57,7 @@ public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR 
             }
 
             // Specific type: CachedGaMvExpr.
-            EXPR retVal = func.callExpr(args).get(0).simplify(); // ToDo: Here with Maxima as well.
+            EXPR retVal = func.callExpr(args).get(0).simplifyFast(); // Casadi
             cachedFunctionsUsage.compute(name, (k, v) -> ++v);
             return cachedFac.cachedEXPR(retVal);
         }
@@ -85,8 +85,8 @@ public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR 
         List<CACHED> paramsEXPR = symbolicMultivectorParams.stream().map(VAR::asEXPR).map(cachedFac::cachedEXPR).toList();
 
         // Specific type: CachedGaMvExpr.
-        // EXPR symbolicReturn = res.apply(paramsEXPR).simplifySparsify();
-        EXPR symbolicReturn = res.apply(paramsEXPR).simplify(symbolicMultivectorParams);
+        EXPR symbolicReturn = res.apply(paramsEXPR).simplifyFast(); // Casadi
+        // EXPR symbolicReturn = res.apply(paramsEXPR).simplify(symbolicMultivectorParams); // Maxima
         GaFunction<EXPR, VAR, VAL> func = fac.createFunction(name, casadiFuncParams, List.of(symbolicReturn));
         return func;
     }

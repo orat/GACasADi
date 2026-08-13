@@ -80,9 +80,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return sparse;
     }
 
-    @Deprecated
+    /**
+     * Simplifies only with CasADi.
+     */
     @Uncached
-    public EXPR simplify() {
+    public EXPR simplifyFast() {
         return create(simplifySparsifySX(this.sx));
     }
 
