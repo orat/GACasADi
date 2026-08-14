@@ -308,6 +308,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
     public PgaMvExpr down() {
         PgaMvExpr e0 = this.createSparse();
         e0.sx.at(this.getIAlgebra().indexOfBlade("e0")).assign(new SX(1));
+        //TODO muss ich hier nicht vorher normalisieren?
         return sub(e0);
     }
 
@@ -358,15 +359,30 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
         return create(SxStatic.rdivide(sx, svec));
     }
     
+    private static boolean checkEpsilon(double actualValue, double target) {
+        final double epsilon = 1e-3d;
+        return Math.abs(actualValue - target) <= epsilon;
+    }
+    
+    private boolean isMotor(){
+        // 1. belongs to even sub-algebra without including the pseudoscalar
+        if (!isEven() || !gradeSelection(4).isSparseEmpty()) return false;
+        // 2. satisfies the unit magnitude (versor) normalization constraint
+        // this is equivalent with reversibility
+        PgaMvExpr temp = gp(reverse());
+        if (!temp.isScalar() ||
+            checkEpsilon(SxStatic.evalf(temp.sx).at(0).scalar(),1)) return false;
+        return true;
+    }
+    
+    private boolean isLine(){
+        // is bivector?
+        if (!isBivector()) return false;
+        // test plucker condition
+        return op(this).isSparseEmpty();
+    }
+    
     /**
-     * PGA specific implementation should be possible based on 
-     * https://arxiv.org/pdf/2005.04015
-     * 
-     * The inverse of a multivector in 3D PGA exists only, if its representation matrix is regular. 
-     * For geometric motors: \(M^{-1}=\frac{\widetilde{M}}{M\widetilde{M}}\)
-     * For general multivectors you need to solve the \(16 \times 16\) linear equation system of the left 
-     * multiplication after the scalar \(1\).
-     * 
      * Matrices for 3D/4D PGA, ganja.js uses closed-form recursive adjunct/denominator expansions based on grade
      * involutions and antiautomorphisms.
      * 
@@ -382,7 +398,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
      * 
      * https://enkimute.github.io/LookMaNoMatrices/
      * 
-     * for normalized objects:
+     * for normalized objects only:
      * plane --> x
      * line --> -x
      * point --> -x
@@ -397,13 +413,38 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
      */
     @Override
     public PgaMvExpr generalInverse() {
-        throw new UnsupportedOperationException("Not supported yet."); 
-        
-        /*PgaMvExpr Brev = this.reverse();
-        PgaMvExpr B2 = this.gp(Brev);
-        PgaMvExpr a = B2.euclid(); // TODO a ist ein scalar - how to get it?
-        PgaMvExpr b = B2.idle(); // ToDo b soll scalar coefficient from B2.idle also von B2.idle()=b e0123 sein
-        return (CONSTANTS.one().gp(a.scalarInverse())-((b/a.square()).gp(this.getIAlgebra().indexOfBlade("e0","e1","e2","e3")))).gp(Brev);*/
+        // The precondition "normalization" is not tested here. It should be part of the typesystem. Because
+        // we have not yet implemented one, it is a precondition that the user has to fulfil. So If multiple
+        // motors are sandwhiched before invoking generalInverse() the motor must be normalized first.
+        // Numerical test if it is normalized instead to runtime is possible but time consuming.
+        // is motor?
+        if (isMotor()){
+            return this.reverse();
+        }
+        switch (grade()) {
+            // is plane?
+            case 1:
+                return this;
+            // is bivector?
+            case 2:
+                // is line? 
+                if (isLine()){
+                    return negate();
+                // is general bivector
+                } else {
+                    // bivectors only
+                    PgaMvExpr Brev = this.reverse();
+                    PgaMvExpr B2 = this.gp(Brev);
+                    PgaMvExpr a = B2.selectShift(0, 0); // ToDo a ist ein scalar - how to get it?
+                    PgaMvExpr b = B2.idle(); // b e0123
+                    return CONSTANTS.one().gp(a.scalarInverse()).sub((b.gp(a.square().scalarInverse()).gp(b))).gp(Brev);
+                }
+            // is point?
+            case 3:
+                return negate();
+            default:
+                throw new UnsupportedOperationException("Multivector of this type can not be inverted!"); 
+        }
     }
 
     @Override
