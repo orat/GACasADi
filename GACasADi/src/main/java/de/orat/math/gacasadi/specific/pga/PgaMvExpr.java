@@ -19,7 +19,6 @@ import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaMvExpr;
 import de.orat.math.gacasadi.generic.IGetSX;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
-import de.orat.math.gacasadi.specific.cga.CgaMvExpr;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
@@ -370,8 +369,9 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
         // 2. satisfies the unit magnitude (versor) normalization constraint
         // this is equivalent with reversibility
         PgaMvExpr temp = gp(reverse());
-        if (!temp.isScalar() ||
-            checkEpsilon(SxStatic.evalf(temp.sx).at(0).scalar(),1)) return false;
+        if (!temp.isScalar()
+            || checkEpsilon(temp.asScalarDouble(), 1))
+            return false;
         return true;
     }
     
@@ -435,7 +435,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
                     // bivectors only
                     PgaMvExpr Brev = this.reverse();
                     PgaMvExpr B2 = this.gp(Brev);
-                    PgaMvExpr a = B2.selectShift(0, 0); // ToDo a ist ein scalar - how to get it?
+                    PgaMvExpr a = B2.filterScalar();
                     PgaMvExpr b = B2.idle(); // b e0123
                     return CONSTANTS.one().gp(a.scalarInverse()).sub((b.gp(a.square().scalarInverse()).gp(b))).gp(Brev);
                 }

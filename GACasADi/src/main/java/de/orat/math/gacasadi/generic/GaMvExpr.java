@@ -348,6 +348,11 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     }
 
     @Override
+    public boolean isSparseEmpty() {
+        return this.sx.nnz_() == 0;
+    }
+
+    @Override
     public int pseudoscalarGrade() {
         return this.getIAlgebra().getGradesCount() - 1;
     }
@@ -612,6 +617,10 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return create(GaMvExpr.filterShift(algebra, this.sx,
             algebra.indexOfBlade(selectBladeOfBasevectors.toArray(String[]::new)),
             algebra.indexOfBlade(shiftToBladeOfBasevectors.toArray(String[]::new))));
+    }
+
+    public EXPR filterScalar() {
+        return this.filterShift(0, 0);
     }
 
     @Override
