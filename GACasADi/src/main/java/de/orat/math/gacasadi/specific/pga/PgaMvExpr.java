@@ -290,7 +290,13 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
      */
     @Override
     public PgaMvExpr up() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (!isOnlyEuclidBasevector()){
+            throw new IllegalArgumentException("Up projection with an argument which is no euclidian vector is not allowed: "+toString());
+        }
+        PgaMvExpr e0 = this.createSparse();
+        e0.sx.at(this.getIAlgebra().indexOfBlade("e0")).assign(new SX(1));
+        // vec + ε₀
+        return add(e0);
     }
 
     /**
@@ -300,12 +306,14 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
      */
     @Override
     public PgaMvExpr down() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        PgaMvExpr e0 = this.createSparse();
+        e0.sx.at(this.getIAlgebra().indexOfBlade("e0")).assign(new SX(1));
+        return sub(e0);
     }
 
     @Override
     public PgaMvExpr negate14() {
-        throw new UnsupportedOperationException("Not available (cga only)."); 
+        throw new UnsupportedOperationException("Not available (cga only) and not needed."); 
     }
 
     // non linear function, iplementation via matrix calculations of casadi
@@ -354,11 +362,48 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
      * PGA specific implementation should be possible based on 
      * https://arxiv.org/pdf/2005.04015
      * 
+     * The inverse of a multivector in 3D PGA exists only, if its representation matrix is regular. 
+     * For geometric motors: \(M^{-1}=\frac{\widetilde{M}}{M\widetilde{M}}\)
+     * For general multivectors you need to solve the \(16 \times 16\) linear equation system of the left 
+     * multiplication after the scalar \(1\).
+     * 
+     * Matrices for 3D/4D PGA, ganja.js uses closed-form recursive adjunct/denominator expansions based on grade
+     * involutions and antiautomorphisms.
+     * 
+     * utilizing specialized non-metric Poincare duality and custom adjugate formulas
+     * 
+     * this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(this.Mul(this.
+     * Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0].Inverse))
+     * 
+     * Object.defineProperty(res.prototype, 'Conjugate', {configurable:true,get(){var res = new this.
+     * constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,-1,1][grades[i]%4]);
+     * return res; }});
+     * ['~','Conjugate',1]
+     * 
+     * https://enkimute.github.io/LookMaNoMatrices/
+     * 
+     * for normalized objects:
+     * plane --> x
+     * line --> -x
+     * point --> -x
+     * motor --> reverse(x) (changes the sign of the bivector and trivector coefficients only.)
+     * 
+     * general bivector BB: Recall that a bivector BB only represents a single line if B∧B=0B∧B=0, 
+     * the so called Plücker condition. If a bivector BB does not satisfy that requirement, it is no blade, 
+     * i.e. not the result of meeting two planes or joining two points. For such an element the inverse is 
+     * slightly more complicated.
+     * 
      * @return 
      */
     @Override
     public PgaMvExpr generalInverse() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
+        
+        /*PgaMvExpr Brev = this.reverse();
+        PgaMvExpr B2 = this.gp(Brev);
+        PgaMvExpr a = B2.euclid(); // TODO a ist ein scalar - how to get it?
+        PgaMvExpr b = B2.idle(); // ToDo b soll scalar coefficient from B2.idle also von B2.idle()=b e0123 sein
+        return (CONSTANTS.one().gp(a.scalarInverse())-((b/a.square()).gp(this.getIAlgebra().indexOfBlade("e0","e1","e2","e3")))).gp(Brev);*/
     }
 
     @Override
