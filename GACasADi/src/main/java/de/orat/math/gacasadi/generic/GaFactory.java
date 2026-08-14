@@ -68,4 +68,12 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
         }
         return DMtoVAL(mv);
     }
+
+    @Override
+    public VAL createValue(List<String> bladeOfBasevectors, double value) {
+        DM res = this.createSparseDM();
+        int index = this.getIAlgebra().indexOfBlade(bladeOfBasevectors.toArray(String[]::new));
+        res.at(index, 0).assign(new DM(value));
+        return DMtoVAL(res);
+    }
 }

@@ -354,7 +354,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
         if (!s.isScalar()) {
             throw new IllegalArgumentException("The argument of divs() must be a scalar!");
         }
-        SX svec = SxStatic.repmat(s.asScalar(), sx.sparsity().rows(), 1);
+        SX svec = SxStatic.repmat(s.asScalarSXCell(), sx.sparsity().rows(), 1);
         return create(SxStatic.rdivide(sx, svec));
     }
     

@@ -937,7 +937,7 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
         if (!s.isScalar()) {
             throw new IllegalArgumentException("The argument of divs() must be a scalar!");
         }
-        SX svec = SxStatic.repmat(s.asScalar(), sx.sparsity().rows(), 1);
+        SX svec = SxStatic.repmat(s.asScalarSXCell(), sx.sparsity().rows(), 1);
         return create(SxStatic.rdivide(sx, svec));
     }
 

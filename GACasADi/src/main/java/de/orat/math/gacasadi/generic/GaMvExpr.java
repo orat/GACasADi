@@ -3,6 +3,7 @@ package de.orat.math.gacasadi.generic;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.casadi.SxSubMatrix;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.spi.ExternalServiceLoader;
 import de.dhbw.rahmlab.casadi.spi.ICasADiExternalProcessor;
@@ -156,7 +157,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     }
 
     // Precondition: a and b are of same length, column vectors, same algebra.
-    public static SX product(IProduct product, SX a, SX b) {
+    protected static SX product(IProduct product, SX a, SX b) {
         final long n_rows = a.rows(); //==b.rows()
         int[] aIndices = a.get_row().stream().mapToInt(Long::intValue).toArray();
         int[] bIndices = b.get_row().stream().mapToInt(Long::intValue).toArray();
@@ -223,26 +224,37 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     }
 
     @Uncached
-    public EXPR createFromScalar(SX sx) {
-        // 1x1
-        if (!sx.sparsity().is_scalar()) {
+    public EXPR createFromScalar(SX scalarSX) {
+        // checks dimension is 1x1
+        if (!scalarSX.sparsity().is_scalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
         SX result = createSparseSX();
-        result.at(0).assign(sx);
+        result.at(0, 0).assign(scalarSX);
         return create(result);
     }
 
-    public SX asScalar() {
+    /**
+     * Use only if you know, what you do! Returns a single SX cell.
+     */
+    @Deprecated
+    public SxSubMatrix asScalarSXCell() {
         if (!this.isScalar()) {
             throw new IllegalArgumentException("This is no scalar!");
         }
-        return this.getSX().at(0);
+        return this.getSX().at(0, 0);
+    }
+
+    /**
+     * Be cautious! Works only, if scalar and numeric.
+     */
+    public double asScalarDouble() {
+        return SxStatic.evalf(this.asScalarSXCell()).scalar(); // asScalarSXCell used correctly.
     }
 
     @Uncached
     public EXPR computeScalar(java.util.function.Function<SX, SX> computer) {
-        SX inputScalar = this.asScalar();
+        SX inputScalar = this.asScalarSXCell(); // asScalarSXCell used correctly.
         SX outputScalar = computer.apply(inputScalar);
         EXPR mv = createFromScalar(outputScalar);
         return mv;
@@ -261,7 +273,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         if (!y.isScalar()) {
             throw new IllegalArgumentException("The argument y of atan2(y,x) is no scalar!");
         }
-        SX result = SxStatic.atan2(y.asScalar(), this.asScalar());
+        SX result = SxStatic.atan2(y.asScalarSXCell(), this.asScalarSXCell()); // asScalarSXCell used correctly.
         return createFromScalar(result);
     }
 
@@ -325,6 +337,17 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     }
 
     @Override
+    public boolean isScalar() {
+        final long nnz = this.sx.nnz_();
+        if (nnz == 1) {
+            // Regular scalar?
+            return this.sx.at(0, 0).nnz_() == 1;
+        }
+        // Structural zero?
+        return nnz == 0;
+    }
+
+    @Override
     public int pseudoscalarGrade() {
         return this.getIAlgebra().getGradesCount() - 1;
     }
@@ -361,14 +384,6 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return create(res);
     }
 
-    /*
-    @Override
-    public EXPR reverse() {
-        var revm = GAOperatorMatrixUtils.createReversionOperatorMatrix(getIAlgebra());
-        SX result = SxStatic.mtimes(CasADiUtil.toSX(revm), sx);
-        return create(result);
-    }
-     */
     // Could be implemented with Hadamard Product.
     @Override
     public EXPR reverse() {
@@ -477,7 +492,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     /**
      * <pre>
      * Precondition:
-     * - the highest index in retainedIndices is less than or equal to the maximum size of the MV in the current algebra.
+     * - the highest index in retainedIndices is less than or equal to the size of the MV in the current algebra.
      * </pre>
      */
     @Uncached
@@ -488,6 +503,19 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
             res.at(index, 0).assign(resCell);
 
         }
+        return create(res);
+    }
+
+    /**
+     * <pre>
+     * Precondition:
+     * - retainedIndex is less than or equal to the size of the MV in the current algebra.
+     * </pre>
+     */
+    public EXPR filter(int retainedIndex) {
+        SX res = createSparseSX();
+        SX resCell = this.sx.at(retainedIndex, 0);
+        res.at(retainedIndex, 0).assign(resCell);
         return create(res);
     }
 
@@ -521,7 +549,12 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return intersection;
     }
 
-    // Das auch nach außen ziehen über GaCalcAPI::Factory. Aber nicht in der DSL.
+    /**
+     * <pre>
+     * Precondition:
+     * - index is less than or equal to the size of the MV in the current algebra.
+     * </pre>
+     */
     @Uncached
     public EXPR create(int index, double value) {
         SX res = this.createSparseSX();
@@ -532,38 +565,69 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return create(res);
     }
 
+    /**
+     * <pre>
+     * Precondition:
+     * - same size
+     * - all indices are less than or equal to the size of the MV in the current algebra.
+     * </pre>
+     */
     @Uncached
-    public EXPR create(String blade, double value) {
+    public EXPR create(List<Integer> indices, List<Double> values) {
+        final int size = indices.size();
+        if (values.size() != size) {
+            throw new IllegalArgumentException("indices and values are not of same size.");
+        }
         SX res = this.createSparseSX();
-        int index = this.getIAlgebra().indexOfBlade(blade);
+        for (int i = 0; i < size; ++i) {
+            int index = indices.get(i);
+            double value = values.get(i);
+            res.at(index, 0).assign(new SX(value));
+        }
+        return create(res);
+    }
+
+    @Uncached
+    public EXPR create(List<String> bladeOfBasevectors, double value) {
+        SX res = this.createSparseSX();
+        int index = this.getIAlgebra().indexOfBlade(bladeOfBasevectors.toArray(String[]::new));
         res.at(index, 0).assign(new SX(value));
         return create(res);
     }
 
-    public static SX selectShift(IAlgebra algebra, SX sx, int selectIndex, int shiftToIndex) {
+    public static SX filterShift(IAlgebra algebra, SX sx, int selectIndex, int shiftToIndex) {
         SX res = GaMvExpr.createSparseSX(algebra);
         SX resCell = sx.at(selectIndex, 0);
         res.at(shiftToIndex, 0).assign(resCell);
         return res;
     }
 
-    public EXPR selectShift(int selectIndex, int shiftToIndex) {
-        return create(GaMvExpr.selectShift(this.getIAlgebra(), this.sx, selectIndex, shiftToIndex));
-    }
-
-    // Hochziehen bis in die DSL.
-    public EXPR coef(EXPR coefBladeMV) {
-        List<Integer> coefBladeMVIndices = coefBladeMV.nzIndices();
-        if (coefBladeMVIndices.size() != 1) {
-            throw new IllegalArgumentException(String.format("coef allows only 1 blade bot got %s", coefBladeMVIndices.size()));
-        }
-        int coefBladeIndex = coefBladeMVIndices.get(0);
-        return selectShift(coefBladeIndex, 0);
+    public EXPR filterShift(int selectIndex, int shiftToIndex) {
+        return create(GaMvExpr.filterShift(this.getIAlgebra(), this.sx, selectIndex, shiftToIndex));
     }
 
     @Uncached
-    public EXPR coef(String... coefBladeOfBasevectors) {
+    public EXPR filterShift(List<String> selectBladeOfBasevectors, List<String> shiftToBladeOfBasevectors) {
+        IAlgebra algebra = this.getIAlgebra();
+        return create(GaMvExpr.filterShift(algebra, this.sx,
+            algebra.indexOfBlade(selectBladeOfBasevectors.toArray(String[]::new)),
+            algebra.indexOfBlade(shiftToBladeOfBasevectors.toArray(String[]::new))));
+    }
+
+    @Override
+    public EXPR coef1(EXPR coefBladeMV) {
+        List<Integer> coefBladeMVIndices = coefBladeMV.nzIndices();
+        if (coefBladeMVIndices.size() != 1) {
+            throw new IllegalArgumentException(String.format("coef() allows only 1 blade but got %s", coefBladeMVIndices.size()));
+        }
+        int coefBladeIndex = coefBladeMVIndices.get(0);
+        return filterShift(coefBladeIndex, 0);
+    }
+
+    @Uncached
+    @Override
+    public EXPR coef2(String... coefBladeOfBasevectors) {
         int coefBladeIndex = this.getIAlgebra().indexOfBlade(coefBladeOfBasevectors);
-        return selectShift(coefBladeIndex, 0);
+        return filterShift(coefBladeIndex, 0);
     }
 }
