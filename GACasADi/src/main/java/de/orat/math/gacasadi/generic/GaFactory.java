@@ -46,7 +46,7 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
         return sparse;
     }
 
-    public VAL create(int index, double value) {
+    public VAL createValue(int index, double value) {
         DM mv = createSparseDM();
         mv.at(index, 0).assign(new DM(value));
         return DMtoVAL(mv);
@@ -55,7 +55,7 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
     /**
      * Precondition: same size
      */
-    public VAL create(List<Integer> indices, List<Double> values) {
+    public VAL createValue(List<Integer> indices, List<Double> values) {
         final int size = indices.size();
         if (values.size() != size) {
             throw new IllegalArgumentException("indices and values are not of same size.");

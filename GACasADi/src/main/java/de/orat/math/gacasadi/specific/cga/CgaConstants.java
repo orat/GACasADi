@@ -71,11 +71,11 @@ public abstract class CgaConstants<MV extends IMultivector<MV>> {
     }
 
     public MV getPseudoscalar() {
-        return cached("E", () -> fac().createPseudoscalar());
+        return cached("I", () -> fac().createPseudoscalar());
     }
 
     public MV getInversePseudoscalar() {
-        return cached("E˜", () -> fac().createInversePseudoscalar());
+        return cached("I˜", () -> fac().createInversePseudoscalar());
     }
 
     public MV one() {
