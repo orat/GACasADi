@@ -42,9 +42,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         return alLibFile;
     }
 
-    /**
-     * TODO: With the current implementation, they might depend on the specific definition of cga used.
-     */
     private Map<String, CgaMvExpr> createConstants() {
         var map = new HashMap<String, CgaMvExpr>();
 
