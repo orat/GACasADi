@@ -61,7 +61,7 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         map.put("ñ", createValue(createBaseVectorOriginDoran()).toExpr());
         map.put("E₀", createValue(createMinkovskiBiVector()).toExpr());
         map.put("E₃", createValue(createEuclideanPseudoscalar()).toExpr());
-        map.put("E", createValue(createPseudoscalar()).toExpr());
+        map.put("I", createValue(createPseudoscalar()).toExpr());
 
         return map;
     }

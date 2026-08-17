@@ -228,7 +228,7 @@ public class PgaFactory extends GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> 
         map.put("ε₃", createValue(createBaseVectorZ(1d)).toExpr());
         map.put("π", createValue(createScalar(Math.PI)).toExpr());
         map.put("E₃", createValue(createEuclideanPseudoscalar()).toExpr());
-        map.put("E", createValue(createPseudoscalar()).toExpr());
+        map.put("I", createValue(createPseudoscalar()).toExpr());
 
         return map;
     }
