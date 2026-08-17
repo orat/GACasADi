@@ -6,6 +6,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,6 +41,12 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
         return sparse;
     }
 
+    public static DM createSparseDM(IAlgebra algebra) {
+        int basisBladeCount = algebra.getBladesCount();
+        DM sparse = new DM(new Sparsity(basisBladeCount, 1)); // fullSparse
+        return sparse;
+    }
+
     public DM createSparseDM() {
         int basisBladeCount = getIAlgebra().getBladesCount();
         DM sparse = new DM(new Sparsity(basisBladeCount, 1)); // fullSparse
@@ -50,6 +57,16 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
         DM mv = createSparseDM();
         mv.at(index, 0).assign(new DM(value));
         return DMtoVAL(mv);
+    }
+
+    public VAL createValue(int[] indices, double[] values) {
+        List<Integer> indicesList = Arrays.stream(indices)
+            .boxed()
+            .toList();
+        List<Double> valuesList = Arrays.stream(values)
+            .boxed()
+            .toList();
+        return createValue(indicesList, valuesList);
     }
 
     /**

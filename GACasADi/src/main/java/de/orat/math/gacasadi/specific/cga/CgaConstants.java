@@ -1,7 +1,6 @@
 package de.orat.math.gacasadi.specific.cga;
 
 import de.orat.math.gacalc.spi.IMultivector;
-import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.function.Supplier;
 
 public abstract class CgaConstants<MV extends IMultivector<MV>> {
@@ -10,28 +9,28 @@ public abstract class CgaConstants<MV extends IMultivector<MV>> {
         return CgaFactory.instance;
     }
 
-    abstract MV cached(String name, Supplier<SparseDoubleMatrix> creator);
+    abstract MV cached(String name, Supplier<CgaMvValue> creator);
 
     public abstract MV getSparseEmptyInstance();
 
     public MV getBaseVectorOrigin() {
-        return cached("ε₀", () -> fac().createBaseVectorOrigin(1d));
+        return cached("ε₀", () -> fac().createBaseVectorOrigin());
     }
 
     public MV getBaseVectorInfinity() {
-        return cached("εᵢ", () -> fac().createBaseVectorInfinity(1d));
+        return cached("εᵢ", () -> fac().createBaseVectorInfinity());
     }
 
     public MV getBaseVectorX() {
-        return cached("ε₁", () -> fac().createBaseVectorX(1d));
+        return cached("ε₁", () -> fac().createBaseVectorX());
     }
 
     public MV getBaseVectorY() {
-        return cached("ε₂", () -> fac().createBaseVectorY(1d));
+        return cached("ε₂", () -> fac().createBaseVectorY());
     }
 
     public MV getBaseVectorZ() {
-        return cached("ε₃", () -> fac().createBaseVectorZ(1d));
+        return cached("ε₃", () -> fac().createBaseVectorZ());
     }
 
     public MV getEpsilonPlus() {

@@ -23,12 +23,11 @@ public class CgaConstantsExpr extends CgaConstants<CgaMvExpr> {
         = new ConcurrentHashMap<>(128, 0.5f);
 
     @Override
-    public CgaMvExpr cached(String name, Supplier<SparseDoubleMatrix> creator) {
+    public CgaMvExpr cached(String name, Supplier<CgaMvValue> creator) {
         // Avoid Recursive Update exception happening with computeIfAbsent.
         var value = this.cache.get(name);
         if (value == null) {
-            var sparseDoubleMatrix = creator.get();
-            value = CgaMvExpr.create(sparseDoubleMatrix);
+            value = creator.get().toExpr();
             this.cache.putIfAbsent(name, value);
         }
         return value;

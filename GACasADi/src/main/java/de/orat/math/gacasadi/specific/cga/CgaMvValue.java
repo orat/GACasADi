@@ -10,6 +10,7 @@ import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
@@ -111,9 +112,9 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     }
 
     public static CgaMvValue create(double scalar) {
-        ColumnVectorSparsity sparsity = CasADiUtil.determineSparsity(0, CgaFactory.instance.getIAlgebra());
-        SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
-        return create(sdm);
+        DM res = GaFactory.createSparseDM(CgaFactory.instance.getIAlgebra());
+        res.at(0, 0).assign(new DM(scalar));
+        return create(res);
     }
 
     /**
