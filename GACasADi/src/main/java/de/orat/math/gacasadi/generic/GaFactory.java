@@ -6,6 +6,7 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import de.orat.math.gacasadi.specific.cga.CgaFactory;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +31,13 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
     public abstract GaFunction<EXPR, VAR, VAL> createFunction(String name, List<? extends VAR> parameters, List<? extends EXPR> returns);
 
     public abstract IAlgebra getIAlgebra();
+
+    protected int[] baseVectorsToIndices(String... baseVectors) {
+        IAlgebra algebra = this.getIAlgebra();
+        return Arrays.stream(baseVectors)
+            .mapToInt(algebra::indexOfBlade)
+            .toArray();
+    }
 
     public EXPR createSparse() {
         return SXtoEXPR(createSparseSX());
