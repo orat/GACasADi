@@ -6,7 +6,6 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
-import de.orat.math.gacasadi.specific.cga.CgaFactory;
 import java.util.Arrays;
 import java.util.List;
 
