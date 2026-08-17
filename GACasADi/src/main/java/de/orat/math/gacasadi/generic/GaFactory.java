@@ -6,8 +6,11 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -99,5 +102,23 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
         int index = this.getIAlgebra().indexOfBlade(bladeOfBasevectors.toArray(String[]::new));
         res.at(index, 0).assign(new DM(value));
         return DMtoVAL(res);
+    }
+
+    // random multivectors
+    @Override
+    public VAL createValueRandom() {
+        final int basisBladesCount = this.getIAlgebra().getBladesCount();
+        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
+        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
+        var val = createValue(sdm);
+        return val;
+    }
+
+    @Override
+    public VAL createValueRandom(int[] grades) {
+        Random random = new Random();
+        int[] indices = this.getIAlgebra().getIndizes(grades);
+        double[] values = random.doubles(-1, 1).limit(indices.length).toArray();
+        return this.createValue(indices, values);
     }
 }

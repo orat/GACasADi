@@ -7,20 +7,17 @@ import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacalc.spi.ILoopService;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.algebraGeneric.impl.gaalop.GaalopAlgebra;
-import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @AutoService(IGAFactory.class)
 public class PgaFactory extends GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> {
@@ -128,27 +125,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> 
     @Override
     public PgaMvValue createValue(double scalar) {
         return PgaMvValue.create(scalar);
-    }
-
-    @Override
-    public PgaMvValue createValueRandom() {
-        final int basisBladesCount = this.alDef.getBladesCount();
-        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
-        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
-        var val = createValue(sdm);
-        return val;
-    }
-
-    @Override
-    public PgaMvValue createValueRandom(int[] grades) {
-        Random random = new Random();
-        int[] indizes = PgaFactory.instance.getIAlgebra().getIndizes(grades);
-        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
-        var sparsity = CasADiUtil.determineSparsity(grades, PgaFactory.instance.getIAlgebra());
-        //var sparsity = CasADiUtil.toColumnVectorSparsity(sxSparsity)new CGAMultivectorSparsity(indizes);
-        var sdm = new SparseDoubleColumnVector(sparsity, values);
-        var val = createValue(sdm);
-        return val;
     }
 
     public PgaMvValue createE(double x, double y, double z) {

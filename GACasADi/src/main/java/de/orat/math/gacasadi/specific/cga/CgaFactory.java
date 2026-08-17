@@ -11,15 +11,12 @@ import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @AutoService(IGAFactory.class)
 public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
@@ -142,27 +139,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         return this.loopService;
     }
 
-    // random multivectors
-    @Override
-    public CgaMvValue createValueRandom() {
-        final int basisBladesCount = this.alDef.getBladesCount();
-        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
-        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
-        var val = createValue(sdm);
-        return val;
-    }
-
-    @Override
-    public CgaMvValue createValueRandom(int[] grades) {
-        Random random = new Random();
-        int[] indizes = this.getIAlgebra().getIndizes(grades);
-        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
-        var sparsity = createSparsity(indizes);
-        var sdm = new SparseDoubleColumnVector(sparsity, values);
-        var val = createValue(sdm);
-        return val;
-    }
-
     /*
     public static void main(String[] args) {
         var fac = new CgaFactory();
@@ -283,12 +259,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         int[] indices = super.baseVectorsToIndices("e4", "e5");
         double[] values = {1d, -1d};
         return super.createValue(indices, values);
-    }
-
-    @Deprecated
-    public static ColumnVectorSparsity createSparsity(int[] rows) {
-        int bladesCount = CgaFactory.instance.getIAlgebra().getBladesCount();
-        return new ColumnVectorSparsity(bladesCount, rows);
     }
 
     @Override

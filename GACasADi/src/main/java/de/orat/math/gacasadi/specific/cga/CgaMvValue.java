@@ -377,10 +377,8 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     
     private static CgaMvValue createE3(Tuple c) {
         int[] euclidIndices = getEuclidIndizes();
-        var sparsity = CgaFactory.createSparsity(euclidIndices);
-        double[] nonzeros = new double[]{c.values[0], c.values[1], c.values[2]};
-        var vec = new SparseDoubleColumnVector(sparsity, nonzeros);
-        return create(vec);
+        double[] values = {c.values[0], c.values[1], c.values[2]};
+        return CgaFactory.instance.createValue(euclidIndices, values);
 
         /* warum funktioniert das nicht
         return constants2().getBaseVectorX().gpWithScalar(c.values[0]).

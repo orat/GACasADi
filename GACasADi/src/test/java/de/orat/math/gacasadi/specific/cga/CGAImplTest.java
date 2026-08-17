@@ -29,12 +29,18 @@ public class CGAImplTest {
         //ExprGraphFactory fac = ExprGraphFactory.get(new CGAExprGraphFactory());
     }
 
+    @Deprecated
+    public static ColumnVectorSparsity createSparsity(int[] rows) {
+        int bladesCount = CgaFactory.instance.getIAlgebra().getBladesCount();
+        return new ColumnVectorSparsity(bladesCount, rows);
+    }
+
     @Test
     public void testAdd() {
         var fac = TestExprGraphFactory.instance();
-        ColumnVectorSparsity sparsity_a = CgaFactory.createSparsity(new int[]{1, 2, 3});
+        ColumnVectorSparsity sparsity_a = createSparsity(new int[]{1, 2, 3});
         MultivectorVariable mvsa = fac.createVariable("a", sparsity_a);
-        ColumnVectorSparsity sparsity_b = CgaFactory.createSparsity(new int[]{1, 3, 4});
+        ColumnVectorSparsity sparsity_b = createSparsity(new int[]{1, 3, 4});
         MultivectorVariable mvsb = fac.createVariable("b", sparsity_b);
 
         MultivectorExpression mvsc = mvsa.addition(mvsb);
@@ -80,9 +86,9 @@ public class CGAImplTest {
     @Test
     public void testSub() {
         var fac = TestExprGraphFactory.instance();
-        ColumnVectorSparsity sparsity_a = CgaFactory.createSparsity(new int[]{1, 2, 3});
+        ColumnVectorSparsity sparsity_a = createSparsity(new int[]{1, 2, 3});
         MultivectorVariable mvsa = fac.createVariable("a", sparsity_a);
-        ColumnVectorSparsity sparsity_b = CgaFactory.createSparsity(new int[]{1, 3, 4});
+        ColumnVectorSparsity sparsity_b = createSparsity(new int[]{1, 3, 4});
         MultivectorVariable mvsb = fac.createVariable("b", sparsity_b);
 
         MultivectorExpression mvsc = mvsa.subtraction(mvsb);
@@ -128,9 +134,9 @@ public class CGAImplTest {
     @Test
     public void testOP() {
         var fac = TestExprGraphFactory.instance();
-        ColumnVectorSparsity sparsity_a = CgaFactory.createSparsity(new int[]{1, 2, 3});
+        ColumnVectorSparsity sparsity_a = createSparsity(new int[]{1, 2, 3});
         MultivectorVariable mvsa = fac.createVariable("a", sparsity_a);
-        ColumnVectorSparsity sparsity_b = CgaFactory.createSparsity(new int[]{1, 3, 4});
+        ColumnVectorSparsity sparsity_b = createSparsity(new int[]{1, 3, 4});
         MultivectorVariable mvsb = fac.createVariable("b", sparsity_b);
 
         MultivectorExpression mvsc = mvsa.outerProduct(mvsb);
@@ -220,7 +226,7 @@ public class CGAImplTest {
     public void testGPVec1Fix() {
 
         var fac = TestExprGraphFactory.instance();
-        //ColumnVectorSparsity sparsity_a = CgaFactory.createSparsity(new int[]{1,2,3});
+        //ColumnVectorSparsity sparsity_a = createSparsity(new int[]{1,2,3});
         //MultivectorSymbolic mva = CGAExprGraphFactory.createMultivectorSymbolic("a", sparsity_a);
 
         MultivectorVariable mva = fac.createVariable("a", 1);
