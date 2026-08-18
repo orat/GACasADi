@@ -42,6 +42,8 @@ public interface IAlgebra {
         return 1 << getBaseSize();
     }
 
+    List<String> bladeOfBasevectorsFromIndex(int index);
+
     //einf
     int indexOfBlade(String baseVector);
 

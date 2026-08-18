@@ -11,14 +11,12 @@ import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.GaLoopService;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.MatrixSparsity;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @AutoService(IGAFactory.class)
 public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> {
@@ -41,27 +39,24 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         return alLibFile;
     }
 
-    /**
-     * TODO: With the current implementation, they might depend on the specific definition of cga used.
-     */
     private Map<String, CgaMvExpr> createConstants() {
         var map = new HashMap<String, CgaMvExpr>();
 
-        map.put("ε₀", createValue(createBaseVectorOrigin(1d)).toExpr());
-        map.put("εᵢ", createValue(createBaseVectorInfinity(1d)).toExpr());
-        map.put("ε₁", createValue(createBaseVectorX(1d)).toExpr());
-        map.put("ε₂", createValue(createBaseVectorY(1d)).toExpr());
-        map.put("ε₃", createValue(createBaseVectorZ(1d)).toExpr());
-        map.put("ε₊", createValue(createEpsilonPlus()).toExpr());
-        map.put("ε₋", createValue(createEpsilonMinus()).toExpr());
-        map.put("π", createValue(createScalar(Math.PI)).toExpr());
-        map.put("∞", createValue(createBaseVectorInfinityDorst()).toExpr());
-        map.put("o", createValue(createBaseVectorOriginDorst()).toExpr());
-        map.put("n", createValue(createBaseVectorInfinityDoran()).toExpr());
-        map.put("ñ", createValue(createBaseVectorOriginDoran()).toExpr());
-        map.put("E₀", createValue(createMinkovskiBiVector()).toExpr());
-        map.put("E₃", createValue(createEuclideanPseudoscalar()).toExpr());
-        map.put("E", createValue(createPseudoscalar()).toExpr());
+        map.put("ε₀", createBaseVectorOrigin().toExpr());
+        map.put("εᵢ", createBaseVectorInfinity().toExpr());
+        map.put("ε₁", createBaseVectorX().toExpr());
+        map.put("ε₂", createBaseVectorY().toExpr());
+        map.put("ε₃", createBaseVectorZ().toExpr());
+        map.put("ε₊", createEpsilonPlus().toExpr());
+        map.put("ε₋", createEpsilonMinus().toExpr());
+        map.put("π", createScalar(Math.PI).toExpr());
+        map.put("∞", createBaseVectorInfinityDorst().toExpr());
+        map.put("o", createBaseVectorOriginDorst().toExpr());
+        map.put("n", createBaseVectorInfinityDoran().toExpr());
+        map.put("ñ", createBaseVectorOriginDoran().toExpr());
+        map.put("E₀", createMinkovskiBiVector().toExpr());
+        map.put("E₃", createEuclideanPseudoscalar().toExpr());
+        map.put("I", createPseudoscalar().toExpr());
 
         return map;
     }
@@ -144,99 +139,82 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         return this.loopService;
     }
 
-    // random multivectors
-    @Override
-    public CgaMvValue createValueRandom() {
-        final int basisBladesCount = this.alDef.getBladesCount();
-        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
-        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
-        var val = createValue(sdm);
-        return val;
+    /*
+    public static void main(String[] args) {
+        var fac = new CgaFactory();
+        var al = fac.alDef;
+        int[] values = {1, 2, 3, 4, 5, 15, 16};
+        for (int value : values) {
+            List<String> base = al.bladeOfBasevectorsFromIndex(value);
+            System.out.println(String.format("%s: %s", value, base));
+        }
     }
-
-    @Override
-    public CgaMvValue createValueRandom(int[] grades) {
-        Random random = new Random();
-        int[] indizes = this.getIAlgebra().getIndizes(grades);
-        double[] values = random.doubles(-1, 1).limit(indizes.length).toArray();
-        var sparsity = createSparsity(indizes);
-        var sdm = new SparseDoubleColumnVector(sparsity, values);
-        var val = createValue(sdm);
-        return val;
-    }
-
+     */
     // create constants
-    // based on e4e5
-    protected static SparseDoubleMatrix createBaseVectorOrigin(double scalar) {
-        double[] nonzeros = new double[]{-0.5d * scalar, 0.5d * scalar};
-        int[] rows = new int[]{4, 5};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorOrigin() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {-0.5d, 0.5d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorInfinity(double scalar) {
-        double[] nonzeros = new double[]{scalar, scalar};
-        int[] rows = new int[]{4, 5};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorInfinity() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {1d, 1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorX(double scalar) {
-        double[] nonzeros = new double[]{scalar};
-        int[] rows = new int[]{1};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorX() {
+        int[] indices = super.baseVectorsToIndices("e1");
+        double[] values = {1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorY(double scalar) {
-        double[] nonzeros = new double[]{scalar};
-        int[] rows = new int[]{2};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorY() {
+        int[] indices = super.baseVectorsToIndices("e2");
+        double[] values = {1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorZ(double scalar) {
-        double[] nonzeros = new double[]{scalar};
-        int[] rows = new int[]{3};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorZ() {
+        int[] indices = super.baseVectorsToIndices("e3");
+        double[] values = {1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createScalar(double scalar) {
-        ColumnVectorSparsity sparsity = createSparsity(new int[]{0});
-        return new /*SparseCGAColumnVector*/ SparseDoubleMatrix(sparsity, new double[]{scalar});
+    protected CgaMvValue createScalar(double scalar) {
+        return createValue(scalar);
     }
 
-    protected static SparseDoubleMatrix createEpsilonPlus() {
-        ColumnVectorSparsity sparsity = createSparsity(new int[]{4, 5});
-        return new SparseDoubleMatrix(sparsity, new double[]{1d, 0d});
+    protected CgaMvValue createEpsilonPlus() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {1d, 0d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createEpsilonMinus() {
-        ColumnVectorSparsity sparsity = createSparsity(new int[]{4, 5});
-        return new SparseDoubleMatrix(sparsity, new double[]{0d, 1d});
+    protected CgaMvValue createEpsilonMinus() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {0d, 1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createEuclideanPseudoscalar() {
-        ColumnVectorSparsity sparsity = createSparsity(new int[]{16});
-        return new SparseDoubleMatrix(sparsity, new double[]{1d});
+    protected CgaMvValue createEuclideanPseudoscalar() {
+        int[] indices = {this.alDef.indexOfBlade("e1", "e2", "e3")};
+        double[] values = {1d};
+        return super.createValue(indices, values);
     }
 
-    protected SparseDoubleMatrix createPseudoscalar() {
-        ColumnVectorSparsity sparsity = createSparsity(new int[]{this.alDef.getBladesCount() - 1});
-        return new SparseDoubleMatrix(sparsity, new double[]{1d});
+    protected CgaMvValue createPseudoscalar() {
+        int[] indices = {this.alDef.getBladesCount() - 1};
+        double[] values = {1d};
+        return super.createValue(indices, values);
     }
 
     //TODO
     // In Gameron steht aber pseudoscalar().reverse()/(pseudoscalar left contraction pseudoscalar().reverse())
     // vielleicht ist das die Impl. die unabhängig von ga model ist und die impl hier
     // geht nur für CGA?
-    protected SparseDoubleMatrix createInversePseudoscalar() {
-        return CgaFactory.instance.createValue(createPseudoscalar()).reverse().elements();
-    }
-
-    protected static int getMikovskiBivectorIndex() {
-        return 15;
+    protected CgaMvValue createInversePseudoscalar() {
+        return createPseudoscalar().reverse();
     }
 
     /**
@@ -246,50 +224,41 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
      *
      * @return
      */
-    protected static SparseDoubleMatrix createMinkovskiBiVector() {
-        ColumnVectorSparsity sparsity = createSparsity(new int[]{getMikovskiBivectorIndex()});
-        return new SparseDoubleMatrix(sparsity, new double[]{2d});
+    protected CgaMvValue createMinkovskiBiVector() {
+        int[] indices = {this.alDef.indexOfBlade("e4", "e5")};
+        double[] values = {2d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createE(double x, double y, double z) {
-        double[] nonzeros = new double[]{x, y, z};
-        int[] rows = new int[]{1, 2, 3};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createE(double x, double y, double z) {
+        int[] indices = super.baseVectorsToIndices("e1", "e2", "e3");
+        double[] values = {x, y, z};
+        return super.createValue(indices, values);
     }
 
     // die folgenden Defs sind noch nicht überprüft
-    protected static SparseDoubleMatrix createBaseVectorInfinityDorst() {
-        double[] nonzeros = new double[]{-1d, 1d};
-        int[] rows = new int[]{4, 5};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorInfinityDorst() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {-1d, 1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorOriginDorst() {
-        double[] nonzeros = new double[]{0.5d, 0.5d};
-        int[] rows = new int[]{4, 5};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorOriginDorst() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {0.5d, 0.5d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorInfinityDoran() {
-        double[] nonzeros = new double[]{1d, 1d};
-        int[] rows = new int[]{4, 5};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
+    protected CgaMvValue createBaseVectorInfinityDoran() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {1d, 1d};
+        return super.createValue(indices, values);
     }
 
-    protected static SparseDoubleMatrix createBaseVectorOriginDoran() {
-        double[] nonzeros = new double[]{1d, -1d};
-        int[] rows = new int[]{4, 5};
-        ColumnVectorSparsity sparsity = createSparsity(rows);
-        return new SparseDoubleMatrix(sparsity, nonzeros);
-    }
-
-    public static ColumnVectorSparsity createSparsity(int[] rows) {
-        int bladesCount = CgaFactory.instance.getIAlgebra().getBladesCount();
-        return new ColumnVectorSparsity(bladesCount, rows);
+    protected CgaMvValue createBaseVectorOriginDoran() {
+        int[] indices = super.baseVectorsToIndices("e4", "e5");
+        double[] values = {1d, -1d};
+        return super.createValue(indices, values);
     }
 
     @Override

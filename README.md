@@ -7,7 +7,7 @@ This is a [CasADi](https://web.casadi.org/) based implementation of the [GACalcA
 
 This project depends on [JCasADi](https://github.com/MobMonRob/JCasADi), a java wrapper for [CasADi](https://web.casadi.org/).
 
-The readme for the annotation which generates a cached version of [`iMultivectorSymbolic`](https://github.com/orat/GACalcAPI/blob/master/src/main/java/de/orat/math/gacalc/spi/iMultivectorSymbolic.java) can be found in [GACasADi_SymbolicMultivectorCachingProcessor](GACasADi_SymbolicMultivectorCachingProcessor/README.md).
+The readme for the annotation processor which generates a cached version of [`IMultivectorExpression`](https://github.com/orat/GACalcAPI/blob/master/src/main/java/de/orat/math/gacalc/spi/IMultivectorExpression.java) can be found in [GACasADi_MvExprCachingProcessor](GACasADi_MvExprCachingProcessor/README.md).
 
 ## Project status
 At the moment only the algebras CGA and PGA are supported. For futher ones code has to be written, e.g. for specific support of 3d-Visualisation and implementation of some features, which are dependend to the algebra specifities. In the future instead of writing Java-code, all speficic functionality should be configurable in specific ascii files.
@@ -24,7 +24,7 @@ At the moment only the algebras CGA and PGA are supported. For futher ones code 
 | &#x03B5;&#x2083; | \epsilon_3 | \u03B5\u2083 | base vector representing z direction |
 | &#x03C0;         | \pi        | \u03C0       | Ludolphs- or circle constant | Math.PI |
 | &#x0045;&#x2083; | E_3        | \u0045\u2083 | Euclidean pseudoscalar | &#x03B5;&#x2081; &#x2227; &#x03B5;&#x2082; &#x2227; &#x03B5;&#x2083;     |
-| &#x0045;         | E          | \u0045       | Pseudoscalar | &#x03B5;&#x1D62; &#x2227; &#x03B5;&#x2081; &#x2227; &#x03B5;&#x2082; &#x2227; &#x03B5;&#x2083; &#x2227; &#x03B5;&#x2080;|
+| I                | I          | \u0049       | Pseudoscalar | &#x03B5;&#x1D62; &#x2227; &#x03B5;&#x2081; &#x2227; &#x03B5;&#x2082; &#x2227; &#x03B5;&#x2083; &#x2227; &#x03B5;&#x2080;|
 
 ### Builtin functions
 The following functions are implemented specific for PGA:
@@ -47,7 +47,13 @@ The following functions are not yet supported:
 | :---------- | ------------ |
 | up()        | up-projection of a euclidean vector into the projected space |
 | down()      | down-projection of a multivector into the euclidean space by normalization and rejection from the minkowski plane E0 |
+
+
+#### Generally supported Builtin functions
+| symbol      | description |
+| :---------- | ------------ |
 | euclid()    | euclidean part of the multivector, only blades not formed basis vectors squaring to 0 or -1 |
 | idle()      | idle part of the multivector, only blades formaed by basis vectors which includes at minimum one which squares to 0 or -1 |
+
 
 ### Builtin opererators

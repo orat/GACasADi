@@ -6,7 +6,11 @@ import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.dhbw.rahmlab.casadi.nativelib.NativeLibLoader;
 import de.orat.math.gacalc.spi.IGAFactory;
 import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
+import de.orat.math.sparsematrix.SparseDoubleColumnVector;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Oliver Rettig (Oliver.Rettig@orat.de)
@@ -30,6 +34,13 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
 
     public abstract IAlgebra getIAlgebra();
 
+    protected int[] baseVectorsToIndices(String... baseVectors) {
+        IAlgebra algebra = this.getIAlgebra();
+        return Arrays.stream(baseVectors)
+            .mapToInt(algebra::indexOfBlade)
+            .toArray();
+    }
+
     public EXPR createSparse() {
         return SXtoEXPR(createSparseSX());
     }
@@ -40,22 +51,38 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
         return sparse;
     }
 
+    public static DM createSparseDM(IAlgebra algebra) {
+        int basisBladeCount = algebra.getBladesCount();
+        DM sparse = new DM(new Sparsity(basisBladeCount, 1)); // fullSparse
+        return sparse;
+    }
+
     public DM createSparseDM() {
         int basisBladeCount = getIAlgebra().getBladesCount();
         DM sparse = new DM(new Sparsity(basisBladeCount, 1)); // fullSparse
         return sparse;
     }
 
-    public VAL create(int index, double value) {
+    public VAL createValue(int index, double value) {
         DM mv = createSparseDM();
         mv.at(index, 0).assign(new DM(value));
         return DMtoVAL(mv);
     }
 
+    public VAL createValue(int[] indices, double[] values) {
+        List<Integer> indicesList = Arrays.stream(indices)
+            .boxed()
+            .toList();
+        List<Double> valuesList = Arrays.stream(values)
+            .boxed()
+            .toList();
+        return createValue(indicesList, valuesList);
+    }
+
     /**
      * Precondition: same size
      */
-    public VAL create(List<Integer> indices, List<Double> values) {
+    public VAL createValue(List<Integer> indices, List<Double> values) {
         final int size = indices.size();
         if (values.size() != size) {
             throw new IllegalArgumentException("indices and values are not of same size.");
@@ -67,5 +94,31 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
             mv.at(index, 0).assign(new DM(value));
         }
         return DMtoVAL(mv);
+    }
+
+    @Override
+    public VAL createValue(List<String> bladeOfBasevectors, double value) {
+        DM res = this.createSparseDM();
+        int index = this.getIAlgebra().indexOfBlade(bladeOfBasevectors.toArray(String[]::new));
+        res.at(index, 0).assign(new DM(value));
+        return DMtoVAL(res);
+    }
+
+    // random multivectors
+    @Override
+    public VAL createValueRandom() {
+        final int basisBladesCount = this.getIAlgebra().getBladesCount();
+        double[] result = new Random().doubles(-1, 1).limit(basisBladesCount).toArray();
+        var sdm = new SparseDoubleColumnVector(ColumnVectorSparsity.dense(basisBladesCount), result);
+        var val = createValue(sdm);
+        return val;
+    }
+
+    @Override
+    public VAL createValueRandom(int[] grades) {
+        Random random = new Random();
+        int[] indices = this.getIAlgebra().getIndizes(grades);
+        double[] values = random.doubles(-1, 1).limit(indices.length).toArray();
+        return this.createValue(indices, values);
     }
 }

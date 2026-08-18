@@ -3,12 +3,10 @@ package de.orat.math.gacasadi.specific.pga;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
 import de.orat.math.gacalc.spi.IMultivectorVariable;
-import de.orat.math.gacasadi.algebraGeneric.api.IAlgebra;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.specific.pga.gen.CachedPgaMvExpr;
 import de.orat.math.gacasadi.generic.IGaMvVariable;
 import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import de.orat.math.sparsematrix.SparseDoubleMatrix;
 
 public class PgaMvVariable extends CachedPgaMvExpr implements IGaMvVariable<PgaMvExpr, PgaMvVariable, PgaMvValue>, IMultivectorVariable<PgaMvExpr, PgaMvVariable, PgaMvValue> {
 

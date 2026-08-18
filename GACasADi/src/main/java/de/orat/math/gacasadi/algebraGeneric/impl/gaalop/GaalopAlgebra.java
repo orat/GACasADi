@@ -154,6 +154,12 @@ public class GaalopAlgebra implements IAlgebra {
     }
 
     @Override
+    public List<String> bladeOfBasevectorsFromIndex(int index) {
+        Blade blade = this.algebra.getBlade(index);
+        return blade.getBases();
+    }
+
+    @Override
     public int indexOfBlade(String baseVector) {
         Blade blade = new Blade(List.of(baseVector));
         int index;

@@ -3,14 +3,13 @@ package de.orat.math.gacasadi.specific.pga;
 import de.dhbw.rahmlab.casadi.SxStatic;
 import static de.dhbw.rahmlab.casadi.api.Util.toStdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.casadi.DM;
-import de.orat.math.gacalc.api.MultivectorValue;
 import de.orat.math.gacalc.spi.IMultivectorValue;
 import de.orat.math.gacalc.util.GeometricObject;
 import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
-import de.orat.math.gacasadi.generic.CasADiUtil;
 import static de.orat.math.gacasadi.generic.CasADiUtil.toCasADiSparsity;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.pga.gen.DelegatingPgaMvValue;
@@ -70,10 +69,9 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     }
    
     public static PgaMvValue create(double scalar) {
-        //CGAMultivectorSparsity sparsity = new CGAMultivectorSparsity(new int[]{0});
-        ColumnVectorSparsity sparsity = CasADiUtil.determineSparsity(0, PgaFactory.instance.getIAlgebra());
-        SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
-        return create(sdm);
+        DM res = GaFactory.createSparseDM(PgaFactory.instance.getIAlgebra());
+        res.at(0, 0).assign(new DM(scalar));
+        return create(res);
     }
     /**
      * Only to be used from DelegatingGaMvValue! Otherwise will lead to inconsistencies!
@@ -163,7 +161,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         values.add(location.values[0]);
         values.add(location.values[1]);
         values.add(location.values[2]);
-        PgaMvValue mv = PgaFactory.instance.create(getBaseVectorIndizes(), values);
+        PgaMvValue mv = PgaFactory.instance.createValue(getBaseVectorIndizes(), values);
         //TODO signedWeight hineinbekommen
         //mv.gpWithScalar(signedWeight);
         return mv.dual();
@@ -205,7 +203,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         values.add(abcd.values[1]);
         values.add(abcd.values[2]);
         // e0, e1, e2, e3
-        return  PgaFactory.instance.create(getBaseVectorIndizes(), values);
+        return PgaFactory.instance.createValue(getBaseVectorIndizes(), values);
     }
     private static PgaMvValue createPlane(GeometricObject obj) {
         //TODO 
@@ -233,7 +231,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         values.add(plucker.values[3]);
         values.add(plucker.values[4]);
         values.add(plucker.values[5]);
-        return  PgaFactory.instance.create(pluckerIndices(), values);
+        return PgaFactory.instance.createValue(pluckerIndices(), values);
     }
     private static PgaMvValue createLine(GeometricObject obj){
         //TODO

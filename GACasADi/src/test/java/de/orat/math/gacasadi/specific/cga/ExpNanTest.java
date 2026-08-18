@@ -9,10 +9,17 @@ import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.orat.math.gacasadi.generic.GaFunction;
 import de.orat.math.gacasadi.generic.IGetSX;
 import static de.orat.math.gacasadi.specific.cga.CgaMvValue.getEuclidIndizes;
+import de.orat.math.sparsematrix.ColumnVectorSparsity;
 import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import java.util.List;
 
 public class ExpNanTest {
+
+    @Deprecated
+    public static ColumnVectorSparsity createSparsity(int[] rows) {
+        int bladesCount = CgaFactory.instance.getIAlgebra().getBladesCount();
+        return new ColumnVectorSparsity(bladesCount, rows);
+    }
 
     /**
      * Works only if expr are constructed from getDelegate() of inputs.
@@ -60,7 +67,7 @@ public class ExpNanTest {
          */
         //  Noch näher an der DSL.
         int[] euclidIndices = getEuclidIndizes();
-        var sparsity = CgaFactory.createSparsity(euclidIndices);
+        var sparsity = createSparsity(euclidIndices);
         double[] nonzeros = new double[]{0d, 1d, 0d};
         var sdm = new SparseDoubleColumnVector(sparsity, nonzeros);
         CgaMvValue ae = fac.createValue(sdm);

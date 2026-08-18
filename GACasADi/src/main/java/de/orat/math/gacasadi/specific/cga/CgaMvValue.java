@@ -10,6 +10,7 @@ import de.orat.math.gacalc.util.Tuple;
 import de.orat.math.gacasadi.delegating.annotation.api.GenerateDelegate;
 import de.orat.math.gacasadi.generic.CasADiUtil;
 import de.orat.math.gacasadi.generic.ComposableImmutableBinaryTree;
+import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
@@ -111,9 +112,9 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     }
 
     public static CgaMvValue create(double scalar) {
-        ColumnVectorSparsity sparsity = CasADiUtil.determineSparsity(0, CgaFactory.instance.getIAlgebra());
-        SparseDoubleMatrix sdm = new SparseDoubleMatrix(sparsity, new double[]{scalar});
-        return create(sdm);
+        DM res = GaFactory.createSparseDM(CgaFactory.instance.getIAlgebra());
+        res.at(0, 0).assign(new DM(scalar));
+        return create(res);
     }
 
     /**
@@ -376,10 +377,8 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     
     private static CgaMvValue createE3(Tuple c) {
         int[] euclidIndices = getEuclidIndizes();
-        var sparsity = CgaFactory.createSparsity(euclidIndices);
-        double[] nonzeros = new double[]{c.values[0], c.values[1], c.values[2]};
-        var vec = new SparseDoubleColumnVector(sparsity, nonzeros);
-        return create(vec);
+        double[] values = {c.values[0], c.values[1], c.values[2]};
+        return CgaFactory.instance.createValue(euclidIndices, values);
 
         /* warum funktioniert das nicht
         return constants2().getBaseVectorX().gpWithScalar(c.values[0]).
