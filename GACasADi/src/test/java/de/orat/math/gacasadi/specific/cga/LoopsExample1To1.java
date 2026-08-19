@@ -22,9 +22,9 @@ public class LoopsExample1To1 {
 
         // Loop: Abbildung der Variablen auf rein symbolische Parameter.
         // Nebenbedingung: Array Elemente müssen die gleiche Sparsity haben.
-        var sym_arAcc = fac.createVariable("sym_arAcc", arAcc0);
-        var sym_aSim = fac.createVariable("sym_aSim", aSim);
-        var sym_aArr = fac.createVariable("sym_aArr", aArr0);
+        var sym_arAcc = arAcc0.toVar("sym_arAcc");
+        var sym_aSim = aSim.toVar("sym_aSim");
+        var sym_aArr = aArr0.toVar("sym_aArr");
 
         // Loop: Definition der "inneren Funktion".
         var arAcc_i1 = sym_arAcc.addition(sym_aArr);

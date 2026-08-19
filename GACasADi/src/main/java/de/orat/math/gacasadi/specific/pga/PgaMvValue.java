@@ -354,13 +354,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         }
         return result;
     }
-    
-    @Override
-    public boolean isNull(double precision) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
-    
     /**
      * Nullable!
      */
@@ -398,5 +392,10 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
          */
         var dm = SxStatic.evalf(sym.getSX());
         return create(dm);
+    }
+
+    @Override
+    public PgaMvVariable toVar(String name) {
+        return new PgaMvVariable(name, this.getSparsityCasadi());
     }
 }

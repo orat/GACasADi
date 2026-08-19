@@ -481,4 +481,9 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
         }
         return create(result);
     }
+
+    @Override
+    public PgaMvVariable toVar(String name) {
+        return new PgaMvVariable(name, this.getSparsityCasadi());
+    }
 }

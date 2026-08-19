@@ -1049,4 +1049,9 @@ SXScalar.sumProd(new SXScalar[]{A,B2,B4,B5}, R, new int[]{15,3,1,0}).
     public CgaMvExpr asEXPR() {
         return this;
     }
+
+    @Override
+    public CgaMvVariable toVar(String name) {
+        return new CgaMvVariable(name, this.getSparsityCasadi());
+    }
 }

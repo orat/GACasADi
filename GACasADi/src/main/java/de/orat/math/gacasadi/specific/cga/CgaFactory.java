@@ -71,12 +71,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
         return constants;
     }
 
-    // create symbolic multivectors
-    @Override
-    public CgaMvVariable createVariable(String name, CgaMvExpr from) {
-        return new CgaMvVariable(name, from);
-    }
-
     @Override
     public CgaMvVariable createVariable(String name, MatrixSparsity sparsity) {
         return CgaMvExpr.create(name, ColumnVectorSparsity.instance(sparsity));
@@ -269,11 +263,6 @@ public class CgaFactory extends GaFactory<CgaMvExpr, CgaMvVariable, CgaMvValue> 
     @Override
     protected CgaMvValue DMtoVAL(DM dm) {
         return CgaMvValue.create(dm);
-    }
-
-    @Override
-    public CgaMvVariable EXPRtoVAR(String name, CgaMvExpr from) {
-        return createVariable(name, from);
     }
 
     @Override

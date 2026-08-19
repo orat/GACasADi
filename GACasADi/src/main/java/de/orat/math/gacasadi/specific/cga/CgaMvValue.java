@@ -14,8 +14,6 @@ import de.orat.math.gacasadi.generic.GaFactory;
 import de.orat.math.gacasadi.generic.IGaMvValue;
 import de.orat.math.gacasadi.generic.IGetSparsityCasadi;
 import de.orat.math.gacasadi.specific.cga.gen.DelegatingCgaMvValue;
-import de.orat.math.sparsematrix.ColumnVectorSparsity;
-import de.orat.math.sparsematrix.SparseDoubleColumnVector;
 import de.orat.math.sparsematrix.SparseDoubleMatrix;
 import java.util.List;
 import org.apache.commons.math3.util.Precision;
@@ -1075,19 +1073,8 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
                 .add(constants2().getBaseVectorZ().gpWithScalar(z))
                 .add(createInf(0.5*(x*x+y*y+z*z))));
     }*/
-    
-    // TODO kann in eine default impl eines interfaces verschoben werden von dem diese Klasse hier
-    // erbt, da andere impl das auch brauchen können, gilt für alle impl
-    private boolean isNull(){
-        return getSparsity().isNull();
+    @Override
+    public CgaMvVariable toVar(String name) {
+        return new CgaMvVariable(name, this.getSparsityCasadi());
     }
-    public boolean isNull(double precision){
-        StdVectorDouble values = getDM().get_nonzeros();
-        for (int i=0;i<values.size();i++){
-            if (!Precision.equals(values.get(i), 0d, precision)) return false;
-            // if (Math.abs(values.get(i)) > precision) return false;
-        }
-        return true;
-    }
-
 }

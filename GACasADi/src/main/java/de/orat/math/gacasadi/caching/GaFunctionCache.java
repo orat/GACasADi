@@ -72,14 +72,14 @@ public class GaFunctionCache<CACHED, EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR 
         for (int i = 0; i < size; ++i) {
             EXPR arg = args.get(i);
             // sparsity
-            var param = fac.EXPRtoVAR(getParamName(i), arg);
+            VAR param = arg.toVar(getParamName(i));
             casadiFuncParams.add(param);
 
             // Preserve identity for symbolicMultivectorParams.
             Integer firstOccurrence = argsFirstOccurrences.get(i);
             // assert firstOccurrence <= i;
             // assert casadiFuncParams.size() - 1 == i;
-            var symbolicMultivectorParam = casadiFuncParams.get(firstOccurrence);
+            VAR symbolicMultivectorParam = casadiFuncParams.get(firstOccurrence);
             symbolicMultivectorParams.add(symbolicMultivectorParam);
         }
         List<CACHED> paramsEXPR = symbolicMultivectorParams.stream().map(VAR::asEXPR).map(cachedFac::cachedEXPR).toList();

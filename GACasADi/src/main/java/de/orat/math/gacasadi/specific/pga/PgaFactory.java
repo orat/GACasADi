@@ -49,11 +49,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> 
         return PgaMvValue.create(dm);
     }
 
-    @Override
-    public PgaMvVariable EXPRtoVAR(String name, PgaMvExpr from) {
-        return createVariable(name, from);
-    }
-
     // create function
     @Override
     public GaFunction<PgaMvExpr, PgaMvVariable, PgaMvValue> createFunction(String name,
@@ -85,11 +80,6 @@ public class PgaFactory extends GaFactory<PgaMvExpr, PgaMvVariable, PgaMvValue> 
 
     public PgaConstantsValue constantsValue() {
         return PgaConstantsValue.instance;
-    }
-
-    @Override
-    public PgaMvVariable createVariable(String name, PgaMvExpr from) {
-        return new PgaMvVariable(name, from);
     }
 
     @Override

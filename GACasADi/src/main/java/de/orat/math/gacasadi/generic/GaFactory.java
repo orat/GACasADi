@@ -27,8 +27,6 @@ public abstract class GaFactory<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR exte
 
     protected abstract VAL DMtoVAL(DM dm);
 
-    public abstract VAR EXPRtoVAR(String name, EXPR from);
-
     @Override
     public abstract GaFunction<EXPR, VAR, VAL> createFunction(String name, List<? extends VAR> parameters, List<? extends EXPR> returns);
 
