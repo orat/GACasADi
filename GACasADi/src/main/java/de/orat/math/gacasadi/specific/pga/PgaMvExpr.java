@@ -319,11 +319,11 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
     // non linear function, iplementation via matrix calculations of casadi
     @Override
     public PgaMvExpr meet(PgaMvExpr b) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not yet implemented."); 
     }
     @Override
     public PgaMvExpr join(PgaMvExpr b) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not yet implemented."); 
     }
 
     @Override
@@ -359,7 +359,7 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
     }
     
     private static boolean checkEpsilon(double actualValue, double target) {
-        final double epsilon = 1e-3d;
+        final double epsilon = 1e-5d;
         return Math.abs(actualValue - target) <= epsilon;
     }
     
