@@ -144,7 +144,7 @@ public class CGADecomposeTest {
        
     
     private void test(GeometricObject obj, CgaMvValue mv){
-        GeometricObject obj2 = mv.decompose(obj.isIPNS());
+        GeometricObject obj2 = mv.decompose(obj.isIntrinsic());
         System.out.println(obj2.toString());
         assertEquals(obj, obj2);
     }

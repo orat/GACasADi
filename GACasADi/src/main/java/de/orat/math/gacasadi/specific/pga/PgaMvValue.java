@@ -141,7 +141,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
             default:
                 throw new RuntimeException("Composition of the given type is not yet supported!");
         }
-        if (!obj.isIPNS()){ 
+        if (!obj.isExtrinsic()){ 
             result = result.dual();
         }    
         return result;
@@ -212,12 +212,15 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     }
     private static List<Integer> pluckerIndices(){
         List<Integer> indices = new ArrayList();
-        indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0","e1"));
-        indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0","e2"));
-        indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0","e3"));
+        // direction
         indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e1","e2"));
         indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e1","e3"));
         indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e2","e3"));
+        // moment
+        indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0","e1"));
+        indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0","e2"));
+        indices.add(PgaFactory.instance.getIAlgebra().indexOfBlade("e0","e3"));
+        
         return indices;
     }
     private static PgaMvValue createLine(Tuple plucker){
@@ -238,8 +241,18 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         // aus location und attitude die Plucker coordinates beschaffen
         throw new RuntimeException("not yet implemented!");
     }
+    
+    private boolean isHomogeneous(){
+        int[] grades = grades();
+        return grades.length <= 1;
+    }
+    
     @Override
-    public GeometricObject decompose(boolean isIPNS) {
+    public GeometricObject decompose(boolean isExtrinsic) {
+        if (!isHomogeneous()) {
+            System.out.println("The given multivector is not homogenious and therefore does not correspond to a geometric object!");
+            return null;
+        }
         switch (grade()){
             case 0:
                 // scalar
@@ -252,7 +265,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
                 Tuple[] attitudeAndLocation = decomposePlane();
                 //TODO
                 double squaredWeight = 0d;
-                return new GeometricObject(GeometricObject.GeometricType.PLANE, isIPNS,
+                return new GeometricObject(GeometricObject.GeometricType.PLANE, isExtrinsic,
                         attitudeAndLocation[0], attitudeAndLocation[1],
                         true, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
                 
@@ -260,7 +273,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
             case 2:
                 attitudeAndLocation = decomposePlucker(decomposeLine());
                 squaredWeight = 0d; // ToDo squaredWeight as func. of attitude?
-                return new GeometricObject(GeometricObject.GeometricType.LINE, isIPNS,
+                return new GeometricObject(GeometricObject.GeometricType.LINE, isExtrinsic,
                         attitudeAndLocation[0], 
                         attitudeAndLocation[1],
                         true, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
@@ -269,7 +282,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
             case 3:
                 //TODO
                 squaredWeight = 0d;
-                return new GeometricObject(GeometricObject.GeometricType.POINT, isIPNS, null, 
+                return new GeometricObject(GeometricObject.GeometricType.POINT, isExtrinsic, null, 
                         decomposePoint(),
                         0d, squaredWeight,
                         GeometricObject.Sign.UNKNOWN, grade());
@@ -321,21 +334,23 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     /**
      * Decompose this pga multivector value into a tuple representing plucker coordinates of a line.
      * 
-     * @return plucker coordinates
+     * @return plucker coordinates (direction followed by moment)
      */
     private Tuple decomposeLine(){
-        if (grade() != 2) throw new IllegalArgumentException("Lines are of grade 2!");
+        if (grade() != 2) throw new IllegalArgumentException("Lines are always (intrinsic/extrinsic) of grade 2!");
         Double[] result = new Double[6];
         get(pluckerIndices()).toArray(result);
         return new Tuple(result);
     }
     
-    // plucker: attitude, moment
+    // plucker: 1. direction, 2. moment
     private static Tuple[] decomposePlucker(Tuple plucker){
-        Tuple[] result = new Tuple[2]; // attitude, location
+        Tuple[] result = new Tuple[2]; // direction u, location (closest point to the origin)
         
-        // attitude, u
-        result[0] = new Tuple(new double[]{plucker.values[0], plucker.values[1], plucker.values[2]});
+        // direction u = x,y,z from e12=z,e13=y,e23=x
+        result[0] = new Tuple(new double[]{plucker.values[2], plucker.values[1], plucker.values[0]});
+        
+        // determine the closest point to the origin
         
         // wenn das Moment m == 0 dann geht die Gerade durch den Ursprung
         //TODO eventuell nicht auf exakte Gleichheit testen sondern auf einen Mindestabstand?
