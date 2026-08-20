@@ -1,8 +1,10 @@
 package de.orat.math.gacasadi.generic;
 
+import de.dhbw.rahmlab.casadi.impl.casadi.DM;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
+import de.dhbw.rahmlab.casadi.impl.std.StdVectorDouble;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.spi.IGAFunction;
@@ -96,6 +98,13 @@ public class GaFunction<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaM
             WrapUtil.MANUAL_CLEANER.cleanupUnreachable();
         }
     }
+
+    /*
+    public List<Double> callDouble(List<Double> args) {
+        StdVectorDouble vecDouble = new StdVectorDouble(args);
+        DM call_num_in = new DM(vecDouble);
+    }
+     */
 
     @Override
     public String toString() {

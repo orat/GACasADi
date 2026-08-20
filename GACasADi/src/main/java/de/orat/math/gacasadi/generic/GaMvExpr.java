@@ -627,9 +627,9 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     public EXPR coef1(EXPR coefBladeMV) {
         List<Integer> coefBladeMVIndices = coefBladeMV.nzIndices();
         if (coefBladeMVIndices.size() != 1) {
-            throw new IllegalArgumentException(String.format("coef() allows only 1 blade but got %s", coefBladeMVIndices.size()));
+            throw new IllegalArgumentException(String.format("coef() allows only 1 blade but got %s.", coefBladeMVIndices.size()));
         }
-        int coefBladeIndex = coefBladeMVIndices.get(0);
+        final int coefBladeIndex = coefBladeMVIndices.get(0);
         return filterShift(coefBladeIndex, 0);
     }
 
@@ -638,5 +638,27 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
     public EXPR coef2(String... coefBladeOfBasevectors) {
         int coefBladeIndex = this.getIAlgebra().indexOfBlade(coefBladeOfBasevectors);
         return filterShift(coefBladeIndex, 0);
+    }
+
+    @Override
+    public EXPR setBlade(EXPR bladeIndexMV, EXPR scalarValue) {
+        List<Integer> bladeIndexMVIndices = bladeIndexMV.nzIndices();
+        if (bladeIndexMVIndices.size() != 1) {
+            throw new IllegalArgumentException(String.format("setBlade allows only 1 blade but got %s.", bladeIndexMVIndices.size()));
+        }
+        final int bladeIndex = bladeIndexMVIndices.get(0);
+
+        if (!scalarValue.isScalar()) {
+            throw new IllegalArgumentException("setBlade allows only a scalar as value to be set.");
+        }
+
+        SX res = copySX(this.getSX());
+        res.at(bladeIndex, 0).assign(scalarValue.asScalarSXCell()); // asScalarSXCell used correctly.
+        return create(res);
+    }
+
+    public SX copySX(SX toBeCopied) {
+        // copy constructor
+        return new SX(toBeCopied);
     }
 }
