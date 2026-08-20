@@ -298,17 +298,38 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
         return add(e0);
     }
 
+    private PgaMvExpr createBaseVector(String name){
+        PgaMvExpr baseVector = this.createSparse();
+        switch (name){
+            case "e0":
+                baseVector.sx.at(this.getIAlgebra().indexOfBlade("e0")).assign(new SX(1));
+                return baseVector;
+            case "e1":
+                 baseVector.sx.at(this.getIAlgebra().indexOfBlade("e1")).assign(new SX(1));
+                return baseVector;
+            case "e2":
+                 baseVector.sx.at(this.getIAlgebra().indexOfBlade("e2")).assign(new SX(1));
+                return baseVector;
+            case "e3":
+                 baseVector.sx.at(this.getIAlgebra().indexOfBlade("e3")).assign(new SX(1));
+                return baseVector;
+            default:
+                System.out.println("Try to create a basevector with unknown name \""+name+"\"!");
+                return null;
+        }
+    }
     /**
-     * projected point --> euclidean point
+     * projected (extrinsic) point (PGA) --> euclidean point
      * 
-     * @return 
+     * @return Euclidean point from down projection
      */
     @Override
     public PgaMvExpr down() {
-        PgaMvExpr e0 = this.createSparse();
-        e0.sx.at(this.getIAlgebra().indexOfBlade("e0")).assign(new SX(1));
-        //TODO muss ich hier nicht vorher normalisieren?
-        return sub(e0);
+        //PgaMvExpr e0 = this.createSparse();
+        //e0.sx.at(this.getIAlgebra().indexOfBlade("e0")).assign(new SX(1));
+        //return sub(e0);
+        PgaMvExpr E3 = createBaseVector("e0").op(createBaseVector("e1")).op(createBaseVector("e2")).op(createBaseVector("e3"));
+        return negate().divs(ip(E3).gradeSelection(0)).sub(E3).dual();
     }
 
     @Override

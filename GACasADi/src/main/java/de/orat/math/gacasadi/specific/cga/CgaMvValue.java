@@ -19,7 +19,7 @@ import java.util.List;
 import org.apache.commons.math3.util.Precision;
 
 @GenerateDelegate(to = CgaMvExpr.class)
-public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvExpr, CgaMvVariable, CgaMvValue>, IMultivectorValue<CgaMvExpr, CgaMvVariable, CgaMvValue>, IGetSparsityCasadi {
+public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMvExpr, CgaMvVariable, CgaMvValue>,IMultivectorValue<CgaMvExpr, CgaMvVariable, CgaMvValue>, IGetSparsityCasadi {
 
     /**
      * Can be expensive.
@@ -198,7 +198,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
             default:
                 throw new RuntimeException("Composition of the given type is not yet supported!");
         }
-        if (!obj.isIPNS()){ 
+        if (!obj.isExtrinsic()){ 
             result = result.dual();
         }    
         return result;
@@ -927,7 +927,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
         
         //TODO
         // herausfinden ob real oder imaginärer dipol und info in den Konstruktor übergeben
-        return new GeometricObject(GeometricObject.Space.IPNS, REAL, p1,
+        return new GeometricObject(GeometricObject.Space.EXTRINSIC, REAL, p1,
                                      p2, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
     }
     
