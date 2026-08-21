@@ -35,11 +35,6 @@ The following functions are implemented specific for PGA:
 | log()       | logarithm of general rotor/even multivector (should be normalized) |
 | sqrt()      | squared root of a general rotor/even multivector or a scalar |
 
-The following functions, which are available in general, are not supported for PGA:
-
-| symbol      | description |
-| :---------- | ------------ |
-| negate14()  | negate the signs of the vector- and 4-vector parts of an multivector. Usable to implement general-inverse. |
 
 The following functions are not yet supported:
 
