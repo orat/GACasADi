@@ -20,13 +20,16 @@ public class CGADecomposeTest {
         Tuple probePoint = new Tuple(new double[]{0,0,0});
         double radius = 2d;
         double squaredWeight = 1d;
-        boolean isIPNS = true;
-        GeometricObject obj = GeometricObject.createSphere(position,  isIPNS, radius, 
+        boolean isExtrinsic = true; // ipns
+        GeometricObject obj = GeometricObject.createSphere(position,  isExtrinsic, radius, 
                                                squaredWeight, Sign.POSITIVE, 1);
+        // DIPOLE_IPNS{REAL, attitude=(0.0, 0.0, -1.0), location=(1.0, 2.0, 5.0), location2=(1.0, 2.0, 1.0), squaredSize=1.0, squaredWeight=-1.0,  grade=2}
         System.out.println(obj.toString());
         // SPHERE_IPNS{REAL, location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=1.0,  grade=1}
         CgaMvValue mv = CgaMvValue.compose(obj);
-        
+        // expected: <SPHERE_IPNS{REAL, location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=1.0,  grade=1}> 
+        // but was:  <SPHERE_OPNS{IMAGINARY, location=(1.0, 2.0, 3.0), squaredSize=-4.0, squaredWeight=-1.0,  grade=1}>
+	
         test(obj, mv);
         // SPHERE_IPNS{REAL, location=(1.0, 2.0, 3.0), squaredSize=4.0, squaredWeight=-1.0,  grade=1}
     }
@@ -68,8 +71,8 @@ public class CGADecomposeTest {
         double[] position = new double[]{1d, 2d, 3d};
         double[] direction = new double[]{4,-1,1};// new double[]{0,0,1};
         double squaredWeight = 1d;
-        boolean isIPNS = true;
-        GeometricObject obj = GeometricObject.createLine(position,  direction, isIPNS,
+        boolean isExtrinsic = true; // ipns
+        GeometricObject obj = GeometricObject.createLine(position,  direction, isExtrinsic,
                                                squaredWeight, Sign.POSITIVE, 2);
         CgaMvValue mv = CgaMvValue.compose(obj);
         test(obj, mv);
@@ -142,10 +145,9 @@ public class CGADecomposeTest {
         // <DIPOLE_IPNS{REAL, attitude=(NaN, NaN, NaN), location=(NaN, NaN, 0.0), location2=(NaN, NaN, 0.0), squaredSize=NaN, squaredWeight=0.0,  grade=3}>
     }
        
-    
     private void test(GeometricObject obj, CgaMvValue mv){
-        GeometricObject obj2 = mv.decompose(obj.isIntrinsic());
-        System.out.println(obj2.toString());
+        GeometricObject obj2 = mv.decompose(obj.isExtrinsic());
+        System.out.println("obj2 = "+obj2.toString());
         assertEquals(obj, obj2);
     }
 }

@@ -283,9 +283,9 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
     }
 
     /**
-     * euclidean point --> projected point
+     * point as euclidean vector --> projected point (OPNS, intrinsic orientation type, grade 1)
      * 
-     * @return 
+     * @return Homogeneous point with intrinsic orientation type with grade 1
      */
     @Override
     public PgaMvExpr up() {

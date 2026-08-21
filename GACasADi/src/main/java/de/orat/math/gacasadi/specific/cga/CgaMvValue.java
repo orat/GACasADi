@@ -399,7 +399,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     
     
     // TODO in welches Interface muss das? welches Interface soll returned werden
-    public GeometricObject decompose(boolean isIPNS){
+    public GeometricObject decompose(boolean isExtrinsic){ // ipns
         
         CgaMvValue probePoint; // = constants2().getBaseVectorOrigin();
         probePoint = createIPNSRoundPoint(new Tuple(new double[]{0,0,0}), 1d);
@@ -420,7 +420,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
                 if (isIPNSRound()){
                     // hier lande ich flälschlicherweise mit ipns-plane
                     // if radius < eps this results in a round-point
-                    return decomposeSphereOrRoundPoint(isIPNS);
+                    return decomposeSphereOrRoundPoint(isExtrinsic);
                     // ipns round point (round)
                     //if (Math.abs(sphere.squaredSizeOfRound()) < eps){
                     //if (Math.abs(go.squaredSizeOfRound) < eps){
@@ -435,7 +435,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
                 //TODO
                 
                 // opns attitude scalar (attitude?)
-                if (isIPNS && isAttitude()) { //CGAAttitudeIPNS.is(attitude)){
+                if (isExtrinsic && isAttitude()) { //CGAAttitudeIPNS.is(attitude)){
                    // return new CGAAttitudeIPNS(attitude);
                    System.out.println("Grade 1 object found: "+toString()+
                        ". IPNS attitude not yet supported!");
@@ -451,16 +451,16 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
                 break;
                 
             case 2:
-                if (isIPNS){
+                if (isExtrinsic){
                     System.out.println("Test grade 2:");
                     if (isIPNSFlat()){
-                        return decomposeScrewAxisOrLine(isIPNS, probePoint);
+                        return decomposeScrewAxisOrLine(isExtrinsic, probePoint);
                     }
                     if (isIPNSRound()){
-                        return decomposeCircleOrOrientedPoint(isIPNS);
+                        return decomposeCircleOrOrientedPoint(isExtrinsic);
                     }
                     // ipns attitude bivector (attitude)
-                    if (isIPNS && isAttitude()) { //if (CGAAttitudeIPNS.is(attitude)){
+                    if (isExtrinsic && isAttitude()) { //if (CGAAttitudeIPNS.is(attitude)){
                         System.out.println("Grade 2 found: "+toString()+
                             ". IPNS attitude not yet supported!");
                         //return new CGAAttitudeBivectorIPNS(attitude);
@@ -494,7 +494,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
                 
             case 3:
                 // ipns
-                if (isIPNS) {
+                if (isExtrinsic) {
                     // ipns flat point (flat)
                     //if (CGAFlatIPNS.is(attitude)){
                     System.out.println("Test grade 3:");
@@ -544,7 +544,7 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
                 break;
                 
             case 4:
-                if (isIPNS){
+                if (isExtrinsic){
                     // ipns attitude scalar (attitude)
                     if (isAttitude()) { //if (CGAAttitudeIPNS.is(attitude)){
                         //return new CGAAttitudeIPNS(attitude);
@@ -661,18 +661,18 @@ public class CgaMvValue extends DelegatingCgaMvValue implements IGaMvValue<CgaMv
     
     //TODO unklar ob squaredSize=0 oder inf sein sollte
     // squaredWeight hat falsches Vorzeichen
-    private GeometricObject decomposePlane(boolean isIPNS, CgaMvValue probePoint) {
-        CgaMvValue attitude = decomposeAttitudeFlatAsEInf(isIPNS); // bivector^einf, grade-3
-        return new GeometricObject(GeometricObject.GeometricType.PLANE, isIPNS,
+    private GeometricObject decomposePlane(boolean isExtrinsic, CgaMvValue probePoint) {
+        CgaMvValue attitude = decomposeAttitudeFlatAsEInf(isExtrinsic); // bivector^einf, grade-3
+        return new GeometricObject(GeometricObject.GeometricType.PLANE, isExtrinsic,
                         extractE3FromBivectorInf(attitude), 
-                        decomposeLocationFlat(isIPNS, probePoint),
+                        decomposeLocationFlat(isExtrinsic, probePoint),
                         true, squaredWeight(attitude), GeometricObject.Sign.UNKNOWN, grade());
     }
     
     // - bei line/plane-ipns funktioniert es
-    private Tuple decomposeLocationFlat(boolean isIPNS, CgaMvValue probePoint) {
+    private Tuple decomposeLocationFlat(boolean isExtrinsic, CgaMvValue probePoint) {
         CgaMvValue m = this;
-        if (!isIPNS) m = dual();
+        if (!isExtrinsic) m = dual();
        
         CgaMvValue result = probePoint.op(m).div(m); // round point ipns
         

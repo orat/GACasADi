@@ -148,7 +148,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
     }
     
     /**
-     * Create a point as a grade-3 trivector.
+     * Create a point as a grade-3 trivector (extrinsic orientation type).
      * 
      * @param location
      * @param signedWeight
@@ -210,6 +210,11 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         // aus location und attitude die 3 Parameter a,b,c,d beschaffen
         throw new RuntimeException("not yet implemented!");
     }
+    /**
+     * Get plücker indizes from an extrinsic line
+     * 
+     * @return list of indizes
+     */
     private static List<Integer> pluckerIndices(){
         List<Integer> indices = new ArrayList();
         // direction
@@ -260,33 +265,48 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
                                    ". No geometric object for visualization available!");
                 return null;
                 
-            // plane
+            // plane or point
             case 1:
-                Tuple[] attitudeAndLocation = decomposePlane();
-                //TODO
-                double squaredWeight = 0d;
-                return new GeometricObject(GeometricObject.GeometricType.PLANE, isExtrinsic,
-                        attitudeAndLocation[0], attitudeAndLocation[1],
-                        true, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
+                if (isExtrinsic){
+                    Tuple[] attitudeAndLocation = decomposePlane();
+                    //TODO
+                    double squaredWeight = 0d;
+                    return new GeometricObject(GeometricObject.GeometricType.PLANE, isExtrinsic,
+                            attitudeAndLocation[0], attitudeAndLocation[1],
+                            true, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
+                } else {
+                    //TODO
+                    double squaredWeight = 0d;
+                    return new GeometricObject(GeometricObject.GeometricType.POINT, isExtrinsic, null, 
+                            decomposePoint(isExtrinsic),
+                            0d, squaredWeight,
+                            GeometricObject.Sign.UNKNOWN, grade());
+                }
                 
             // line
             case 2:
-                attitudeAndLocation = decomposePlucker(decomposeLine());
-                squaredWeight = 0d; // ToDo squaredWeight as func. of attitude?
+                Tuple[]  attitudeAndLocation = decomposePlucker(decomposeLine(isExtrinsic));
+                double squaredWeight = 0d; // ToDo squaredWeight as func. of attitude?
                 return new GeometricObject(GeometricObject.GeometricType.LINE, isExtrinsic,
                         attitudeAndLocation[0], 
                         attitudeAndLocation[1],
                         true, squaredWeight, GeometricObject.Sign.UNKNOWN, grade());
                 
-            // point 
+            // point or plane
             case 3:
                 //TODO
                 squaredWeight = 0d;
-                return new GeometricObject(GeometricObject.GeometricType.POINT, isExtrinsic, null, 
-                        decomposePoint(),
+                if (isExtrinsic){
+                    return new GeometricObject(GeometricObject.GeometricType.POINT, isExtrinsic, null, 
+                        decomposePoint(isExtrinsic),
                         0d, squaredWeight,
                         GeometricObject.Sign.UNKNOWN, grade());
-                 
+                } else {
+                    return new GeometricObject(GeometricObject.GeometricType.PLANE, isExtrinsic, null, 
+                            decomposePoint(isExtrinsic),
+                            0d, squaredWeight,
+                            GeometricObject.Sign.UNKNOWN, grade());
+                } 
             case 4:
                 // pseudo scalar
                 System.out.println("Pseudoscalar (grade 4) found: "+toString()+
@@ -321,14 +341,18 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         return result;
     }
 
-    private Tuple decomposePoint(){
+    private Tuple decomposePoint(boolean isExtrinsic){
         // dual(1e0 + xe1 + ye2 + ze3)
         Double[] p = new Double[4];
         // e0,e1,e2,e3
-        undual().get(getBaseVectorIndizes()).toArray(p);
+        PgaMvValue temp = this;
+        if (isExtrinsic){
+            temp = undual();
+        }
+        temp.get(getBaseVectorIndizes()).toArray(p);
         //TODO
         // squaredWeight mit rausziehen und irgendwie weiterreichen
-        return new Tuple(new double[]{p[1], p[2],p[3]});
+        return new Tuple(new double[]{p[1],p[2],p[3]});
     }
     
     /**
@@ -336,11 +360,20 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
      * 
      * @return plucker coordinates (direction followed by moment)
      */
-    private Tuple decomposeLine(){
-        if (grade() != 2) throw new IllegalArgumentException("Lines are always (intrinsic/extrinsic) of grade 2!");
+    private Tuple decomposeLine(boolean isExtrinsic){
+        //if (grade() != 2) throw new IllegalArgumentException("Lines are always (intrinsic/extrinsic) of grade 2!");
         Double[] result = new Double[6];
-        get(pluckerIndices()).toArray(result);
+        PgaMvValue temp = this;
+        if (!isExtrinsic){
+            temp = dual();
+        }
+        temp.get(pluckerIndices()).toArray(result);
         return new Tuple(result);
+    }
+    
+    private static boolean checkEpsilon(double actualValue, double target) {
+        final double epsilon = 1e-7f; 
+        return Math.abs(actualValue - target) <= epsilon;
     }
     
     // plucker: 1. direction, 2. moment
@@ -354,7 +387,7 @@ public class PgaMvValue extends DelegatingPgaMvValue implements IGaMvValue<PgaMv
         
         // wenn das Moment m == 0 dann geht die Gerade durch den Ursprung
         //TODO eventuell nicht auf exakte Gleichheit testen sondern auf einen Mindestabstand?
-        if (plucker.values[3] == 0 && plucker.values[4] == 0 && plucker.values[5] == 0) 
+        if (checkEpsilon(plucker.values[3],0) && checkEpsilon(plucker.values[4], 0) && checkEpsilon(plucker.values[5],0)) 
             result[1] = new Tuple(new double[]{0d,0d,0d});
         else {
             // (u x m)/u^2
