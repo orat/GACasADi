@@ -657,7 +657,7 @@ public abstract class GaMvExpr<EXPR extends GaMvExpr<EXPR, VAR, VAL>, VAR extend
         return create(res);
     }
 
-    public SX copySX(SX toBeCopied) {
+    public static SX copySX(SX toBeCopied) {
         // copy constructor
         return new SX(toBeCopied);
     }

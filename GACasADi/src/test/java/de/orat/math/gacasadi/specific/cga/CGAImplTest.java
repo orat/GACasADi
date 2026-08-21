@@ -1219,6 +1219,7 @@ public class CGAImplTest {
         }
     }
 
+    /*
     @Test
     public void testNegate14Random() {
         var fac = TestExprGraphFactory.instance();
@@ -1251,6 +1252,7 @@ public class CGAImplTest {
         } catch (Exception e) {
         }
     }
+     */
 
     /**
      * involute.

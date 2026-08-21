@@ -332,11 +332,6 @@ public abstract class PgaMvExpr extends GaMvExpr<PgaMvExpr, PgaMvVariable, PgaMv
         return negate().divs(ip(E3).gradeSelection(0)).sub(E3).dual();
     }
 
-    @Override
-    public PgaMvExpr negate14() {
-        throw new UnsupportedOperationException("Not available (cga only) and not needed."); 
-    }
-
     // non linear function, iplementation via matrix calculations of casadi
     @Override
     public PgaMvExpr meet(PgaMvExpr b) {

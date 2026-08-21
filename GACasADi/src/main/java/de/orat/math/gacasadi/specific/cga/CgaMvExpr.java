@@ -355,8 +355,7 @@ public abstract class CgaMvExpr extends GaMvExpr<CgaMvExpr, CgaMvVariable, CgaMv
      *
      * @return multivector with changed signs for vector and 4-vector parts
      */
-    @Override
-    public CgaMvExpr negate14() {
+    private CgaMvExpr negate14() {
         IAlgebra algebra = this.getIAlgebra();
         SX res = createSparseSX();
         SX minusOne = new SX(-1);
