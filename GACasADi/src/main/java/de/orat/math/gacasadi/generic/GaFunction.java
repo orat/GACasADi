@@ -1,11 +1,9 @@
 package de.orat.math.gacasadi.generic;
 
-import de.dhbw.rahmlab.casadi.impl.casadi.CodeGenerator;
+import de.dhbw.rahmlab.casadi.api.core.wrapper.function.FunctionWrapper;
 import de.dhbw.rahmlab.casadi.impl.casadi.Function;
-import de.dhbw.rahmlab.casadi.impl.casadi.GenericType;
 import de.dhbw.rahmlab.casadi.impl.casadi.SX;
 import de.dhbw.rahmlab.casadi.impl.casadi.Sparsity;
-import de.dhbw.rahmlab.casadi.impl.std.Dict;
 import de.dhbw.rahmlab.casadi.impl.std.StdVectorSX;
 import de.dhbw.rahmlab.casadi.implUtil.WrapUtil;
 import de.orat.math.gacalc.spi.IGAFunction;
@@ -149,11 +147,7 @@ public class GaFunction<EXPR extends IGaMvExpr<EXPR, VAR, VAL>, VAR extends IGaM
 
     @Override
     public void generateC(String path, String fileName) {
-        Dict options = new Dict();
-        options.put("with_header", new GenericType(true));
-        CodeGenerator generator = new CodeGenerator(fileName, options);
-        // c function name will be same as casadi function name.
-        generator.add(this.f_sym_casadi);
-        generator.generate(path);
+        // C function name will be same as casadi function name.
+        new FunctionWrapper(f_sym_casadi).generate(path, fileName);
     }
 }
